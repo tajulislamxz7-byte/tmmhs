@@ -86,40 +86,60 @@ export function initSearch() {
     const q = query.toLowerCase();
     let results = [];
 
+    // Merge sampleData with API server users (include pending too)
+    let serverUsers = [];
+    try { serverUsers = JSON.parse(localStorage.getItem('gfa_users_cache') || '[]'); } catch(e) {}
+    // Also try localStorage fallback
+    const lsUsers = JSON.parse(localStorage.getItem('gfa_users') || '[]');
+    const allUsers = serverUsers.length > 0 ? serverUsers : lsUsers;
+    const lsStudents = allUsers.filter(u => u.role === 'student');
+    const lsTeachers = allUsers.filter(u => u.role === 'teacher');
+    const lsAlumni   = allUsers.filter(u => u.role === 'alumni');
+    const allStudents = [...students, ...lsStudents.filter(u => !students.find(s => s.id === u.id))];
+    const allTeachers = [...teachers, ...lsTeachers.filter(u => !teachers.find(t => t.id === u.id))];
+    const allAlumni   = [...alumni,   ...lsAlumni.filter(u =>   !alumni.find(a => a.id === u.id))];
+    const allNotices  = JSON.parse(localStorage.getItem('gfa_notices') || JSON.stringify(notices));
+    const allEvents   = JSON.parse(localStorage.getItem('gfa_events')  || JSON.stringify(events));
+
     if (currentFilter === 'all' || currentFilter === 'students') {
-      const matched = students.filter(s =>
-        s.name.toLowerCase().includes(q) || s.id.toLowerCase().includes(q) ||
-        s.roll.includes(q) || s.class.toLowerCase().includes(q) ||
-        s.section.toLowerCase().includes(q) || s.batch.toLowerCase().includes(q)
+      const matched = allStudents.filter(s =>
+        (s.name||'').toLowerCase().includes(q) || (s.id||'').toLowerCase().includes(q) ||
+        (s.roll||'').toString().includes(q) || (s.class||'').toLowerCase().includes(q) ||
+        (s.section||'').toLowerCase().includes(q) || (s.batch||'').toLowerCase().includes(q) ||
+        (s.email||'').toLowerCase().includes(q)
       ).map(s => ({ ...s, type: 'student' }));
       results = [...results, ...matched];
     }
 
     if (currentFilter === 'all' || currentFilter === 'teachers') {
-      const matched = teachers.filter(t =>
-        t.name.toLowerCase().includes(q) || t.subject.toLowerCase().includes(q) || t.id.toLowerCase().includes(q)
+      const matched = allTeachers.filter(t =>
+        (t.name||'').toLowerCase().includes(q) || (t.subject||'').toLowerCase().includes(q) ||
+        (t.id||'').toLowerCase().includes(q) || (t.email||'').toLowerCase().includes(q)
       ).map(t => ({ ...t, type: 'teacher' }));
       results = [...results, ...matched];
     }
 
     if (currentFilter === 'all' || currentFilter === 'alumni') {
-      const matched = alumni.filter(a =>
-        a.name.toLowerCase().includes(q) || a.profession.toLowerCase().includes(q) ||
-        a.university.toLowerCase().includes(q) || a.company.toLowerCase().includes(q)
+      const matched = allAlumni.filter(a =>
+        (a.name||'').toLowerCase().includes(q) || (a.profession||'').toLowerCase().includes(q) ||
+        (a.university||'').toLowerCase().includes(q) || (a.company||'').toLowerCase().includes(q) ||
+        (a.email||'').toLowerCase().includes(q)
       ).map(a => ({ ...a, type: 'alumni' }));
       results = [...results, ...matched];
     }
 
     if (currentFilter === 'all' || currentFilter === 'notices') {
-      const matched = notices.filter(n =>
-        n.title.toLowerCase().includes(q) || n.category.toLowerCase().includes(q) || n.content.toLowerCase().includes(q)
+      const matched = allNotices.filter(n =>
+        (n.title||'').toLowerCase().includes(q) || (n.category||'').toLowerCase().includes(q) ||
+        (n.content||'').toLowerCase().includes(q)
       ).map(n => ({ ...n, type: 'notice' }));
       results = [...results, ...matched];
     }
 
     if (currentFilter === 'all' || currentFilter === 'events') {
-      const matched = events.filter(e =>
-        e.title.toLowerCase().includes(q) || e.category.toLowerCase().includes(q) || e.description.toLowerCase().includes(q)
+      const matched = allEvents.filter(e =>
+        (e.title||'').toLowerCase().includes(q) || (e.category||'').toLowerCase().includes(q) ||
+        (e.description||'').toLowerCase().includes(q)
       ).map(e => ({ ...e, type: 'event' }));
       results = [...results, ...matched];
     }
@@ -142,28 +162,28 @@ export function initSearch() {
     const html = results.slice(0, 12).map(r => {
       if (r.type === 'student') return `
         <div class="search-result-item" onclick="closeSearch();navigate('student-profile','${r.id}')">
-          <img src="${r.avatar}" class="avatar avatar-md" alt="${r.name}">
+          <img src="${r.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed='+encodeURIComponent(r.name)}" class="avatar avatar-md" alt="${r.name}" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=default'">
           <div class="search-result-info">
             <div class="font-semibold text-sm">${highlight(r.name, query)}</div>
-            <div class="text-xs text-muted">${r.class} · Section ${r.section} · ${r.batch} · Roll ${r.roll}</div>
+            <div class="text-xs text-muted">${[r.class, r.section?'Sec '+r.section:'', r.batch, r.roll?'Roll '+r.roll:''].filter(Boolean).join(' · ')}</div>
           </div>
           <span class="badge badge-primary">Student</span>
         </div>`;
       if (r.type === 'teacher') return `
         <div class="search-result-item" onclick="closeSearch();navigate('teacher-profile','${r.id}')">
-          <img src="${r.avatar}" class="avatar avatar-md" alt="${r.name}">
+          <img src="${r.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed='+encodeURIComponent(r.name)}" class="avatar avatar-md" alt="${r.name}" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=default'">
           <div class="search-result-info">
             <div class="font-semibold text-sm">${highlight(r.name, query)}</div>
-            <div class="text-xs text-muted">${highlight(r.subject, query)} · ${r.qualification}</div>
+            <div class="text-xs text-muted">${[r.subject, r.qualification].filter(Boolean).join(' · ')}</div>
           </div>
           <span class="badge badge-purple">Teacher</span>
         </div>`;
       if (r.type === 'alumni') return `
         <div class="search-result-item" onclick="closeSearch();navigate('alumni')">
-          <img src="${r.avatar}" class="avatar avatar-md" alt="${r.name}">
+          <img src="${r.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed='+encodeURIComponent(r.name)}" class="avatar avatar-md" alt="${r.name}" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=default'">
           <div class="search-result-info">
             <div class="font-semibold text-sm">${highlight(r.name, query)}</div>
-            <div class="text-xs text-muted">${highlight(r.profession, query)} · ${r.company} · Batch ${r.graduationYear}</div>
+            <div class="text-xs text-muted">${[r.profession, r.company, r.graduationYear?'Batch '+r.graduationYear:''].filter(Boolean).join(' · ')}</div>
           </div>
           <span class="badge badge-success">Alumni</span>
         </div>`;

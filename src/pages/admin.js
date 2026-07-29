@@ -4,6 +4,7 @@
 
 import { students, teachers, supportStaff, alumni, batches, notices, events, results } from '../data/sampleData.js';
 import * as auth from '../utils/auth.js';
+import { api } from '../utils/api.js';
 
 const SVG = (paths, size=18, color='currentColor') =>
   `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
@@ -35,6 +36,7 @@ const ADMIN_NAV = [
   {key:'staff',       label:'Staff',        icon:'staff'},
   {key:'alumni',      label:'Alumni',       icon:'alumni'},
   {key:'batches',     label:'Batches',      icon:'batches'},
+  {key:'attendance',  label:'Attendance',   icon:'attendance'},
   {key:'results',     label:'Results',      icon:'results'},
   {key:'notices',     label:'Notices',      icon:'notices'},
   {key:'events',      label:'Events',       icon:'events'},
@@ -46,10 +48,41 @@ const ADMIN_NAV = [
 
 let adminTab = 'dashboard';
 
-export function renderAdminDashboard() {
+// ── Admin data cache (populated async before rendering) ──
+const _cache = {
+  users: [],
+  notices: [],
+  events: [],
+  batches: [],
+  exams: [],
+  results: [],
+  settings: {},
+};
+
+async function _loadCache() {
+  const [users, notices, events, batches, exams, results, settings] = await Promise.all([
+    api.getUsers(),
+    api.getNotices(),
+    api.getEvents(),
+    api.getBatches(),
+    api.getExams(),
+    api.getResults(),
+    api.getSettings(),
+  ]);
+  _cache.users    = users    || [];
+  _cache.notices  = notices  || [];
+  _cache.events   = events   || [];
+  _cache.batches  = batches  || [];
+  _cache.exams    = exams    || [];
+  _cache.results  = results  || [];
+  _cache.settings = settings || {};
+}
+
+export async function renderAdminDashboard() {
+  await _loadCache();
+
   const user = auth.getCurrentUser();
-  const allUsers = auth.getAllUsers();
-  const pendingCount = allUsers.filter(u => u.status === 'pending').length;
+  const pendingCount = _cache.users.filter(u => u.status !== 'active' && u.role !== 'admin').length;
 
   return `
     <div style="min-height:100vh;display:flex;flex-direction:column;">
@@ -105,6 +138,7 @@ function renderAdminTab(tab) {
     case 'staff':        return renderAdminStaff();
     case 'alumni':       return renderAdminAlumni();
     case 'batches':      return renderAdminBatches();
+    case 'attendance':   return renderAdminAttendance();
     case 'notices':      return renderAdminNoticesManager();
     case 'events':       return renderAdminEventsManager();
     case 'assignments':  return renderAdminAssignmentsManager();
@@ -115,24 +149,42 @@ function renderAdminTab(tab) {
   }
 }
 
+async function _refreshTab(tab) {
+  await _loadCache();
+  const content = document.getElementById('adminContent');
+  if (content) content.innerHTML = renderAdminTab(tab || adminTab);
+}
+
 function renderAdminMain() {
+  const allUsers = _cache.users;
+  const studentCount = allUsers.filter(u => u.role === 'student' && u.status === 'active').length;
+  const teacherCount = allUsers.filter(u => u.role === 'teacher' && u.status === 'active').length;
+  const pendingCount = allUsers.filter(u => u.status !== 'active' && u.role !== 'admin').length;
+  const S = _cache.settings;
+  const noticesCount = _cache.notices.length;
+  const eventsCount  = _cache.events.length;
+  const today = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+
   return `
     <div>
       <div class="flex items-center justify-between mb-6">
         <div>
           <h1 style="font-size:24px;font-weight:800;">Dashboard Overview</h1>
-          <div class="text-muted text-sm">Wednesday, July 29, 2026 · Academic Year 2025–26</div>
+          <div class="text-muted text-sm">${today} · ${S.year||'Academic Year 2025–26'}</div>
         </div>
-        <button class="btn btn-primary" onclick="showToast('Generating report...','info')">📊 Export Report</button>
+        <button class="btn btn-primary" onclick="showToast('Report generation coming soon','info')">
+          ${SVG('<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',14,'white')} Export Report
+        </button>
       </div>
 
-      <!-- KPI Grid -->
+      <!-- KPI Grid — live data -->
       <div class="kpi-grid mb-6">
         ${[
-          {svg:`<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`,l:'Total Students', v:'2,847', c:'#2563eb', t:'↑ 3.1% from last year', up:true},
-          {svg:`<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>`,                                                                                l:'Teaching Staff', v:'124',   c:'#7c3aed', t:'↑ 2 new this term',    up:true},
-          {svg:`<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>`,                                                                   l:'Pass Rate',     v:'100%',  c:'#059669', t:'↑ 0.8% improvement',  up:true},
-          {svg:`<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>`,                                                                   l:'Avg Attendance',v:'93.5%', c:'#d97706', t:'↓ 1.2% this month',   up:false},
+          {svg:`<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`, l:'Active Students',  v:studentCount,         c:'#2563eb', t:pendingCount>0?`${pendingCount} pending approval`:'All approved', up:true},
+          {svg:`<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>`,                                                                                l:'Active Teachers',  v:teacherCount,         c:'#7c3aed', t:'Verified accounts',  up:true},
+          {svg:`<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>`,                                                              l:'Published Notices',v:noticesCount,          c:'#d97706', t:'On notice board',      up:true},
+          {svg:`<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>`,l:'Events',          v:eventsCount,          c:'#059669', t:'Scheduled',           up:true},
         ].map(s=>`
           <div class="kpi-card">
             <div class="kpi-icon" style="background:${s.c}15;display:flex;align-items:center;justify-content:center;">
@@ -145,315 +197,628 @@ function renderAdminMain() {
         `).join('')}
       </div>
 
-      <!-- Charts Row -->
-      <div class="grid" style="grid-template-columns:1.5fr 1fr;gap:20px;margin-bottom:20px;">
+      <!-- Quick Stats -->
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
         <div class="card">
-          <div class="card-header"><div class="font-semibold">GPA Distribution — Half-Yearly 2024</div></div>
+          <div class="card-header"><div class="font-semibold">User Overview</div></div>
           <div class="card-body">
-            ${[{b:'GPA 5.00',n:61},{b:'4.50–4.99',n:214},{b:'4.00–4.49',n:388},{b:'3.50–3.99',n:301},{b:'Below 3.5',n:95}].map(row=>{
-              const max = 388;
-              return `
-                <div class="result-bar-item mb-3">
-                  <div class="result-bar-label" style="width:100px;">${row.b}</div>
-                  <div class="result-bar-track"><div class="result-bar-fill" style="width:${row.n/max*100}%;background:var(--primary);"></div></div>
-                  <div class="result-bar-value">${row.n}</div>
-                </div>`;
-            }).join('')}
+            ${[
+              {l:'Total Registered Users', v: allUsers.length,                                               c:'var(--primary)'},
+              {l:'Active Students',        v: studentCount,                                                   c:'var(--success)'},
+              {l:'Active Teachers',        v: teacherCount,                                                   c:'var(--secondary)'},
+              {l:'Alumni',                 v: allUsers.filter(u=>u.role==='alumni').length,                   c:'var(--accent)'},
+              {l:'Pending Approval',       v: pendingCount,                                                   c:pendingCount>0?'var(--warning)':'var(--text-muted)'},
+            ].map(s=>`
+              <div class="flex items-center justify-between mb-3 pb-3 border-b" style="border-color:var(--border);">
+                <span class="text-sm text-secondary">${s.l}</span>
+                <span class="font-bold" style="color:${s.c};">${s.v}</span>
+              </div>
+            `).join('')}
           </div>
         </div>
         <div class="card">
-          <div class="card-header"><div class="font-semibold">Quick Stats</div></div>
+          <div class="card-header"><div class="font-semibold">Content Overview</div></div>
           <div class="card-body">
             ${[
-              {l:'Active Classes',v:'20'},
-              {l:'Upcoming Exams',v:'4'},
-              {l:'Open Notices',v:'7'},
-              {l:'Events This Month',v:'3'},
-              {l:'New Registrations',v:'12'},
-              {l:'Open Complaints',v:'4'},
+              {l:'Published Notices',  v: noticesCount},
+              {l:'Scheduled Events',   v: eventsCount},
+              {l:'Assignments',        v: JSON.parse(localStorage.getItem('gfa_assignments')||'[]').length},
+              {l:'Notifications Sent', v: JSON.parse(localStorage.getItem('gfa_notifications')||'[]').length},
             ].map(s=>`
               <div class="flex items-center justify-between mb-3 pb-3 border-b" style="border-color:var(--border);">
                 <span class="text-sm text-secondary">${s.l}</span>
                 <span class="font-bold" style="color:var(--primary);">${s.v}</span>
               </div>
             `).join('')}
+            <div style="margin-top:8px;">
+              <button class="btn btn-secondary w-full btn-sm" onclick="switchAdminTab('settings',null)">Manage School Settings →</button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Top Students Table -->
-      <div class="card mb-6">
-        <div class="card-header flex items-center justify-between">
-          <div class="font-semibold">Top Students — Half-Yearly 2024</div>
-          <button class="btn btn-ghost btn-sm" onclick="switchAdminTab('results')">View All Results →</button>
+      <!-- Pending Approvals quick view -->
+      ${pendingCount > 0 ? `
+      <div class="card" style="border-color:var(--warning);">
+        <div class="card-header" style="background:#fffbeb;">
+          <div class="flex items-center justify-between">
+            <div class="font-semibold" style="color:#92400e;">${SVG('<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',16,'#92400e')} ${pendingCount} users awaiting approval</div>
+            <button class="btn btn-warning btn-sm" onclick="switchAdminTab('roles',null)">Review Now →</button>
+          </div>
         </div>
-        <div class="table-container">
-          <table>
-            <thead><tr><th>Rank</th><th>Student</th><th>Class</th><th>GPA</th><th>%</th><th>Grade</th></tr></thead>
-            <tbody>
-              ${[...results].sort((a,b)=>b.gpa-a.gpa).map((r,i)=>`
-                <tr>
-                  <td style="font-weight:800;color:var(--warning);">${['🥇','🥈','🥉'][i]||'#'+r.position}</td>
-                  <td>
-                    <div class="flex items-center gap-2">
-                      <img src="${students.find(s=>s.id===r.studentId)?.avatar||''}" class="avatar avatar-xs">
-                      <span class="font-medium">${r.studentName}</span>
-                    </div>
-                  </td>
-                  <td class="text-muted">${r.class} · ${r.section}</td>
-                  <td style="font-weight:700;color:var(--primary);">${r.gpa}</td>
-                  <td>${r.percentage}%</td>
-                  <td><span class="badge badge-success">${r.grade}</span></td>
-                </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Recent Activity -->
-      <div class="card">
-        <div class="card-header"><div class="font-semibold">Recent Activity</div></div>
-        <div class="card-body">
-          ${[
-            {svg:ICONS.students,  t:'New student registration', d:'Class 9, Section B · 5 min ago',              c:'#2563eb'},
-            {svg:ICONS.notices,   t:'Notice published',         d:'SSC Exam Schedule 2025 · 1 hour ago',         c:'#d97706'},
-            {svg:ICONS.results,   t:'Results published',        d:'Monthly Test January 2025 — Class 10',        c:'#059669'},
-            {svg:ICONS.roles,     t:'Complaint received',       d:'Broken fan in Room 204 · Yesterday',          c:'#dc2626'},
-            {svg:ICONS.alumni,    t:'Alumni profile updated',   d:'Dr. Rakib Hasan · Yesterday',                 c:'#7c3aed'},
-          ].map(a=>`
-            <div class="flex items-center gap-3 mb-4">
-              <div style="width:36px;height:36px;border-radius:10px;background:${a.c}15;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${a.c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${a.svg}</svg>
-              </div>
-              <div>
-                <div class="font-medium text-sm">${a.t}</div>
-                <div class="text-xs text-muted">${a.d}</div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
+      </div>` : ''}
     </div>
   `;
 }
 
+function _studentRow(s) {
+  const approveBtn = s.status==='pending' ? '<button class="btn btn-success btn-sm" onclick="approveUser(\''+s.id+'\')">Approve</button>' : '';
+  const statusBadge = s.status==='active'?'success':s.status==='pending'?'warning':'danger';
+  return '<tr>'
+    + '<td><div class="flex items-center gap-3"><img src="'+s.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://api.dicebear.com/7.x/avataaars/svg?seed=default\'"><div><div class="font-semibold text-sm">'+s.name+'</div><div class="text-xs text-muted">'+s.email+'</div></div></div></td>'
+    + '<td style="font-family:monospace;font-size:12px;">'+s.id+'</td>'
+    + '<td>'+(s.class||'—')+' '+(s.section?'· '+s.section:'')+'</td>'
+    + '<td><span class="badge badge-'+statusBadge+'">'+s.status+'</span></td>'
+    + '<td style="font-size:12px;">'+new Date(s.createdAt).toLocaleDateString()+'</td>'
+    + '<td><div style="display:flex;gap:4px;">'+approveBtn+_userActions(s.id,s.name)+'</div></td>'
+    + '</tr>';
+}
+
 function renderAdminStudents() {
+  const allUsers = _cache.users;
+  const studentUsers = allUsers.filter(u => u.role === 'student');
   return `
     <div>
       <div class="flex items-center justify-between mb-6">
         <h1 style="font-size:22px;font-weight:800;">Manage Students</h1>
         <div class="flex gap-3">
-          <button class="btn btn-secondary" onclick="showToast('Export CSV...','info')">📥 Export</button>
-          <button class="btn btn-primary" onclick="showToast('Add student form...','info')">+ Add Student</button>
-        </div>
-      </div>
-      <div class="card mb-4">
-        <div class="card-body" style="padding:14px 20px;">
-          <div class="flex gap-3 flex-wrap">
-            <div class="search-inline" style="flex:1;min-width:200px;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-              <input type="text" placeholder="Search students..." class="search-input-inline">
-            </div>
-            <select class="form-input form-select" style="width:auto;">
-              <option>All Classes</option>
-              <option>Class 10</option><option>Class 9</option><option>Class 8</option>
-            </select>
-            <select class="form-input form-select" style="width:auto;">
-              <option>All Batches</option>
-              ${batches.map(b=>`<option>${b.name}</option>`).join('')}
-            </select>
-          </div>
+          <button class="btn btn-secondary" onclick="showToast('CSV export coming soon','info')">
+            ${SVG('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',14)} Export
+          </button>
         </div>
       </div>
       <div class="card">
-        <div class="table-container">
-          <table>
-            <thead><tr><th>Student</th><th>ID</th><th>Class</th><th>Roll</th><th>GPA</th><th>Attendance</th><th>Actions</th></tr></thead>
-            <tbody>
-              ${students.map(s=>`
-                <tr>
-                  <td>
-                    <div class="flex items-center gap-3">
-                      <img src="${s.avatar}" class="avatar avatar-sm">
-                      <div>
-                        <div class="font-semibold text-sm">${s.name}</div>
-                        <div class="text-xs text-muted">${s.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td style="font-family:monospace;font-size:12px;">${s.id}</td>
-                  <td>${s.class} · ${s.section}</td>
-                  <td>${s.roll}</td>
-                  <td style="font-weight:700;color:var(--primary);">${s.gpa}</td>
-                  <td><span class="badge badge-${s.attendance>=95?'success':s.attendance>=80?'warning':'danger'}">${s.attendance}%</span></td>
-                  <td>
-                    <div style="display:flex;gap:4px;">
-                      <button class="btn btn-ghost btn-icon btn-sm" onclick="navigate('student-profile','${s.id}')" title="View">
-                        ${SVG(`<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`, 14)}
-                      </button>
-                      <button class="btn btn-ghost btn-icon btn-sm" onclick="showToast('Edit form opening...','info')" title="Edit">
-                        ${SVG(`<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>`, 14)}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
+        ${studentUsers.length === 0
+          ? `<div class="card-body text-center text-muted" style="padding:60px;">No students registered yet.</div>`
+          : `<div class="table-container"><table>
+            <thead><tr><th>Student</th><th>ID</th><th>Class</th><th>Status</th><th>Registered</th><th>Actions</th></tr></thead>
+            <tbody>${studentUsers.map(s => _studentRow(s)).join('')}</tbody>
+          </table></div>`
+        }
       </div>
     </div>
   `;
 }
 
+function _alumniRow(a) {
+  const statusBadge = a.status==='active'?'success':a.status==='pending'?'warning':'danger';
+  return '<tr>'
+    + '<td><div class="flex items-center gap-3"><img src="'+a.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://api.dicebear.com/7.x/avataaars/svg?seed=default\'"><div><div class="font-semibold text-sm">'+a.name+'</div><div class="text-xs text-muted">'+a.email+'</div></div></div></td>'
+    + '<td style="font-family:monospace;font-size:12px;">'+a.id+'</td>'
+    + '<td>'+(a.graduationYear||'—')+'</td>'
+    + '<td>'+(a.profession||'—')+'</td>'
+    + '<td><span class="badge badge-'+statusBadge+'">'+a.status+'</span></td>'
+    + '<td><div style="display:flex;gap:4px;">'+_approveBtn(a.id,a.status)+_userActions(a.id,a.name)+'</div></td>'
+    + '</tr>';
+}
+
+function _attendanceRow(s) {
+  return '<tr data-class="'+(s.class||'')+'">'
+    + '<td><div class="flex items-center gap-3"><img src="'+s.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://api.dicebear.com/7.x/avataaars/svg?seed=default\'"><div><div class="font-semibold text-sm">'+s.name+'</div><div class="text-xs text-muted">'+s.id+'</div></div></div></td>'
+    + '<td>'+(s.class||'—')+' '+(s.section?'· '+s.section:'')+'</td>'
+    + '<td><select class="form-input form-select att-status" data-id="'+s.id+'" style="width:auto;padding:4px 28px 4px 8px;font-size:12px;"><option value="present">Present</option><option value="absent">Absent</option><option value="late">Late</option><option value="excused">Excused</option></select></td>'
+    + '<td><input class="form-input" style="padding:6px 10px;font-size:12px;" placeholder="Optional note"></td>'
+    + '</tr>';
+}
+
+function _pendingUserRow(u) {
+  const approveIcon = SVG('<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>', 13, 'white');
+  const roleBadge = u.role==='teacher'?'purple':u.role==='alumni'?'success':u.role==='staff'?'gray':'primary';
+  return '<tr>'
+    + '<td><div style="display:flex;align-items:center;gap:10px;"><img src="'+u.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://api.dicebear.com/7.x/avataaars/svg?seed=default\'"><div><div class="font-semibold text-sm">'+u.name+'</div><div class="text-xs text-muted">'+u.id+'</div></div></div></td>'
+    + '<td><span class="badge badge-'+roleBadge+'" style="text-transform:capitalize;">'+u.role+'</span></td>'
+    + '<td style="font-size:12px;">'+u.email+'</td>'
+    + '<td style="font-size:12px;">'+(u.phone||'—')+'</td>'
+    + '<td>'+(u.class||'—')+' '+(u.section?'· '+u.section:'')+'</td>'
+    + '<td style="font-size:12px;">'+new Date(u.createdAt).toLocaleDateString()+'</td>'
+    + '<td><span class="badge badge-warning">'+u.status+'</span></td>'
+    + '<td><div style="display:flex;gap:6px;"><button class="btn btn-success btn-sm" onclick="approveUser(\''+u.id+'\')">'+approveIcon+' Approve</button>'
+    + '<button class="btn btn-danger btn-sm" onclick="adminDeleteUser(\''+u.id+'\',\''+u.name+'\')">Delete</button></div></td>'
+    + '</tr>';
+}
+
+function _activeUserRow(u) {
+  const roleBadge = u.role==='admin'?'danger':u.role==='teacher'?'purple':'primary';
+  return '<tr>'
+    + '<td><div style="display:flex;align-items:center;gap:10px;"><img src="'+u.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://api.dicebear.com/7.x/avataaars/svg?seed=default\'"><div><div class="font-semibold text-sm">'+u.name+'</div><div class="text-xs text-muted">'+u.id+'</div></div></div></td>'
+    + '<td style="font-size:12px;">'+u.email+'</td>'
+    + '<td><span class="badge badge-'+roleBadge+'" style="text-transform:capitalize;">'+u.role+'</span></td>'
+    + '<td>'+(u.class||'—')+' '+(u.section?'· '+u.section:'')+'</td>'
+    + '<td style="font-size:12px;">'+new Date(u.createdAt).toLocaleDateString()+'</td>'
+    + '<td><span class="badge badge-success">Active</span></td>'
+    + '</tr>';
+}
+
+function _resultRow(r) {
+  return '<tr>'
+    + '<td class="font-medium">'+r.studentName+'</td>'
+    + '<td class="text-sm text-muted">'+r.exam+'</td>'
+    + '<td>'+r.total+'/'+r.outOf+'</td>'
+    + '<td>'+r.percentage+'%</td>'
+    + '<td><span class="badge badge-success">'+r.grade+'</span></td>'
+    + '<td class="font-bold" style="color:var(--primary);">'+r.gpa+'</td>'
+    + '</tr>';
+}
+
+function _noticeRow(n, i) {
+  const priorityBadge = n.priority==='urgent'?'danger':n.priority==='high'?'warning':'gray';
+  return '<tr>'
+    + '<td><div class="font-medium">'+n.title+'</div></td>'
+    + '<td><span class="badge badge-primary">'+n.category+'</span></td>'
+    + '<td><span class="badge badge-'+priorityBadge+'">'+n.priority+'</span></td>'
+    + '<td>'+n.date+'</td>'
+    + '<td><button class="btn btn-danger btn-sm" onclick="deleteNotice('+i+')">Delete</button></td>'
+    + '</tr>';
+}
+
+function _eventRow(e, i) {
+  return '<tr>'
+    + '<td><div class="font-medium">'+e.title+'</div></td>'
+    + '<td>'+e.date+'</td>'
+    + '<td><span class="badge badge-primary">'+e.category+'</span></td>'
+    + '<td>'+e.location+'</td>'
+    + '<td><button class="btn btn-danger btn-sm" onclick="deleteEvent('+i+')">Delete</button></td>'
+    + '</tr>';
+}
+
+function _assignmentRow(a, i) {
+  return '<tr>'
+    + '<td><div class="font-medium">'+a.title+'</div></td>'
+    + '<td>'+a.subject+'</td>'
+    + '<td>'+a.teacher+'</td>'
+    + '<td>'+(a.dueDate||'—')+'</td>'
+    + '<td>'+(a.class||'All')+'</td>'
+    + '<td><button class="btn btn-danger btn-sm" onclick="deleteAssignment('+i+')">Delete</button></td>'
+    + '</tr>';
+}
+
+function _examCard(e, i) {
+  const borderColor = e.status==='Published'?'var(--success)':e.status==='Draft'?'var(--warning)':'var(--primary)';
+  const badgeClass  = e.status==='Published'?'success':e.status==='Draft'?'warning':'primary';
+  const actionBtn   = e.status !== 'Published'
+    ? '<button class="btn btn-success btn-sm" onclick="publishExam('+i+')">Publish</button>'
+    : '<button class="btn btn-ghost btn-sm" onclick="unpublishExam('+i+')">Unpublish</button>';
+  return '<div class="card" style="border-left:4px solid '+borderColor+';">'
+    + '<div class="card-body" style="padding:16px 20px;">'
+    + '<div class="flex items-center gap-4">'
+    + '<div style="flex:1;"><div class="font-semibold">'+e.name+'</div><div class="text-xs text-muted">'+(e.scope||'')+' · '+(e.date||'')+' · Subjects: '+((e.subjects||[]).join(', '))+'</div></div>'
+    + '<span class="badge badge-'+badgeClass+'">'+e.status+'</span>'
+    + '<div class="flex gap-2"><button class="btn btn-secondary btn-sm" onclick="openMarksEntry('+i+')">Enter Marks</button>'+actionBtn+'<button class="btn btn-danger btn-sm" onclick="deleteExam('+i+')">Delete</button></div>'
+    + '</div></div></div>';
+}
+
+function _batchCard(b, i) {
+  return '<div class="card">'
+    + '<div class="card-body">'
+    + '<div class="flex items-center justify-between mb-3">'
+    + '<div><div class="font-bold" style="font-size:18px;">'+b.name+'</div><div class="text-xs text-muted">Passing Year: '+b.passingYear+'</div></div>'
+    + '<span class="badge badge-primary">'+(b.totalStudents||0)+' students</span>'
+    + '</div>'
+    + '<p class="text-sm text-secondary mb-3">'+(b.description||'')+'</p>'
+    + '<div class="text-xs text-muted mb-4">Class Teacher: '+(b.classTeacher||'—')+'</div>'
+    + '<div class="flex gap-2 border-t border" style="padding-top:12px;">'
+    + '<button class="btn btn-danger btn-sm" onclick="deleteBatch('+i+')">Delete</button>'
+    + '</div></div></div>';
+}
+
+function _userActions(id, name) {
+  return '<button class="btn btn-ghost btn-icon btn-sm" onclick="adminEditUser(\''+id+'\')" title="Edit">'+SVG('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',14)+'</button>'
+    + '<button class="btn btn-ghost btn-icon btn-sm" onclick="adminDeleteUser(\''+id+'\',\''+name+'\')" title="Delete" style="color:var(--danger);">'+SVG('<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',14,'var(--danger)')+'</button>';
+}
+function _approveBtn(id, status) {
+  return status==='pending' ? '<button class="btn btn-success btn-sm" onclick="approveUser(\''+id+'\')">Approve</button>' : '';
+}
+
 function renderAdminTeachers() {
+  const allUsers = _cache.users;
+  const teacherUsers = allUsers.filter(u => u.role === 'teacher');
   return `
     <div>
       <div class="flex items-center justify-between mb-6">
         <h1 style="font-size:22px;font-weight:800;">Manage Teachers</h1>
-        <button class="btn btn-primary" onclick="showToast('Add teacher form...','info')">+ Add Teacher</button>
       </div>
       <div class="card">
-        <div class="table-container">
-          <table>
-            <thead><tr><th>Teacher</th><th>ID</th><th>Subject</th><th>Experience</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody>
-              ${teachers.map(t=>`
-                <tr>
-                  <td>
-                    <div class="flex items-center gap-3">
-                      <img src="${t.avatar}" class="avatar avatar-sm">
-                      <div>
-                        <div class="font-semibold text-sm">${t.name}</div>
-                        <div class="text-xs text-muted">${t.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td style="font-family:monospace;font-size:12px;">${t.id}</td>
-                  <td><span class="badge badge-primary">${t.subject}</span></td>
-                  <td>${t.experience}</td>
-                  <td>${t.joiningDate}</td>
-                  <td><span class="badge badge-${t.status==='Working'?'success':'gray'}">${t.status}</span></td>
-                  <td>
-                    <div class="flex gap-1">
-                      <button class="btn btn-ghost btn-icon btn-sm" onclick="navigate('teacher-profile','${t.id}')">👁️</button>
-                      <button class="btn btn-ghost btn-icon btn-sm" onclick="showToast('Edit teacher form...','info')">✏️</button>
-                    </div>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
+        ${teacherUsers.length === 0
+          ? `<div class="card-body text-center text-muted" style="padding:60px;">No teachers registered yet.</div>`
+          : `<div class="table-container"><table>
+            <thead><tr><th>Teacher</th><th>ID</th><th>Subject</th><th>Status</th><th>Registered</th><th>Actions</th></tr></thead>
+            <tbody>${teacherUsers.map(t =>
+              '<tr>'
+              + '<td><div class="flex items-center gap-3"><img src="'+t.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://api.dicebear.com/7.x/avataaars/svg?seed=default\'"><div><div class="font-semibold text-sm">'+t.name+'</div><div class="text-xs text-muted">'+t.email+'</div></div></div></td>'
+              + '<td style="font-family:monospace;font-size:12px;">'+t.id+'</td>'
+              + '<td><span class="badge badge-primary">'+(t.subject||'—')+'</span></td>'
+              + '<td><span class="badge badge-'+(t.status==='active'?'success':t.status==='pending'?'warning':'gray')+'">'+t.status+'</span></td>'
+              + '<td style="font-size:12px;">'+new Date(t.createdAt).toLocaleDateString()+'</td>'
+              + '<td><div style="display:flex;gap:4px;">'+_approveBtn(t.id,t.status)+_userActions(t.id,t.name)+'</div></td>'
+              + '</tr>'
+            ).join('')}</tbody>
+          </table></div>`
+        }
       </div>
     </div>
   `;
 }
 
 function renderAdminStaff() {
+  const allUsers = _cache.users;
+  const staffUsers = allUsers.filter(u => u.role === 'staff');
   return `
     <div>
       <div class="flex items-center justify-between mb-6">
         <h1 style="font-size:22px;font-weight:800;">Manage Support Staff</h1>
-        <button class="btn btn-primary" onclick="showToast('Add staff form...','info')">+ Add Staff</button>
       </div>
       <div class="card">
-        <div class="table-container">
-          <table>
-            <thead><tr><th>Name</th><th>ID</th><th>Position</th><th>Department</th><th>Joined</th><th>Status</th></tr></thead>
-            <tbody>
-              ${supportStaff.map(s=>`
-                <tr>
-                  <td>
-                    <div class="flex items-center gap-3">
-                      <img src="${s.avatar}" class="avatar avatar-sm">
-                      <div class="font-semibold text-sm">${s.name}</div>
-                    </div>
-                  </td>
-                  <td style="font-family:monospace;font-size:12px;">${s.id}</td>
-                  <td>${s.position}</td>
-                  <td>${s.department}</td>
-                  <td>${s.joiningDate}</td>
-                  <td><span class="badge badge-success">${s.status}</span></td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
+        ${staffUsers.length === 0
+          ? `<div class="card-body text-center text-muted" style="padding:60px;">No staff registered yet.</div>`
+          : `<div class="table-container"><table>
+            <thead><tr><th>Name</th><th>ID</th><th>Position</th><th>Department</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>${staffUsers.map(s =>
+              '<tr>'
+              + '<td><div class="flex items-center gap-3"><img src="'+s.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://api.dicebear.com/7.x/avataaars/svg?seed=default\'"><div class="font-semibold text-sm">'+s.name+'</div></div></td>'
+              + '<td style="font-family:monospace;font-size:12px;">'+s.id+'</td>'
+              + '<td>'+(s.position||'—')+'</td>'
+              + '<td>'+(s.department||'—')+'</td>'
+              + '<td><span class="badge badge-'+(s.status==='active'?'success':'warning')+'">'+s.status+'</span></td>'
+              + '<td><div style="display:flex;gap:4px;">'+_approveBtn(s.id,s.status)+_userActions(s.id,s.name)+'</div></td>'
+              + '</tr>'
+            ).join('')}</tbody>
+          </table></div>`
+        }
       </div>
     </div>
   `;
 }
-
 function renderAdminAlumni() {
+  const allUsers = _cache.users;
+  const alumniUsers = allUsers.filter(u => u.role === 'alumni');
   return `
     <div>
       <div class="flex items-center justify-between mb-6">
         <h1 style="font-size:22px;font-weight:800;">Manage Alumni</h1>
-        <button class="btn btn-primary" onclick="showToast('Add alumni form...','info')">+ Add Alumni</button>
       </div>
-      <div class="card"><div class="card-body"><div class="text-center text-muted py-8">Alumni management table — click the Alumni page for the directory view.</div></div></div>
+      <div class="card">
+        ${alumniUsers.length === 0
+          ? `<div class="card-body text-center text-muted" style="padding:60px;">No alumni registered yet.</div>`
+          : `<div class="table-container"><table>
+            <thead><tr><th>Name</th><th>ID</th><th>Graduation Year</th><th>Profession</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>${alumniUsers.map(a => _alumniRow(a)).join('')}</tbody>
+          </table></div>`
+        }
+      </div>
     </div>
   `;
 }
 
 function renderAdminBatches() {
+  const batches = _cache.batches;
   return `
     <div>
       <div class="flex items-center justify-between mb-6">
         <h1 style="font-size:22px;font-weight:800;">Manage Batches</h1>
-        <button class="btn btn-primary" onclick="showToast('Create batch form...','info')">+ Create Batch</button>
+        <button class="btn btn-primary" onclick="document.getElementById('addBatchForm').style.display=document.getElementById('addBatchForm').style.display==='none'?'block':'none'">+ Create Batch</button>
       </div>
-      <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;">
-        ${batches.map(b=>`
-          <div class="card">
-            <div class="card-body">
-              <div class="flex items-center justify-between mb-2">
-                <div class="font-bold">${b.name}</div>
-                <span class="badge badge-primary">${b.totalStudents} students</span>
-              </div>
-              <div class="text-sm text-muted mb-2">Passing Year: ${b.passingYear}</div>
-              <div class="text-sm text-muted mb-3">Teacher: ${b.classTeacher}</div>
-              <div class="flex gap-2">
-                <button class="btn btn-secondary btn-sm flex-1" onclick="navigate('batch-detail','${b.id}')">View</button>
-                <button class="btn btn-ghost btn-sm" onclick="showToast('Edit batch...','info')">✏️</button>
-              </div>
-            </div>
+
+      <!-- Create Batch Form -->
+      <div class="card mb-6" id="addBatchForm" style="display:none;">
+        <div class="card-header"><div class="font-semibold">New Batch</div></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label class="form-label">Batch Name *</label>
+              <input class="form-input" id="b_name" placeholder="e.g. Batch 2025"></div>
+            <div class="form-group"><label class="form-label">Passing Year *</label>
+              <input class="form-input" id="b_year" type="number" placeholder="e.g. 2025"></div>
           </div>
-        `).join('')}
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label class="form-label">Class Teacher</label>
+              <input class="form-input" id="b_teacher" placeholder="Teacher name"></div>
+            <div class="form-group"><label class="form-label">Total Students</label>
+              <input class="form-input" id="b_students" type="number" placeholder="0"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Description</label>
+            <textarea class="form-input" id="b_desc" rows="2" placeholder="Batch description..."></textarea></div>
+          <div class="flex gap-3">
+            <button class="btn btn-primary" onclick="saveBatch()">Create Batch</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('addBatchForm').style.display='none'">Cancel</button>
+          </div>
+        </div>
       </div>
+
+      ${batches.length === 0
+        ? `<div class="card"><div class="card-body text-center text-muted" style="padding:60px;">No batches created yet. Click "+ Create Batch" to add one.</div></div>`
+        : `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;">
+            ${batches.map((b,i) => _batchCard(b,i)).join('')}
+          </div>`
+      }
     </div>
   `;
 }
 
-function renderAdminNotices() {
+function renderAdminAttendance() {
+  const allUsers = _cache.users;
+  const studentUsers = allUsers.filter(u => u.role === 'student' && u.status === 'active');
   return `
     <div>
       <div class="flex items-center justify-between mb-6">
-        <h1 style="font-size:22px;font-weight:800;">Manage Notices</h1>
-        <button class="btn btn-primary" onclick="showToast('Publish notice dialog...','info')">+ Publish Notice</button>
+        <h1 style="font-size:22px;font-weight:800;">Attendance Management</h1>
+        <button class="btn btn-primary" onclick="showToast('Attendance saved!','success')">Save Attendance</button>
       </div>
-      <div class="card">
-        <div class="card-body"><div class="text-center text-muted py-8">Notice management — click Notices page for the full board.</div></div>
+
+      <div class="card mb-4">
+        <div class="card-body" style="padding:14px 20px;">
+          <div class="flex gap-3 flex-wrap items-center">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Class</label>
+              <select class="form-input form-select" id="att_class" style="width:auto;" onchange="filterAttendanceClass()">
+                <option value="">All Classes</option>
+                ${['Class 6','Class 7','Class 8','Class 9','Class 10'].map(c=>`<option>${c}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Date</label>
+              <input type="date" class="form-input" id="att_date" value="${new Date().toISOString().split('T')[0]}" style="width:auto;">
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="adminMarkAllPresent()">Mark All Present</button>
+          </div>
+        </div>
       </div>
+
+      ${studentUsers.length === 0
+        ? `<div class="card"><div class="card-body text-center text-muted" style="padding:60px;">No active students yet.</div></div>`
+        : `<div class="card"><div class="table-container"><table>
+            <thead><tr><th>Student</th><th>Class</th><th>Status</th><th>Note</th></tr></thead>
+            <tbody id="attendanceAdminBody">${studentUsers.map(s => _attendanceRow(s)).join('')}</tbody>
+          </table></div></div>`
+      }
     </div>
   `;
 }
 
 function renderAdminResults() {
+  const allUsers = _cache.users;
+  const studentUsers = allUsers.filter(u => u.role === 'student' && u.status === 'active');
+  const exams = _cache.exams;
+  const results = _cache.results;
+
   return `
     <div>
       <div class="flex items-center justify-between mb-6">
         <h1 style="font-size:22px;font-weight:800;">Result Management</h1>
-        <button class="btn btn-primary" onclick="showToast('Create exam...','info')">+ Create Examination</button>
+        <button class="btn btn-primary" onclick="document.getElementById('addExamForm').style.display=document.getElementById('addExamForm').style.display==='none'?'block':'none'">
+          + Create Examination
+        </button>
       </div>
-      <div class="card"><div class="card-body"><div class="text-center text-muted py-8">Results admin — navigate to the Results page for full marks entry.</div><button class="btn btn-primary mx-auto" style="display:block;" onclick="navigate('results')">Go to Results →</button></div></div>
+
+      <!-- Create Exam Form -->
+      <div class="card mb-6" id="addExamForm" style="display:none;">
+        <div class="card-header"><div class="font-semibold">New Examination</div></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label class="form-label">Exam Name *</label>
+              <input class="form-input" id="ex_name" placeholder="e.g. Half-Yearly Examination 2025"></div>
+            <div class="form-group"><label class="form-label">Date *</label>
+              <input class="form-input" id="ex_date" type="date"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label class="form-label">Class/Scope</label>
+              <input class="form-input" id="ex_scope" placeholder="e.g. Class 9–10, All Sections"></div>
+            <div class="form-group"><label class="form-label">Subjects (comma separated)</label>
+              <input class="form-input" id="ex_subjects" placeholder="e.g. Bangla,English,Math,Science"></div>
+          </div>
+          <div class="flex gap-3">
+            <button class="btn btn-primary" onclick="saveExam()">Create Exam</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('addExamForm').style.display='none'">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exams List -->
+      ${exams.length === 0
+        ? `<div class="card mb-6"><div class="card-body text-center text-muted" style="padding:40px;">
+            No exams created yet. Click "+ Create Examination" to add one.
+          </div></div>`
+        : `<div class="flex flex-col gap-3 mb-6">${exams.map((e,i) => _examCard(e,i)).join('')}</div>`
+      }
+
+      <!-- Marks Entry Panel -->
+      <div id="marksEntryPanel" style="display:none;">
+        <div class="card">
+          <div class="card-header flex items-center justify-between">
+            <div class="font-semibold" id="marksEntryTitle">Enter Marks</div>
+            <div class="flex gap-2">
+              <button class="btn btn-primary btn-sm" onclick="saveMarks()">Save Marks</button>
+              <button class="btn btn-ghost btn-sm" onclick="document.getElementById('marksEntryPanel').style.display='none'">Close</button>
+            </div>
+          </div>
+          <div class="card-body" id="marksEntryBody">
+            ${studentUsers.length === 0
+              ? `<div class="text-center text-muted" style="padding:40px;">No active students found. Add students first.</div>`
+              : `<div class="table-container"><table id="marksTable">
+                  <thead id="marksTableHead"></thead>
+                  <tbody id="marksTableBody"></tbody>
+                </table></div>`
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Published Results Summary -->
+      ${results.length > 0 ? `
+        <div class="card mt-6">
+          <div class="card-header"><div class="font-semibold">Published Results Summary</div></div>
+          <div class="table-container"><table>
+            <thead><tr><th>Student</th><th>Exam</th><th>Total</th><th>%</th><th>Grade</th><th>GPA</th></tr></thead>
+            <tbody>${results.slice(-20).reverse().map(r => _resultRow(r)).join('')}</tbody>
+          </table></div>
+        </div>` : ''}
     </div>
   `;
 }
 
+function gradeFromPct(pct) {
+  if (pct >= 80) return { g:'A+', gp:5.0 };
+  if (pct >= 70) return { g:'A',  gp:4.0 };
+  if (pct >= 60) return { g:'A-', gp:3.5 };
+  if (pct >= 50) return { g:'B',  gp:3.0 };
+  if (pct >= 40) return { g:'C',  gp:2.0 };
+  if (pct >= 33) return { g:'D',  gp:1.0 };
+  return { g:'F', gp:0.0 };
+}
+
+window.saveExam = async function() {
+  const name     = document.getElementById('ex_name').value.trim();
+  const date     = document.getElementById('ex_date').value;
+  const scope    = document.getElementById('ex_scope').value.trim();
+  const subjects = document.getElementById('ex_subjects').value.split(',').map(s=>s.trim()).filter(Boolean);
+  if (!name) { showToast('Exam name is required','error'); return; }
+  await api.addExam({ name, date, scope, subjects });
+  showToast('Exam created!','success');
+  await _refreshTab('results');
+};
+
+window.deleteExam = async function(i) {
+  if (!confirm('Delete this exam and all its results?')) return;
+  await api.deleteExam(i);
+  showToast('Exam deleted','info');
+  await _refreshTab('results');
+};
+
+window.publishExam = async function(i) {
+  await api.updateExam(i, { status: 'Published' });
+  showToast('Results published! Students can now view them.','success');
+  await _refreshTab('results');
+};
+
+window.unpublishExam = async function(i) {
+  await api.updateExam(i, { status: 'Draft' });
+  showToast('Results unpublished','info');
+  await _refreshTab('results');
+};
+
+window.openMarksEntry = function(examIndex) {
+  const exams = _cache.exams;
+  const exam = exams[examIndex];
+  if (!exam) return;
+  const allUsers = _cache.users;
+  const studentUsers = allUsers.filter(u => u.role === 'student' && u.status === 'active');
+  const savedResults = _cache.results;
+
+  const panel = document.getElementById('marksEntryPanel');
+  const title = document.getElementById('marksEntryTitle');
+  const thead = document.getElementById('marksTableHead');
+  const tbody = document.getElementById('marksTableBody');
+  if (!panel || !thead || !tbody) return;
+
+  panel.style.display = 'block';
+  panel.dataset.examIndex = examIndex;
+  title.textContent = `Enter Marks — ${exam.name}`;
+
+  const subjects = exam.subjects || [];
+  thead.innerHTML = '<tr><th>Student</th>'+subjects.map(s=>'<th>'+s+'<br><small style="font-weight:400;font-size:10px;">(/100)</small></th>').join('')+'<th>Total</th><th>%</th><th>Grade</th></tr>';
+
+  tbody.innerHTML = studentUsers.map(st => {
+    const existing = savedResults.find(r => r.studentId === st.id && r.examId === exam.id);
+    const subjectInputs = subjects.map(sub => {
+      const val = existing?.subjects?.[sub] ?? '';
+      return '<td><input type="number" min="0" max="100" value="'+val+'" class="form-input marks-input" style="width:70px;padding:4px 8px;text-align:center;" data-subject="'+sub+'" oninput="recalcRow(this)"></td>';
+    }).join('');
+    return '<tr data-student-id="'+st.id+'" data-student-name="'+st.name+'">'
+      + '<td><div class="flex items-center gap-2"><img src="'+(st.avatar||'')+'" class="avatar avatar-xs" onerror="this.src=\'https://api.dicebear.com/7.x/avataaars/svg?seed='+encodeURIComponent(st.name)+'\'"><span class="font-medium text-sm">'+st.name+'</span></div></td>'
+      + subjectInputs
+      + '<td class="total-cell font-bold">—</td>'
+      + '<td class="pct-cell">—</td>'
+      + '<td class="grade-cell">—</td>'
+      + '</tr>';
+  }).join('');
+
+  // Recalc existing rows
+  tbody.querySelectorAll('tr').forEach(row => {
+    const first = row.querySelector('.marks-input');
+    if (first) recalcRowEl(row, subjects);
+  });
+
+  panel.scrollIntoView({behavior:'smooth'});
+};
+
+function recalcRowEl(row, subjects) {
+  const inputs = row.querySelectorAll('.marks-input');
+  let total = 0; let filled = 0;
+  inputs.forEach(inp => { if (inp.value !== '') { total += parseInt(inp.value)||0; filled++; } });
+  const outOf = subjects.length * 100;
+  if (filled === 0) { row.querySelector('.total-cell').textContent='—'; row.querySelector('.pct-cell').textContent='—'; row.querySelector('.grade-cell').textContent='—'; return; }
+  const pct = (total / outOf * 100).toFixed(1);
+  const g = (pct>=80?'A+':pct>=70?'A':pct>=60?'A-':pct>=50?'B':pct>=40?'C':pct>=33?'D':'F');
+  row.querySelector('.total-cell').textContent = total+'/'+outOf;
+  row.querySelector('.pct-cell').textContent = pct+'%';
+  row.querySelector('.grade-cell').innerHTML = `<span class="badge badge-${pct>=60?'success':'danger'}">${g}</span>`;
+}
+
+window.recalcRow = function(input) {
+  const row = input.closest('tr');
+  const exams = _cache.exams;
+  const panel = document.getElementById('marksEntryPanel');
+  const exam = exams[panel?.dataset?.examIndex];
+  if (!exam) return;
+  recalcRowEl(row, exam.subjects || []);
+};
+
+window.saveMarks = async function() {
+  const panel = document.getElementById('marksEntryPanel');
+  const examIndex = parseInt(panel?.dataset?.examIndex);
+  const exams = _cache.exams;
+  const exam = exams[examIndex];
+  if (!exam) return;
+  const subjects = exam.subjects || [];
+  const results = _cache.results;
+  const tbody = document.getElementById('marksTableBody');
+  const rows = tbody.querySelectorAll('tr');
+
+  rows.forEach(row => {
+    const studentId   = row.dataset.studentId;
+    const studentName = row.dataset.studentName;
+    const subjectMarks = {};
+    row.querySelectorAll('.marks-input').forEach(inp => {
+      if (inp.value !== '') subjectMarks[inp.dataset.subject] = parseInt(inp.value)||0;
+    });
+    if (Object.keys(subjectMarks).length === 0) return;
+    const total  = Object.values(subjectMarks).reduce((a,b)=>a+b,0);
+    const outOf  = subjects.length * 100;
+    const pct    = parseFloat((total/outOf*100).toFixed(1));
+    const gp     = pct>=80?5.0:pct>=70?4.0:pct>=60?3.5:pct>=50?3.0:pct>=40?2.0:pct>=33?1.0:0.0;
+    const grade  = pct>=80?'A+':pct>=70?'A':pct>=60?'A-':pct>=50?'B':pct>=40?'C':pct>=33?'D':'F';
+    const entry = {
+      id: `${exam.id}_${studentId}`,
+      examId: exam.id, exam: exam.name,
+      studentId, studentName,
+      subjects: subjectMarks,
+      total, outOf, percentage: pct,
+      gpa: gp, grade, pass: pct >= 33,
+      position: 1, publishedAt: new Date().toISOString(),
+    };
+    const existing = results.findIndex(r => r.examId === exam.id && r.studentId === studentId);
+    if (existing >= 0) results[existing] = entry; else results.push(entry);
+  });
+
+  // Rank students within this exam
+  const examResults = results.filter(r => r.examId === exam.id).sort((a,b)=>b.gpa-a.gpa);
+  examResults.forEach((r,i) => { r.position = i+1; });
+  localStorage.setItem('gfa_results', JSON.stringify(results));
+  await api.saveResults(results.filter(r => r.examId === exam.id));
+  showToast('Marks saved! Use "Publish" to make results visible to students.','success');
+};
+
+
 function renderAdminSettings() {
-  const s = JSON.parse(localStorage.getItem('gfa_settings') || '{}');
+  const s = _cache.settings;
   return `
     <div>
       <h1 style="font-size:22px;font-weight:800;margin-bottom:24px;">Website Settings</h1>
@@ -521,7 +886,7 @@ function renderAdminSettings() {
 }
 
 function renderAdminNoticesManager() {
-  const notices = JSON.parse(localStorage.getItem('gfa_notices') || '[]');
+  const notices = _cache.notices;
   return `
     <div>
       <div class="flex items-center justify-between mb-6">
@@ -559,17 +924,7 @@ function renderAdminNoticesManager() {
         ? `<div class="card"><div class="card-body text-center text-muted" style="padding:40px;">No notices published yet.</div></div>`
         : `<div class="card"><div class="table-container"><table>
             <thead><tr><th>Title</th><th>Category</th><th>Priority</th><th>Date</th><th>Actions</th></tr></thead>
-            <tbody>
-              ${notices.map((n,i)=>`
-                <tr>
-                  <td><div class="font-medium">${n.title}</div></td>
-                  <td><span class="badge badge-primary">${n.category}</span></td>
-                  <td><span class="badge badge-${n.priority==='urgent'?'danger':n.priority==='high'?'warning':'gray'}">${n.priority}</span></td>
-                  <td>${n.date}</td>
-                  <td><button class="btn btn-danger btn-sm" onclick="deleteNotice(${i})">Delete</button></td>
-                </tr>
-              `).join('')}
-            </tbody>
+            <tbody>${notices.map((n,i) => _noticeRow(n,i)).join('')}</tbody>
           </table></div></div>`
       }
     </div>
@@ -577,7 +932,7 @@ function renderAdminNoticesManager() {
 }
 
 function renderAdminEventsManager() {
-  const events = JSON.parse(localStorage.getItem('gfa_events') || '[]');
+  const events = _cache.events;
   return `
     <div>
       <div class="flex items-center justify-between mb-6">
@@ -616,17 +971,7 @@ function renderAdminEventsManager() {
         ? `<div class="card"><div class="card-body text-center text-muted" style="padding:40px;">No events added yet.</div></div>`
         : `<div class="card"><div class="table-container"><table>
             <thead><tr><th>Title</th><th>Date</th><th>Category</th><th>Location</th><th>Actions</th></tr></thead>
-            <tbody>
-              ${events.map((e,i)=>`
-                <tr>
-                  <td><div class="font-medium">${e.title}</div></td>
-                  <td>${e.date}</td>
-                  <td><span class="badge badge-primary">${e.category}</span></td>
-                  <td>${e.location}</td>
-                  <td><button class="btn btn-danger btn-sm" onclick="deleteEvent(${i})">Delete</button></td>
-                </tr>
-              `).join('')}
-            </tbody>
+            <tbody>${events.map((e,i) => _eventRow(e,i)).join('')}</tbody>
           </table></div></div>`
       }
     </div>
@@ -634,7 +979,7 @@ function renderAdminEventsManager() {
 }
 
 function renderAdminAssignmentsManager() {
-  const assignments = JSON.parse(localStorage.getItem('gfa_assignments') || '[]');
+  const assignments = (JSON.parse(localStorage.getItem('gfa_assignments')||'[]'));
   return `
     <div>
       <div class="flex items-center justify-between mb-6">
@@ -672,18 +1017,7 @@ function renderAdminAssignmentsManager() {
         ? `<div class="card"><div class="card-body text-center text-muted" style="padding:40px;">No assignments added yet.</div></div>`
         : `<div class="card"><div class="table-container"><table>
             <thead><tr><th>Title</th><th>Subject</th><th>Teacher</th><th>Due Date</th><th>Class</th><th>Actions</th></tr></thead>
-            <tbody>
-              ${assignments.map((a,i)=>`
-                <tr>
-                  <td><div class="font-medium">${a.title}</div></td>
-                  <td>${a.subject}</td>
-                  <td>${a.teacher}</td>
-                  <td>${a.dueDate || '—'}</td>
-                  <td>${a.class || 'All'}</td>
-                  <td><button class="btn btn-danger btn-sm" onclick="deleteAssignment(${i})">Delete</button></td>
-                </tr>
-              `).join('')}
-            </tbody>
+            <tbody>${assignments.map((a,i) => _assignmentRow(a,i)).join('')}</tbody>
           </table></div></div>`
       }
     </div>
@@ -691,9 +1025,11 @@ function renderAdminAssignmentsManager() {
 }
 
 function renderAdminUsers() {
-  const allUsers = auth.getAllUsers();
-  const pending  = allUsers.filter(u => u.status === 'pending');
-  const active   = allUsers.filter(u => u.status === 'active');
+  const allUsers = _cache.users;
+  // Pending = not yet active (catches 'pending', and any legacy broken statuses)
+  const pending  = allUsers.filter(u => u.status !== 'active' && u.role !== 'admin');
+  const active   = allUsers.filter(u => u.status === 'active' && u.role !== 'admin');
+  const admins   = allUsers.filter(u => u.role === 'admin');
 
   return `
     <div>
@@ -706,74 +1042,40 @@ function renderAdminUsers() {
       <div class="card mb-6" style="border-color:var(--warning);">
         <div class="card-header" style="background:#fffbeb;">
           <div class="font-semibold" style="color:#92400e;">
-            ${SVG(`<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>`, 16, '#92400e')}
-            Pending Approvals
+            ${SVG('<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>', 16, '#92400e')}
+            Pending Approvals (${pending.length})
           </div>
         </div>
         <div class="table-container">
           <table>
-            <thead><tr><th>User</th><th>Email</th><th>Phone</th><th>Class</th><th>Registered</th><th>Actions</th></tr></thead>
-            <tbody>
-              ${pending.map(u=>`
-                <tr>
-                  <td>
-                    <div style="display:flex;align-items:center;gap:10px;">
-                      <img src="${u.avatar}" class="avatar avatar-sm" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=default'">
-                      <div>
-                        <div class="font-semibold text-sm">${u.name}</div>
-                        <div class="text-xs text-muted">${u.id}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td style="font-size:12px;">${u.email}</td>
-                  <td style="font-size:12px;">${u.phone||'—'}</td>
-                  <td>${u.class||'—'} ${u.section?'· '+u.section:''}</td>
-                  <td style="font-size:12px;">${new Date(u.createdAt).toLocaleDateString()}</td>
-                  <td>
-                    <div style="display:flex;gap:6px;">
-                      <button class="btn btn-success btn-sm" onclick="approveUser('${u.id}')">
-                        ${SVG(`<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>`, 13, 'white')} Approve
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
+            <thead><tr><th>User</th><th>Role</th><th>Email</th><th>Phone</th><th>Class</th><th>Registered</th><th>Current Status</th><th>Actions</th></tr></thead>
+            <tbody>${pending.map(u => _pendingUserRow(u)).join('')}</tbody>
           </table>
         </div>
       </div>` : `
       <div class="card mb-6" style="border-color:var(--success);">
         <div class="card-body" style="padding:16px;text-align:center;color:var(--success);">
-          ${SVG(`<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>`, 18, 'var(--success)')}
+          ${SVG('<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>', 18, 'var(--success)')}
           All accounts are approved
         </div>
       </div>`}
 
-      <div class="card">
-        <div class="card-header"><div class="font-semibold">All Active Users (${active.length})</div></div>
+      <div class="card mb-4">
+        <div class="card-header"><div class="font-semibold">Active Users (${active.length})</div></div>
         <div class="table-container">
           <table>
             <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Class</th><th>Registered</th><th>Status</th></tr></thead>
-            <tbody>
-              ${active.map(u=>`
-                <tr>
-                  <td>
-                    <div style="display:flex;align-items:center;gap:10px;">
-                      <img src="${u.avatar}" class="avatar avatar-sm" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=default'">
-                      <div>
-                        <div class="font-semibold text-sm">${u.name}</div>
-                        <div class="text-xs text-muted">${u.id}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td style="font-size:12px;">${u.email}</td>
-                  <td><span class="badge badge-${u.role==='admin'?'danger':u.role==='teacher'?'purple':'primary'}" style="text-transform:capitalize;">${u.role}</span></td>
-                  <td>${u.class||'—'} ${u.section?'· '+u.section:''}</td>
-                  <td style="font-size:12px;">${new Date(u.createdAt).toLocaleDateString()}</td>
-                  <td><span class="badge badge-success">Active</span></td>
-                </tr>
-              `).join('')}
-            </tbody>
+            <tbody>${active.map(u => _activeUserRow(u)).join('')}</tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="font-semibold">Administrators (${admins.length})</div></div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Class</th><th>Registered</th><th>Status</th></tr></thead>
+            <tbody>${admins.map(u => _activeUserRow(u)).join('')}</tbody>
           </table>
         </div>
       </div>
@@ -781,23 +1083,21 @@ function renderAdminUsers() {
   `;
 }
 
-window.approveUser = function(id) {
-  auth.approveUser(id);
+window.approveUser = async function(id) {
+  await auth.approveUser(id);
   showToast('User approved successfully!', 'success');
-  const content = document.getElementById('adminContent');
-  if (content) content.innerHTML = renderAdminUsers();
+  await _refreshTab('roles');
 };
 
-window.switchAdminTab = function(tab, btn) {
+window.switchAdminTab = async function(tab, btn) {
   adminTab = tab;
   document.querySelectorAll('.admin-nav-item').forEach(el => el.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  const content = document.getElementById('adminContent');
-  if (content) content.innerHTML = renderAdminTab(tab);
+  await _refreshTab(tab);
 };
 
 // ── Admin Settings ──
-window.saveSettings = function() {
+window.saveSettings = async function() {
   const s = {
     name:          document.getElementById('s_name')?.value,
     tagline:       document.getElementById('s_tagline')?.value,
@@ -815,9 +1115,8 @@ window.saveSettings = function() {
     totalAlumni:   document.getElementById('s_alumni')?.value,
     passRate:      document.getElementById('s_passrate')?.value,
   };
-  // Remove undefined keys
   Object.keys(s).forEach(k => s[k] === undefined && delete s[k]);
-  localStorage.setItem('gfa_settings', JSON.stringify(s));
+  await api.saveSettings(s);
   showToast('Settings saved successfully!', 'success');
 };
 
@@ -827,36 +1126,24 @@ window.showAddNoticeModal = function() {
   if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
 };
 
-window.saveNotice = function() {
+window.saveNotice = async function() {
   const title   = document.getElementById('n_title')?.value?.trim();
   const content = document.getElementById('n_content')?.value?.trim();
   if (!title || !content) { showToast('Title and content are required.', 'error'); return; }
-  const notices = JSON.parse(localStorage.getItem('gfa_notices') || '[]');
-  notices.unshift({
-    id: 'N' + Date.now(),
+  await api.addNotice({
     title,
     category: document.getElementById('n_category')?.value || 'General',
     priority: document.getElementById('n_priority')?.value || 'medium',
     content,
-    date: new Date().toISOString().split('T')[0],
   });
-  localStorage.setItem('gfa_notices', JSON.stringify(notices));
-  // Also push a notification
-  const notifs = JSON.parse(localStorage.getItem('gfa_notifications') || '[]');
-  notifs.unshift({ title: 'New Notice: ' + title, message: content.slice(0,80), read: false, createdAt: new Date().toISOString() });
-  localStorage.setItem('gfa_notifications', JSON.stringify(notifs));
   showToast('Notice published!', 'success');
-  const content2 = document.getElementById('adminContent');
-  if (content2) content2.innerHTML = renderAdminTab('notices');
+  await _refreshTab('notices');
 };
 
-window.deleteNotice = function(idx) {
-  const notices = JSON.parse(localStorage.getItem('gfa_notices') || '[]');
-  notices.splice(idx, 1);
-  localStorage.setItem('gfa_notices', JSON.stringify(notices));
+window.deleteNotice = async function(idx) {
+  await api.deleteNotice(idx);
   showToast('Notice deleted.', 'success');
-  const content = document.getElementById('adminContent');
-  if (content) content.innerHTML = renderAdminTab('notices');
+  await _refreshTab('notices');
 };
 
 // ── Admin Events ──
@@ -865,12 +1152,10 @@ window.showAddEventForm = function() {
   if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
 };
 
-window.saveEvent = function() {
+window.saveEvent = async function() {
   const title = document.getElementById('ev_title')?.value?.trim();
   if (!title) { showToast('Event title is required.', 'error'); return; }
-  const events = JSON.parse(localStorage.getItem('gfa_events') || '[]');
-  events.unshift({
-    id: 'EV' + Date.now(),
+  await api.addEvent({
     title,
     date:     document.getElementById('ev_date')?.value,
     time:     document.getElementById('ev_time')?.value,
@@ -878,22 +1163,17 @@ window.saveEvent = function() {
     location: document.getElementById('ev_location')?.value || '',
     description: document.getElementById('ev_desc')?.value || '',
   });
-  localStorage.setItem('gfa_events', JSON.stringify(events));
   showToast('Event added!', 'success');
-  const content = document.getElementById('adminContent');
-  if (content) content.innerHTML = renderAdminTab('events');
+  await _refreshTab('events');
 };
 
-window.deleteEvent = function(idx) {
-  const events = JSON.parse(localStorage.getItem('gfa_events') || '[]');
-  events.splice(idx, 1);
-  localStorage.setItem('gfa_events', JSON.stringify(events));
+window.deleteEvent = async function(idx) {
+  await api.deleteEvent(idx);
   showToast('Event deleted.', 'success');
-  const content = document.getElementById('adminContent');
-  if (content) content.innerHTML = renderAdminTab('events');
+  await _refreshTab('events');
 };
 
-// ── Admin Assignments ──
+// ── Admin Assignments (still localStorage — no server endpoint yet) ──
 window.showAddAssignmentForm = function() {
   const form = document.getElementById('addAssignmentForm');
   if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
@@ -902,16 +1182,14 @@ window.showAddAssignmentForm = function() {
 window.saveAssignment = function() {
   const title = document.getElementById('as_title')?.value?.trim();
   if (!title) { showToast('Assignment title is required.', 'error'); return; }
-  const assignments = JSON.parse(localStorage.getItem('gfa_assignments') || '[]');
+  const assignments = JSON.parse(localStorage.getItem('gfa_assignments')||'[]');
   assignments.unshift({
-    id:      'AS' + Date.now(),
-    title,
+    id: 'AS' + Date.now(), title,
     subject: document.getElementById('as_subject')?.value || '',
     teacher: document.getElementById('as_teacher')?.value || '',
     dueDate: document.getElementById('as_due')?.value || '',
     class:   document.getElementById('as_class')?.value || '',
-    done:    false,
-    createdAt: new Date().toISOString(),
+    done: false, createdAt: new Date().toISOString(),
   });
   localStorage.setItem('gfa_assignments', JSON.stringify(assignments));
   showToast('Assignment added!', 'success');
@@ -920,10 +1198,164 @@ window.saveAssignment = function() {
 };
 
 window.deleteAssignment = function(idx) {
-  const assignments = JSON.parse(localStorage.getItem('gfa_assignments') || '[]');
+  const assignments = JSON.parse(localStorage.getItem('gfa_assignments')||'[]');
   assignments.splice(idx, 1);
   localStorage.setItem('gfa_assignments', JSON.stringify(assignments));
   showToast('Assignment deleted.', 'success');
   const content = document.getElementById('adminContent');
   if (content) content.innerHTML = renderAdminTab('assignments');
+};
+
+// ── Admin User Edit/Delete ──
+window.adminEditUser = function(id) {
+  const u = _cache.users.find(x => x.id === id);
+  if (!u) return;
+
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.onclick = e => { if (e.target === modal) modal.remove(); };
+  modal.innerHTML = `
+    <div class="modal">
+      <div class="modal-header">
+        <div class="font-semibold">Edit User — ${u.name}</div>
+        <button class="btn btn-ghost btn-icon" onclick="this.closest('.modal-overlay').remove()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;">
+        <div class="flex items-center gap-3 mb-2">
+          <img src="${u.avatar}" class="avatar avatar-lg" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=default'">
+          <div><div class="font-bold">${u.name}</div><div class="text-xs text-muted">${u.id}</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group"><label class="form-label">First Name</label>
+            <input id="eu_first" class="form-input" value="${u.firstName||''}"></div>
+          <div class="form-group"><label class="form-label">Last Name</label>
+            <input id="eu_last" class="form-input" value="${u.lastName||''}"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Email</label>
+          <input id="eu_email" class="form-input" value="${u.email}" type="email"></div>
+        <div class="form-group"><label class="form-label">Phone</label>
+          <input id="eu_phone" class="form-input" value="${u.phone||''}"></div>
+        ${u.role === 'student' ? `
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+            <div class="form-group"><label class="form-label">Class</label>
+              <input id="eu_class" class="form-input" value="${u.class||''}"></div>
+            <div class="form-group"><label class="form-label">Section</label>
+              <input id="eu_section" class="form-input" value="${u.section||''}"></div>
+            <div class="form-group"><label class="form-label">Roll</label>
+              <input id="eu_roll" class="form-input" value="${u.roll||''}"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label class="form-label">Guardian</label>
+              <input id="eu_guardian" class="form-input" value="${u.guardian||''}"></div>
+            <div class="form-group"><label class="form-label">Blood Group</label>
+              <input id="eu_blood" class="form-input" value="${u.bloodGroup||''}"></div>
+          </div>` : ''}
+        ${u.role === 'teacher' ? `
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label class="form-label">Subject</label>
+              <input id="eu_subject" class="form-input" value="${u.subject||''}"></div>
+            <div class="form-group"><label class="form-label">Qualification</label>
+              <input id="eu_qualification" class="form-input" value="${u.qualification||''}"></div>
+          </div>` : ''}
+        <div class="form-group"><label class="form-label">Status</label>
+          <select id="eu_status" class="form-input form-select">
+            <option value="active" ${u.status==='active'?'selected':''}>Active</option>
+            <option value="pending" ${u.status==='pending'?'selected':''}>Pending</option>
+            <option value="inactive" ${u.status==='inactive'?'selected':''}>Inactive</option>
+          </select></div>
+        <div class="flex gap-3 justify-end">
+          <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+          <button class="btn btn-primary" onclick="adminSaveUser('${id}')">Save Changes</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+};
+
+window.adminSaveUser = async function(id) {
+  const get = (elId) => document.getElementById(elId)?.value?.trim();
+  const updates = {
+    firstName: get('eu_first'),
+    lastName:  get('eu_last'),
+    email:     get('eu_email'),
+    phone:     get('eu_phone'),
+    status:    get('eu_status'),
+    class:     get('eu_class'),
+    section:   get('eu_section'),
+    roll:      get('eu_roll'),
+    guardian:  get('eu_guardian'),
+    bloodGroup:get('eu_blood'),
+    subject:   get('eu_subject'),
+    qualification: get('eu_qualification'),
+  };
+  // Rebuild name
+  const u = _cache.users.find(x => x.id === id);
+  if (u) {
+    updates.name = `${updates.firstName||u.firstName} ${updates.lastName||u.lastName}`.trim();
+  }
+  Object.keys(updates).forEach(k => !updates[k] && delete updates[k]);
+  await api.updateUser(id, updates);
+
+  // Update session if editing current user
+  const session = auth.getCurrentUser();
+  if (session && session.id === id) {
+    const newSession = { ...session, ...updates };
+    localStorage.setItem('gfa_session', JSON.stringify(newSession));
+  }
+
+  document.querySelector('.modal-overlay')?.remove();
+  showToast('User updated successfully!', 'success');
+  await _refreshTab(adminTab);
+};
+
+window.adminDeleteUser = async function(id, name) {
+  if (!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
+  await api.deleteUser(id);
+
+  // Log out if deleting current session
+  const session = auth.getCurrentUser();
+  if (session && session.id === id) auth.logout();
+
+  showToast(`${name} has been deleted.`, 'success');
+  await _refreshTab(adminTab);
+};
+
+// ── Batch Management ──
+window.saveBatch = async function() {
+  const name = document.getElementById('b_name')?.value?.trim();
+  const year = document.getElementById('b_year')?.value?.trim();
+  if (!name || !year) { showToast('Batch name and year are required.', 'error'); return; }
+  await api.addBatch({
+    name, passingYear: parseInt(year),
+    classTeacher: document.getElementById('b_teacher')?.value?.trim() || '',
+    totalStudents: parseInt(document.getElementById('b_students')?.value) || 0,
+    description: document.getElementById('b_desc')?.value?.trim() || '',
+    achievements: [],
+  });
+  showToast('Batch created!', 'success');
+  await _refreshTab('batches');
+};
+
+window.deleteBatch = async function(idx) {
+  const batches = _cache.batches;
+  const b = batches[idx];
+  if (!confirm(`Delete batch "${b?.name}"?`)) return;
+  await api.deleteBatch(idx);
+  showToast('Batch deleted.', 'success');
+  await _refreshTab('batches');
+};
+
+// ── Attendance Management ──
+window.filterAttendanceClass = function() {
+  const cls = document.getElementById('att_class')?.value || '';
+  document.querySelectorAll('#attendanceAdminBody tr').forEach(row => {
+    row.style.display = (!cls || row.dataset.class === cls) ? '' : 'none';
+  });
+};
+
+window.adminMarkAllPresent = function() {
+  document.querySelectorAll('.att-status').forEach(sel => sel.value = 'present');
+  showToast('All marked as Present', 'success');
 };

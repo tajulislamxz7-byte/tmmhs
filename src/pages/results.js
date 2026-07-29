@@ -2,7 +2,23 @@
 // RESULTS PAGE — Student Marksheet + Admin/Teacher View
 // ================================================
 
-import { students, results, teachers } from '../data/sampleData.js';
+import { students as sampleStudents, teachers } from '../data/sampleData.js';
+
+function getStudentById(id) {
+  // Check API cache first, then sampleData
+  const cached = JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
+  const u = cached.find(x => x.id === id);
+  if (u) return u;
+  return sampleStudents.find(s => s.id === id);
+}
+
+function getExams() {
+  return JSON.parse(localStorage.getItem('gfa_exams') || '[]');
+}
+
+function getResults() {
+  return JSON.parse(localStorage.getItem('gfa_results') || '[]');
+}
 
 // Build a display profile from localStorage auth user when they aren't in sampleData
 function buildUserProfile(user) {
@@ -28,13 +44,8 @@ function buildUserProfile(user) {
   };
 }
 
-const EXAMS = [
-  { id:'E001', name:'Half-Yearly Examination 2024', scope:'Class 9–10, All Sections', status:'Published', subjects:7, date:'2024-12-01' },
-  { id:'E002', name:'Monthly Test — January 2025', scope:'Class 6–8, All Sections', status:'Published', subjects:4, date:'2025-01-15' },
-  { id:'E003', name:'Pre-Test 2025', scope:'Class 10, Section A & B', status:'Draft', subjects:7, date:'2025-02-01' },
-  { id:'E004', name:'SSC Test Examination 2025', scope:'Class 10, All Sections', status:'Scheduled', subjects:8, date:'2025-02-14' },
-  { id:'E005', name:'Annual Examination 2024', scope:'Class 6–10, All Sections', status:'Published', subjects:8, date:'2024-11-01' },
-];
+const EXAMS = [];  // kept for reference; actual exams are stored in localStorage gfa_exams
+
 
 function gradeFromPct(pct) {
   if (pct >= 80) return { g:'A+', gp:5.0 };
@@ -47,8 +58,9 @@ function gradeFromPct(pct) {
 }
 
 export function renderStudentDashboard(loggedInUser) {
+  const cached = JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
   const student = (loggedInUser && loggedInUser.id)
-    ? (students.find(s => s.id === loggedInUser.id) || buildUserProfile(loggedInUser))
+    ? (cached.find(s => s.id === loggedInUser.id) || sampleStudents.find(s => s.id === loggedInUser.id) || buildUserProfile(loggedInUser))
     : null;
 
   if (!student) return `
@@ -58,7 +70,7 @@ export function renderStudentDashboard(loggedInUser) {
       </div></div>
     </div>`;
 
-  const myResults = results.filter(r => r.studentId === student.id);
+  const myResults = getResults().filter(r => r.studentId === student.id);
   const latest = myResults[0] || null;
 
   return `
@@ -271,6 +283,10 @@ function renderRecentNoticesWidget() {
 export function renderResults(role, loggedInUser) {
   if (role === 'student') return renderStudentDashboard(loggedInUser);
 
+  const exams   = getExams();
+  const results = getResults();
+  const publishedResults = results; // all saved results
+
   return `
     <div class="page-container">
       <div class="page-header">
@@ -279,130 +295,78 @@ export function renderResults(role, loggedInUser) {
             <div>
               <div class="section-tag" style="background:rgba(255,255,255,0.2);color:white;">Academic</div>
               <h1 class="page-title">Result Management</h1>
-              <p class="page-subtitle">Create exams, enter marks, auto-calculate GPA and publish results</p>
+              <p class="page-subtitle">Manage exams and published results from the Admin panel</p>
             </div>
-            <button class="btn btn-primary" onclick="showToast('Create exam dialog opening...','info')">
-              + Create Examination
-            </button>
+            <button class="btn btn-primary" onclick="navigate('admin')">Go to Admin Panel →</button>
           </div>
         </div>
       </div>
       <div class="container section-sm">
-        <!-- Exam List -->
-        <div class="flex flex-col gap-3 mb-8">
-          ${EXAMS.map(e=>`
-            <div class="card" style="cursor:pointer;" onclick="showExamDetail('${e.id}')">
-              <div class="card-body" style="padding:20px 24px;">
-                <div class="flex items-center gap-4">
-                  <div style="width:48px;height:48px;border-radius:12px;background:var(--primary-50);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="font-semibold">${e.name}</div>
-                    <div class="text-sm text-muted">${e.scope} · ${e.subjects} subjects · ${e.date}</div>
-                  </div>
-                  <span class="badge badge-${e.status==='Published'?'success':e.status==='Scheduled'?'primary':'warning'}">${e.status}</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-                </div>
-              </div>
+        ${exams.length === 0 ? `
+          <div class="card">
+            <div class="card-body text-center" style="padding:60px;">
+              <div style="font-size:48px;margin-bottom:12px;">📋</div>
+              <div class="font-semibold" style="font-size:18px;">No exams created yet</div>
+              <div class="text-muted text-sm mt-2 mb-4">Create exams and publish results from the Admin panel</div>
+              <button class="btn btn-primary" onclick="navigate('admin')">Open Admin Panel →</button>
             </div>
-          `).join('')}
-        </div>
-
-        <!-- Marks Entry Table -->
-        <div class="card mb-8">
-          <div class="card-header flex items-center justify-between">
-            <div class="font-semibold">Marks Entry — Half-Yearly 2024, Class 10-A</div>
-            <button class="btn btn-primary btn-sm" onclick="showToast('Results published!','success')">Publish Results</button>
           </div>
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Student</th>
-                  ${Object.keys(results[0].subjects).map(s=>`<th>${s}</th>`).join('')}
-                  <th>Total</th><th>%</th><th>GPA</th><th>Grade</th><th>Rank</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${results.map(r=>{
-                  const g = gradeFromPct(r.percentage);
-                  return `
-                    <tr>
-                      <td>
-                        <div class="flex items-center gap-2">
-                          <img src="${students.find(s=>s.id===r.studentId)?.avatar||''}" class="avatar avatar-xs">
-                          <span class="font-medium">${r.studentName}</span>
+        ` : `
+          <div class="flex flex-col gap-4">
+            ${exams.map(e => {
+              const examResults = publishedResults.filter(r => r.examId === e.id);
+              const passCount = examResults.filter(r => r.pass).length;
+              const passRate = examResults.length > 0 ? Math.round(passCount/examResults.length*100) : 0;
+              return `
+                <div class="card">
+                  <div class="card-body" style="padding:20px 24px;">
+                    <div class="flex items-start gap-4">
+                      <div style="width:48px;height:48px;border-radius:12px;background:var(--primary-50);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-3 mb-1 flex-wrap">
+                          <div class="font-semibold">${e.name}</div>
+                          <span class="badge badge-${e.status==='Published'?'success':e.status==='Draft'?'warning':'primary'}">${e.status}</span>
                         </div>
-                      </td>
-                      ${Object.values(r.subjects).map(m=>`<td style="font-family:monospace;">${m}</td>`).join('')}
-                      <td style="font-weight:700;">${r.total}/${r.outOf}</td>
-                      <td>${r.percentage}%</td>
-                      <td style="font-weight:700;color:var(--primary);">${r.gpa}</td>
-                      <td><span class="badge badge-success">${r.grade}</span></td>
-                      <td style="font-weight:700;">
-                        ${r.position===1
-                          ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`
-                          : r.position===2
-                          ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`
-                          : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`
-                        } #${r.position}
-                      </td>
-                    </tr>`;
-                }).join('')}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Analytics -->
-        <div class="grid" style="grid-template-columns:1fr 1fr;gap:20px;">
-          <div class="card">
-            <div class="card-header"><div class="font-semibold">Pass/Fail Statistics</div></div>
-            <div class="card-body">
-              ${[{l:'Pass',v:results.filter(r=>r.pass).length,total:results.length,c:'var(--success)'},{l:'Fail',v:results.filter(r=>!r.pass).length,total:results.length,c:'var(--danger)'}].map(s=>`
-                <div class="flex items-center gap-3 mb-4">
-                  <div style="flex:1;">
-                    <div class="flex justify-between mb-1"><span class="text-sm font-medium">${s.l}</span><span class="text-sm font-bold">${s.v}</span></div>
-                    <div style="height:8px;background:var(--bg-secondary);border-radius:99px;overflow:hidden;">
-                      <div style="width:${s.total?Math.round(s.v/s.total*100):0}%;height:100%;background:${s.c};border-radius:99px;"></div>
+                        <div class="text-sm text-muted mb-3">${e.scope||''} · ${e.date||''} · Subjects: ${(e.subjects||[]).join(', ')}</div>
+                        ${e.status === 'Published' && examResults.length > 0 ? `
+                          <div class="flex gap-4 flex-wrap text-sm">
+                            <span><strong>${examResults.length}</strong> results</span>
+                            <span style="color:var(--success);"><strong>${passCount}</strong> passed</span>
+                            <span><strong>${passRate}%</strong> pass rate</span>
+                          </div>
+                        ` : e.status === 'Draft' ? `<div class="text-sm text-muted">Not yet published to students</div>` : ''}
+                      </div>
                     </div>
+                    ${e.status === 'Published' && examResults.length > 0 ? `
+                      <div class="table-container mt-4" style="max-height:300px;overflow-y:auto;">
+                        <table>
+                          <thead><tr><th>Student</th>${(e.subjects||[]).map(s=>`<th>${s}</th>`).join('')}<th>Total</th><th>%</th><th>Grade</th><th>GPA</th><th>Rank</th></tr></thead>
+                          <tbody>
+                            ${[...examResults].sort((a,b)=>a.position-b.position).map(r=>`
+                              <tr>
+                                <td class="font-medium">${r.studentName}</td>
+                                ${(e.subjects||[]).map(s=>`<td style="font-family:monospace;">${r.subjects?.[s]??'—'}</td>`).join('')}
+                                <td class="font-bold">${r.total}/${r.outOf}</td>
+                                <td>${r.percentage}%</td>
+                                <td><span class="badge badge-${r.pass?'success':'danger'}">${r.grade}</span></td>
+                                <td class="font-bold" style="color:var(--primary);">${r.gpa}</td>
+                                <td class="font-bold">#${r.position}</td>
+                              </tr>
+                            `).join('')}
+                          </tbody>
+                        </table>
+                      </div>
+                    ` : ''}
                   </div>
                 </div>
-              `).join('')}
-              <div class="text-center mt-2">
-                <div style="font-size:36px;font-weight:900;color:var(--success);">100%</div>
-                <div class="text-xs text-muted">Pass Rate</div>
-              </div>
-            </div>
+              `;
+            }).join('')}
           </div>
-          <div class="card">
-            <div class="card-header"><div class="font-semibold">Top Performers</div></div>
-            <div class="card-body">
-              ${[...results].sort((a,b)=>b.gpa-a.gpa).slice(0,3).map((r,i)=>`
-                <div class="flex items-center gap-3 mb-3">
-                  <div style="width:24px;height:24px;flex-shrink:0;">${i===0
-                    ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`
-                    : i===1
-                    ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`
-                    : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`
-                  }</div>
-                  <img src="${students.find(s=>s.id===r.studentId)?.avatar||''}" class="avatar avatar-sm">
-                  <div class="flex-1">
-                    <div class="font-semibold text-sm">${r.studentName}</div>
-                    <div class="text-xs text-muted">${r.class} · ${r.percentage}%</div>
-                  </div>
-                  <div style="font-weight:800;color:var(--primary);">${r.gpa}</div>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        </div>
+        `}
       </div>
     </div>
   `;
 }
 
-window.showExamDetail = function(id) {
-  showToast('Opening exam detail...', 'info');
-};

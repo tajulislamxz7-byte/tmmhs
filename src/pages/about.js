@@ -14,14 +14,24 @@ const FAQS = [
 ];
 
 export function renderAbout() {
+  const S = JSON.parse(localStorage.getItem('gfa_settings') || '{}');
+  const name     = S.name      || schoolInfo.name;
+  const tagline  = S.tagline   || schoolInfo.tagline;
+  const founded  = S.founded   || schoolInfo.founded;
+  const address  = S.address   || schoolInfo.address;
+  const phone    = S.phone     || schoolInfo.phone;
+  const email    = S.email     || schoolInfo.email;
+  const principal= S.principal || schoolInfo.principalName;
+  const message  = S.message   || schoolInfo.principalMessage;
+
   return `
     <div class="page-container">
       <!-- About Hero -->
       <div class="about-hero">
         <div class="container">
-          <div class="section-tag" style="background:rgba(255,255,255,0.15);color:white;margin-bottom:16px;">Est. ${schoolInfo.founded}</div>
-          <h1 style="font-size:var(--text-5xl);font-weight:900;color:white;font-family:var(--font-display);margin-bottom:16px;">About ${schoolInfo.name}</h1>
-          <p style="font-size:var(--text-xl);color:rgba(255,255,255,0.8);max-width:600px;margin:0 auto;line-height:1.7;">${schoolInfo.tagline}</p>
+          <div class="section-tag" style="background:rgba(255,255,255,0.15);color:white;margin-bottom:16px;">Est. ${founded}</div>
+          <h1 style="font-size:var(--text-5xl);font-weight:900;color:white;font-family:var(--font-display);margin-bottom:16px;">About ${name}</h1>
+          <p style="font-size:var(--text-xl);color:rgba(255,255,255,0.8);max-width:600px;margin:0 auto;line-height:1.7;">${tagline}</p>
         </div>
       </div>
 
@@ -29,7 +39,7 @@ export function renderAbout() {
         <!-- Mission / Vision / History -->
         <div class="grid-2 gap-6 mb-12">
           ${[
-            {svg:'<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>', title:'Our History',  text:schoolInfo.principalMessage},
+            {svg:'<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>', title:'Our History',  text:message},
             {svg:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',                                   title:'Mission',      text:'To give every student a rigorous, well-rounded education that prepares them for university and for life — regardless of background.'},
             {svg:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',           title:'Vision',       text:'To be recognized as one of Bangladesh\'s leading centers of academic excellence and civic character by 2030.'},
             {svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',                  title:'Core Values',  text:'Integrity, Curiosity, Excellence, Community, and Respect — these five values guide every interaction within our school walls.'},
@@ -50,7 +60,7 @@ export function renderAbout() {
         <div class="principal-section mb-12">
           <div class="principal-image">
             <div class="principal-avatar">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=FatimaRahman" alt="${schoolInfo.principalName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(principal)}" alt="${principal}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
             </div>
             <div class="principal-badge">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--primary)"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -59,12 +69,11 @@ export function renderAbout() {
           </div>
           <div class="principal-message">
             <div class="section-tag">Message from the Principal</div>
-            <h2 class="font-display" style="font-size:var(--text-3xl);font-weight:700;margin:12px 0 16px;">${schoolInfo.principalName}</h2>
-            <blockquote class="principal-quote">"${schoolInfo.principalMessage}"</blockquote>
+            <h2 class="font-display" style="font-size:var(--text-3xl);font-weight:700;margin:12px 0 16px;">${principal}</h2>
+            <blockquote class="principal-quote">"${message}"</blockquote>
             <div class="principal-info">
-              <div class="font-bold" style="font-size:var(--text-lg);">${schoolInfo.principalName}</div>
-              <div class="text-muted text-sm">Principal, ${schoolInfo.name}</div>
-              <div class="text-muted text-sm">PhD Physics, BUET · 18+ Years Experience</div>
+              <div class="font-bold" style="font-size:var(--text-lg);">${principal}</div>
+              <div class="text-muted text-sm">Principal, ${name}</div>
             </div>
           </div>
         </div>
@@ -133,19 +142,19 @@ export function renderAbout() {
                 <div style="width:36px;height:36px;border-radius:10px;background:var(--primary-50);display:flex;align-items:center;justify-content:center;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 </div>
-                <div><div class="text-xs text-muted">Address</div><div class="font-medium text-sm">${schoolInfo.address}</div></div>
+                <div><div class="text-xs text-muted">Address</div><div class="font-medium text-sm">${address}</div></div>
               </div>
               <div class="flex items-center gap-3">
                 <div style="width:36px;height:36px;border-radius:10px;background:var(--primary-50);display:flex;align-items:center;justify-content:center;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.23h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l.29-.29a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 18v.92z"/></svg>
                 </div>
-                <div><div class="text-xs text-muted">Phone</div><div class="font-medium text-sm">${schoolInfo.phone}</div></div>
+                <div><div class="text-xs text-muted">Phone</div><div class="font-medium text-sm">${phone}</div></div>
               </div>
               <div class="flex items-center gap-3">
                 <div style="width:36px;height:36px;border-radius:10px;background:var(--primary-50);display:flex;align-items:center;justify-content:center;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                 </div>
-                <div><div class="text-xs text-muted">Email</div><div class="font-medium text-sm">${schoolInfo.email}</div></div>
+                <div><div class="text-xs text-muted">Email</div><div class="font-medium text-sm">${email}</div></div>
               </div>
             </div>
             <div class="mt-6 border-t border" style="padding-top:16px;">

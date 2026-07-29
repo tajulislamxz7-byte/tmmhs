@@ -107,14 +107,14 @@ export function renderLogin() {
               <label class="form-label" style="display:flex;align-items:center;gap:6px;">
                 ${icon('mail', 13)} Email Address
               </label>
-              <input type="email" id="loginEmail" class="form-input" placeholder="your@email.com" value="demo@greenfield.edu" required autocomplete="email">
+              <input type="email" id="loginEmail" class="form-input" placeholder="your@email.com" required autocomplete="email">
             </div>
             <div class="form-group">
               <label class="form-label" style="display:flex;align-items:center;gap:6px;">
                 ${icon('lock', 13)} Password
               </label>
               <div style="position:relative;">
-                <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" value="demo123" required autocomplete="current-password" style="padding-right:44px;">
+                <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required autocomplete="current-password" style="padding-right:44px;">
                 <button type="button" onclick="togglePassword('loginPassword','eyeLoginBtn')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;" id="eyeLoginBtn">
                   ${icon('eye', 16)}
                 </button>
@@ -137,18 +137,11 @@ export function renderLogin() {
             </button>
           </p>
 
-          <!-- Admin credentials hint -->
-          <div style="margin-top:20px;padding:14px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;font-size:12px;color:var(--text-muted);">
-            <div style="font-weight:700;margin-bottom:6px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
-              ${icon('info', 13)} Admin access
-            </div>
-            <div>Email: <code style="background:var(--bg-tertiary);padding:1px 5px;border-radius:4px;">admin@tiarkhali-mmhs.edu.bd</code></div>
-            <div style="margin-top:4px;">Password: <code style="background:var(--bg-tertiary);padding:1px 5px;border-radius:4px;">admin123</code></div>
-            <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
-              <button onclick="clearAllSessions()" style="font-size:11px;color:var(--danger);background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;">
-                ${icon('logOut', 12, 'var(--danger)')} Clear all sessions &amp; start fresh
-              </button>
-            </div>
+          <!-- Clear sessions (dev only) -->
+          <div style="margin-top:16px;text-align:center;">
+            <button onclick="clearAllSessions()" style="font-size:11px;color:var(--text-muted);background:none;border:none;cursor:pointer;padding:0;">
+              Having trouble signing in? Clear session data
+            </button>
           </div>
         </div>
       </div>

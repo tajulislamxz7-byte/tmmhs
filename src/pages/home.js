@@ -287,9 +287,9 @@ export function renderHomeExtra() {
           <div class="principal-message">
             <div class="section-tag">Message from the Principal</div>
             <h2 class="font-display" style="font-size:var(--text-3xl);font-weight:700;margin-bottom:16px;margin-top:12px;">A Word from Our Leader</h2>
-            <blockquote class="principal-quote">"${schoolInfo.principalMessage}"</blockquote>
+            <blockquote class="principal-quote">"${principalMsg}"</blockquote>
             <div class="principal-info">
-              <div class="font-bold" style="font-size:var(--text-lg);">${schoolInfo.principalName}</div>
+              <div class="font-bold" style="font-size:var(--text-lg);">${principalName}</div>
               <div class="text-muted text-sm">Principal, Tiarkhali M.M High School and College</div>
               <div class="text-muted text-sm">PhD Physics, BUET · 18+ Years Experience</div>
             </div>

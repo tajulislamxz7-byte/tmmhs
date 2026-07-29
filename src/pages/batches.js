@@ -2,9 +2,16 @@
 // BATCHES PAGE
 // ================================================
 
-import { batches, students } from '../data/sampleData.js';
+import { batches as sampleBatches, students } from '../data/sampleData.js';
+
+// Get batches from localStorage (admin-created) or sampleData fallback
+function getBatches() {
+  const stored = JSON.parse(localStorage.getItem('gfa_batches') || 'null');
+  return stored !== null ? stored : sampleBatches;
+}
 
 export function renderBatches() {
+  const batches = getBatches();
   return `
     <div class="page-container">
       <div class="page-header">
@@ -19,9 +26,15 @@ export function renderBatches() {
         </div>
       </div>
       <div class="container section-sm">
-        <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:24px;">
-          ${batches.map((b, i) => renderBatchCard(b, i)).join('')}
-        </div>
+        ${batches.length === 0
+          ? `<div class="card"><div class="card-body text-center text-muted" style="padding:60px;">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="margin:0 auto 16px;display:block;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              No batches created yet.
+             </div></div>`
+          : `<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:24px;">
+              ${batches.map((b, i) => renderBatchCard(b, i)).join('')}
+            </div>`
+        }
       </div>
     </div>
   `;
@@ -73,6 +86,7 @@ function renderBatchCard(b, i) {
 }
 
 export function renderBatchDetail(batchId) {
+  const batches = getBatches();
   const batch = batches.find(b => b.id === batchId) || batches[0];
   const batchStudents = students.filter(s => s.batch === batch.id);
 

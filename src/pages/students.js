@@ -2,9 +2,59 @@
 // STUDENTS PAGE & PROFILE
 // ================================================
 
-import { students, classes } from '../data/sampleData.js';
+import { students as sampleStudents, classes } from '../data/sampleData.js';
+import { api } from '../utils/api.js';
+
+// Get all students: sampleData + registered users from API/localStorage
+async function fetchStudents() {
+  const apiUsers = await api.getUsers();
+  const users = apiUsers || JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
+  const registeredStudents = users.filter(u => u.role === 'student').map(u => ({
+    id: u.id, name: u.name, roll: u.roll||'—',
+    class: u.class||'N/A', section: u.section||'N/A',
+    batch: u.batch||'N/A', email: u.email||'',
+    phone: u.phone||'—', address: u.address||'—',
+    bloodGroup: u.bloodGroup||'—', birthday: u.birthday||'—',
+    guardian: u.guardian||'—', skills: u.skills||[],
+    bio: u.bio||'', achievements: u.achievements||[],
+    avatar: u.avatar||`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`,
+    gpa: u.gpa||'N/A', attendance: u.attendance||0, status: u.status,
+  }));
+  // Merge: sampleData first, then registered (skip duplicates)
+  const merged = [...sampleStudents];
+  registeredStudents.forEach(s => { if (!merged.find(x => x.id === s.id)) merged.push(s); });
+  return merged;
+}
+
+function getStudents() {
+  // Sync fallback using cache
+  const cached = JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
+  const registeredStudents = cached.filter(u => u.role === 'student').map(u => ({
+    id: u.id, name: u.name, roll: u.roll||'—',
+    class: u.class||'N/A', section: u.section||'N/A',
+    batch: u.batch||'N/A', email: u.email||'',
+    phone: u.phone||'—', address: u.address||'—',
+    bloodGroup: u.bloodGroup||'—', birthday: u.birthday||'—',
+    guardian: u.guardian||'—', skills: u.skills||[],
+    bio: u.bio||'', achievements: u.achievements||[],
+    avatar: u.avatar||`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`,
+    gpa: u.gpa||'N/A', attendance: u.attendance||0, status: u.status,
+  }));
+  const merged = [...sampleStudents];
+  registeredStudents.forEach(s => { if (!merged.find(x => x.id === s.id)) merged.push(s); });
+  return merged;
+}
 
 export function renderStudents() {
+  const students = getStudents();
+  const totalStudents = students.length;
+  const activeStudents = students.filter(s => s.status !== 'inactive').length;
+  const avgGpa = totalStudents > 0
+    ? (students.reduce((sum, s) => sum + (parseFloat(s.gpa) || 0), 0) / totalStudents).toFixed(2)
+    : '—';
+  const avgAtt = totalStudents > 0
+    ? (students.reduce((sum, s) => sum + (parseFloat(s.attendance) || 0), 0) / totalStudents).toFixed(1) + '%'
+    : '—';
   return `
     <div class="page-container">
       <!-- Page Header -->
@@ -61,7 +111,7 @@ export function renderStudents() {
 
         <!-- Stats Row -->
         <div class="grid-4 gap-4 mb-6">
-          ${[{l:'Total Students',v:students.length,i:'👨‍🎓',c:'var(--primary)'},{l:'Active',v:students.length,i:'✅',c:'var(--success)'},{l:'Avg GPA',v:'4.84',i:'📊',c:'var(--warning)'},{l:'Avg Attendance',v:'95.3%',i:'📅',c:'var(--accent)'}].map(s=>`
+          ${[{l:'Total Students',v:totalStudents,i:'👨‍🎓',c:'var(--primary)'},{l:'Active',v:activeStudents,i:'✅',c:'var(--success)'},{l:'Avg GPA',v:avgGpa,i:'📊',c:'var(--warning)'},{l:'Avg Attendance',v:avgAtt,i:'📅',c:'var(--accent)'}].map(s=>`
             <div class="card">
               <div class="card-body" style="padding:16px 20px;">
                 <div class="flex items-center gap-3">
@@ -75,7 +125,14 @@ export function renderStudents() {
 
         <!-- Students Grid -->
         <div class="students-grid" id="studentsGrid">
-          ${students.map(s => renderStudentCard(s)).join('')}
+          ${students.length === 0
+            ? `<div class="text-center text-muted" style="padding:60px 0;grid-column:1/-1;">
+                <div style="font-size:48px;margin-bottom:12px;">👨‍🎓</div>
+                <div class="font-semibold" style="font-size:18px;">No students enrolled yet</div>
+                <div class="text-sm mt-2">Add students from the Admin panel</div>
+              </div>`
+            : students.map(s => renderStudentCard(s)).join('')
+          }
         </div>
       </div>
     </div>
@@ -111,10 +168,12 @@ function renderStudentCard(s) {
 }
 
 export function renderStudentProfile(studentId) {
-  // First check sampleData students, then check localStorage users
+  const students = getStudents();
+  // Check sampleData/gfa_students first
   let student = students.find(s => s.id === studentId);
   if (!student) {
-    const allUsers = JSON.parse(localStorage.getItem('gfa_users') || '[]');
+    // Check registered users (gfa_users or gfa_users_cache)
+    const allUsers = JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
     const u = allUsers.find(u => u.id === studentId);
     if (u) {
       student = {
@@ -127,6 +186,7 @@ export function renderStudentProfile(studentId) {
         bio: u.bio || '', achievements: u.achievements || [],
         avatar: u.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`,
         gpa: u.gpa || 'N/A', attendance: u.attendance || 0,
+        status: u.status,
       };
     }
   }
@@ -168,6 +228,7 @@ export function renderStudentProfile(studentId) {
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                     Dashboard
                   </button>
+                  ${(() => { try { const me = JSON.parse(localStorage.getItem('gfa_session')||'null'); return me && me.id === student.id ? `<button class="btn btn-secondary" onclick="openEditProfile('${student.id}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit Profile</button>` : ''; } catch(e) { return ''; } })()}
                   <button class="btn btn-secondary" onclick="downloadStudentID('${student.id}')">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Download ID Card
@@ -303,35 +364,53 @@ function renderProfileOverviewTab(student) {
 }
 
 export function renderProfileTabContent(tab, studentId) {
-  const student = students.find(s => s.id === studentId);
+  const students = getStudents();
+  let student = students.find(s => s.id === studentId);
+  if (!student) {
+    const allUsers = JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
+    const u = allUsers.find(u => u.id === studentId);
+    if (u) student = { id:u.id, name:u.name, roll:u.roll||'—', class:u.class||'N/A', section:u.section||'N/A', batch:u.batch||'N/A', email:u.email, phone:u.phone||'—', address:u.address||'—', bloodGroup:u.bloodGroup||'—', birthday:u.birthday||'—', guardian:u.guardian||'—', skills:u.skills||[], bio:u.bio||'', achievements:u.achievements||[], avatar:u.avatar||`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`, gpa:u.gpa||'N/A', attendance:u.attendance||0 };
+  }
   if (!student) return '<p class="text-muted">No student data found.</p>';
 
   if (tab === 'overview') return renderProfileOverviewTab(student);
 
-  if (tab === 'results') return `
+  if (tab === 'results') {
+    const allResults = JSON.parse(localStorage.getItem('gfa_results') || '[]');
+    const studentResults = allResults.filter(r => r.studentId === student.id);
+    return `
     <div class="card">
       <div class="card-header flex items-center justify-between">
         <div class="font-semibold">Exam Results</div>
         <button class="btn btn-primary btn-sm" onclick="showToast('Downloading marksheet PDF...','success')">⬇ Download Marksheet</button>
       </div>
-      <div class="table-container">
-        <table>
-          <thead><tr><th>Exam</th><th>Subject</th><th>Marks</th><th>Grade</th><th>GPA</th></tr></thead>
-          <tbody>
-            ${Object.entries({Physics:93,Chemistry:88,Mathematics:97,English:89,Bangla:84,ICT:95}).map(([sub,marks])=>`
-              <tr>
-                <td>Half-Yearly 2024</td>
-                <td>${sub}</td>
-                <td style="font-family:monospace;">${marks}/100</td>
-                <td><span class="badge badge-success">${marks>=80?'A+':marks>=70?'A':marks>=60?'A-':'B'}</span></td>
-                <td style="font-weight:700;color:var(--primary);">${marks>=80?'5.00':marks>=70?'4.00':marks>=60?'3.50':'3.00'}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
+      ${studentResults.length === 0
+        ? `<div class="card-body text-center text-muted" style="padding:40px;">
+            <div style="font-size:32px;margin-bottom:8px;">📋</div>
+            <div>No results published yet</div>
+          </div>`
+        : `<div class="table-container">
+            <table>
+              <thead><tr><th>Exam</th><th>Subject</th><th>Marks</th><th>Grade</th><th>GPA</th></tr></thead>
+              <tbody>
+                ${studentResults.flatMap(r =>
+                  Object.entries(r.subjects||{}).map(([sub,marks])=>`
+                    <tr>
+                      <td>${r.exam}</td>
+                      <td>${sub}</td>
+                      <td style="font-family:monospace;">${marks}/100</td>
+                      <td><span class="badge badge-success">${marks>=80?'A+':marks>=70?'A':marks>=60?'A-':marks>=50?'B':marks>=40?'C':marks>=33?'D':'F'}</span></td>
+                      <td style="font-weight:700;color:var(--primary);">${marks>=80?'5.00':marks>=70?'4.00':marks>=60?'3.50':marks>=50?'3.00':marks>=40?'2.00':marks>=33?'1.00':'0.00'}</td>
+                    </tr>
+                  `)
+                ).join('')}
+              </tbody>
+            </table>
+          </div>`
+      }
     </div>
   `;
+  }
 
   if (tab === 'attendance') return `
     <div class="card">
@@ -375,3 +454,91 @@ export function renderProfileTabContent(tab, studentId) {
 
   return renderProfileOverviewTab(student);
 }
+
+window.openEditProfile = function(studentId) {
+  const allUsers = JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
+  const u = allUsers.find(x => x.id === studentId);
+  if (!u) { showToast('Profile not found', 'error'); return; }
+
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.onclick = e => { if (e.target === modal) modal.remove(); };
+  modal.innerHTML = `
+    <div class="modal" style="max-width:500px;">
+      <div class="modal-header">
+        <div class="font-semibold">Edit My Profile</div>
+        <button class="btn btn-ghost btn-icon" onclick="this.closest('.modal-overlay').remove()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group"><label class="form-label">First Name</label>
+            <input id="ep_first" class="form-input" value="${u.firstName||u.name.split(' ')[0]||''}"></div>
+          <div class="form-group"><label class="form-label">Last Name</label>
+            <input id="ep_last" class="form-input" value="${u.lastName||u.name.split(' ').slice(1).join(' ')||''}"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Phone</label>
+          <input id="ep_phone" class="form-input" value="${u.phone||''}"></div>
+        <div class="form-group"><label class="form-label">Address</label>
+          <input id="ep_address" class="form-input" value="${u.address||''}"></div>
+        <div class="form-group"><label class="form-label">Bio</label>
+          <textarea id="ep_bio" class="form-input" rows="3">${u.bio||''}</textarea></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group"><label class="form-label">Blood Group</label>
+            <select id="ep_blood" class="form-input form-select">
+              ${['—','A+','A-','B+','B-','AB+','AB-','O+','O-'].map(b=>`<option ${(u.bloodGroup||'—')===b?'selected':''}>${b}</option>`).join('')}
+            </select></div>
+          <div class="form-group"><label class="form-label">Guardian Name</label>
+            <input id="ep_guardian" class="form-input" value="${u.guardian||''}"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Skills (comma separated)</label>
+          <input id="ep_skills" class="form-input" value="${(u.skills||[]).join(', ')}"></div>
+        <div class="flex gap-3 justify-end">
+          <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+          <button class="btn btn-primary" onclick="saveEditProfile('${studentId}')">Save Changes</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+};
+
+window.saveEditProfile = async function(studentId) {
+  const get = id => document.getElementById(id)?.value?.trim();
+  const firstName = get('ep_first');
+  const lastName  = get('ep_last');
+  const updates = {
+    firstName, lastName,
+    name: `${firstName} ${lastName}`.trim(),
+    phone:    get('ep_phone'),
+    address:  get('ep_address'),
+    bio:      get('ep_bio'),
+    bloodGroup: get('ep_blood') === '—' ? '' : get('ep_blood'),
+    guardian: get('ep_guardian'),
+    skills:   get('ep_skills').split(',').map(s=>s.trim()).filter(Boolean),
+  };
+
+  // Update via API (with localStorage fallback built into api.js)
+  try {
+    const { api } = await import('../utils/api.js');
+    await api.updateUser(studentId, updates);
+  } catch(e) {
+    // Direct localStorage fallback
+    const users = JSON.parse(localStorage.getItem('gfa_users') || '[]');
+    const idx = users.findIndex(u => u.id === studentId);
+    if (idx >= 0) { Object.assign(users[idx], updates); localStorage.setItem('gfa_users', JSON.stringify(users)); localStorage.setItem('gfa_users_cache', JSON.stringify(users)); }
+  }
+
+  // Update session if editing own profile
+  try {
+    const session = JSON.parse(localStorage.getItem('gfa_session') || 'null');
+    if (session && session.id === studentId) {
+      Object.assign(session, updates);
+      localStorage.setItem('gfa_session', JSON.stringify(session));
+    }
+  } catch(e) {}
+
+  document.querySelector('.modal-overlay')?.remove();
+  showToast('Profile updated!', 'success');
+  navigate('student-profile', studentId);
+};

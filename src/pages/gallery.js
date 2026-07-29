@@ -15,7 +15,7 @@ export function renderGallery() {
               <h1 class="page-title">Photo Gallery</h1>
               <p class="page-subtitle">Cherished moments from events, functions, and everyday school life</p>
             </div>
-            <button class="btn btn-primary" onclick="showToast('Upload photos dialog...','info')">
+            <button class="btn btn-primary" onclick="if(requireAdmin())showToast('Upload feature — use Admin Panel → Gallery','info')">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg> Upload Photos
             </button>
           </div>

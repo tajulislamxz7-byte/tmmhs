@@ -3,6 +3,7 @@
 // ================================================
 
 import * as auth from './utils/auth.js';
+import { api } from './utils/api.js';
 import { renderNavbar }         from './components/navbar.js';
 import { renderFooter }         from './components/footer.js';
 import { renderSearchModal, initSearch } from './components/search.js';
@@ -17,7 +18,7 @@ import { renderAttendance }     from './pages/attendance.js';
 import { renderNotices }        from './pages/notices.js';
 import { renderEvents }         from './pages/events.js';
 import { renderGallery }        from './pages/gallery.js';
-import { renderMessages }       from './pages/messages.js';
+import { renderMessages, startMessagesPolling, stopMessagesPolling } from './pages/messages.js';
 import { renderAbout }          from './pages/about.js';
 import { renderAdminDashboard } from './pages/admin.js';
 import { renderStaff }          from './pages/staff.js';
@@ -38,6 +39,11 @@ const ADMIN_PAGES      = ['admin'];
 window.navigate = function(page, param = null) {
   const user = auth.getCurrentUser();
 
+  // Stop messages polling when leaving messages page
+  if (currentPage === 'messages' && page !== 'messages') {
+    stopMessagesPolling();
+  }
+
   if (PROTECTED_PAGES.includes(page) && !user) {
     showToast('Please sign in to access this page.', 'warning');
     currentPage  = 'login';
@@ -56,10 +62,15 @@ window.navigate = function(page, param = null) {
   currentParam = param;
   render();
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Start messages polling when entering messages page
+  if (page === 'messages') {
+    setTimeout(startMessagesPolling, 100);
+  }
 };
 
 // ── Render cycle ───────────────────────────────────
-function render() {
+async function render() {
   const user       = auth.getCurrentUser();
   const loggedIn   = !!user;
   const role       = user?.role || 'guest';
@@ -82,15 +93,21 @@ function render() {
   searchRoot.innerHTML = renderSearchModal();
   initSearch();
 
-  // Page
-  pageRoot.innerHTML      = getPageContent(user, role);
-  pageRoot.style.paddingTop = AUTH_PAGES.includes(currentPage) ? '0' : 'var(--nav-height)';
-
-  // Footer
-  footerRoot.innerHTML = (['admin'].includes(currentPage)) ? '' : renderFooter();
-
-  // Bind all interactions
-  bindGlobalActions();
+  // Page — may be async (admin)
+  if (currentPage === 'admin') {
+    pageRoot.innerHTML = `<div class="container section-sm text-center" style="padding:60px 0;"><div class="text-muted">Loading admin panel...</div></div>`;
+    pageRoot.style.paddingTop = '0';
+    footerRoot.innerHTML = '';
+    bindGlobalActions();
+    const html = await renderAdminDashboard();
+    pageRoot.innerHTML = html;
+    bindGlobalActions();
+  } else {
+    pageRoot.innerHTML      = getPageContent(user, role);
+    pageRoot.style.paddingTop = AUTH_PAGES.includes(currentPage) ? '0' : 'var(--nav-height)';
+    footerRoot.innerHTML = (['messages'].includes(currentPage)) ? '' : renderFooter();
+    bindGlobalActions();
+  }
 
   // Fix theme icon state
   const dark = document.documentElement.dataset.theme === 'dark';
@@ -115,7 +132,7 @@ function getPageContent(user, role) {
     case 'notices':           return renderNotices();
     case 'events':            return renderEvents();
     case 'gallery':           return renderGallery();
-    case 'messages':          return renderMessages();
+    case 'messages':          return renderMessages(user);
     case 'about':             return renderAbout();
     case 'admin':             return renderAdminDashboard();
     case 'staff':             return renderStaff();
@@ -135,14 +152,18 @@ function getPageContent(user, role) {
 function bindGlobalActions() {
 
   // ── Auth ──
-  window.handleLogin = function(e) {
+  window.handleLogin = async function(e) {
     e.preventDefault();
     const email    = document.getElementById('loginEmail')?.value?.trim();
     const password = document.getElementById('loginPassword')?.value;
     const errBox   = document.getElementById('loginError');
     const errText  = document.getElementById('loginErrorText');
+    const btn      = document.querySelector('#loginForm button[type="submit"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Signing in...'; }
 
-    const result = auth.login(email, password);
+    const result = await auth.login(email, password);
+
+    if (btn) { btn.disabled = false; btn.textContent = 'Sign In'; }
 
     if (!result.ok) {
       if (errBox && errText) {
@@ -302,7 +323,7 @@ function bindGlobalActions() {
     }).join('');
   };
 
-  window.handleRegister = function(e) {
+  window.handleRegister = async function(e) {
     e.preventDefault();
     const form    = document.getElementById('registerForm');
     const errBox  = document.getElementById('regError');
@@ -319,17 +340,21 @@ function bindGlobalActions() {
       return;
     }
 
+    const btn = form.querySelector('button[type="submit"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Creating account...'; }
+
     const role = document.getElementById('regRoleInput')?.value || 'student';
-    const result = auth.register({ ...data, role });
+    const result = await auth.register({ ...data, role });
+
+    if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
+
     if (!result.ok) {
       errBox.textContent = result.error;
       errBox.style.display = 'block';
       return;
     }
 
-    const docName = document.getElementById('bcUpload')?.files?.[0]?.name;
-    const docMsg = docName ? ' Document: ' + docName + ' uploaded.' : '';
-    showToast('Account created for ' + result.user.name + '! Admin will review your documents and approve your account shortly.', 'success');
+    showToast('Account created for ' + result.user.name + '! Admin will review and approve your account shortly.', 'success');
     setTimeout(() => navigate('login'), 1800);
   };
 
@@ -339,8 +364,8 @@ function bindGlobalActions() {
     const btn   = e.target.querySelector('button[type="submit"]');
     const successBox = document.getElementById('fpSuccess');
 
-    // Check if email exists in our system
-    const users = JSON.parse(localStorage.getItem('gfa_users') || '[]');
+    // Check if email exists
+    const users = await auth.getAllUsers();
     const user  = users.find(u => u.email.toLowerCase() === email.toLowerCase());
     const userName = user ? user.name : email;
 
@@ -387,7 +412,7 @@ function bindGlobalActions() {
     }
   };
 
-  window.handleResetPassword = function(e) {
+  window.handleResetPassword = async function(e) {
     e.preventDefault();
     const code = document.getElementById('rpCode')?.value?.trim();
     const pwd = document.getElementById('rpPassword')?.value;
@@ -404,14 +429,13 @@ function bindGlobalActions() {
         errText.textContent = 'Invalid reset code.';
         errBox.style.display = 'flex'; return;
       }
-      const users = JSON.parse(localStorage.getItem('gfa_users') || '[]');
-      const idx = users.findIndex(u => u.email.toLowerCase() === stored.email.toLowerCase());
-      if (idx === -1) {
+      const users = await auth.getAllUsers();
+      const user = users.find(u => u.email.toLowerCase() === stored.email.toLowerCase());
+      if (!user) {
         errText.textContent = 'No account found with that email.';
         errBox.style.display = 'flex'; return;
       }
-      users[idx].password = pwd;
-      localStorage.setItem('gfa_users', JSON.stringify(users));
+      await api.updateUser(user.id, { password: pwd });
       localStorage.removeItem('gfa_reset');
       showToast('Password reset successful! Please login.', 'success');
       setTimeout(() => navigate('login'), 1500);
@@ -439,6 +463,16 @@ function bindGlobalActions() {
     auth.logout();
     showToast('Signed out successfully.', 'success');
     navigate('home');
+  };
+
+  // ── Admin-only guard ──
+  window.requireAdmin = function(action) {
+    const user = auth.getCurrentUser();
+    if (!user || user.role !== 'admin') {
+      showToast('Admin access required to perform this action.', 'error');
+      return false;
+    }
+    return true;
   };
 
   window.markNotificationRead = function(idx) {
