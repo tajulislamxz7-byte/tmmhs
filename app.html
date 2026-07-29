@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2563eb" />
+  <title>Tiarkhali M.M High School and College</title>
+
+  <!-- EmailJS for password reset emails -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    (function() {
+      emailjs.init({ publicKey: 'En-j_tpNxs4dbH-D4' });
+    })();
+  </script>
+
+  <!-- Preconnect for fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="src/styles/main.css" />
+  <link rel="stylesheet" href="src/styles/components.css" />
+  <link rel="stylesheet" href="src/styles/pages.css" />
+
+  <!-- Restore saved theme before first paint to avoid flash -->
+  <script>
+    (function () {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    })();
+  </script>
+</head>
+<body>
+  <div id="app">
+    <!-- Navbar injected here -->
+    <div id="navbar-root"></div>
+
+    <!-- Global search modal -->
+    <div id="search-root"></div>
+
+    <!-- Page content -->
+    <main id="page-root" style="min-height: 100vh;"></main>
+
+    <!-- Footer injected here -->
+    <div id="footer-root"></div>
+
+    <!-- Toast notifications -->
+    <div id="toast-container"></div>
+  </div>
+
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    (function() {
+      emailjs.init({ publicKey: 'En-j_tpNxs4dbH-D4' });
+    })();
+  </script>
+  <!-- ES Module entry point -->
+  <script type="module" src="src/app.js"></script>
+</html>
