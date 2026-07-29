@@ -45,14 +45,15 @@ function lsRegister(data) {
   const prefixMap = { student:'STU', teacher:'TCH', alumni:'ALM', staff:'STF' };
   const id = `${prefixMap[role]||'STU'}-${new Date().getFullYear()}-${String(users.length+1).padStart(4,'0')}`;
   const name = `${data.firstName} ${data.lastName}`.trim();
+  const clean = (v) => (!v || v === 'Select' || v === 'select') ? '' : v;
   const user = {
     id, name, firstName: data.firstName, lastName: data.lastName,
     email: data.email.toLowerCase().trim(), phone: data.phone||'',
     password: data.password, role,
     avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
     status: 'pending', createdAt: new Date().toISOString(),
-    class: data.class||'', section: data.section||'', batch: data.batch||'',
-    bloodGroup: data.bloodGroup||'', guardian: data.guardian||'',
+    class: clean(data.class), section: clean(data.section), batch: clean(data.batch),
+    bloodGroup: clean(data.bloodGroup), guardian: data.guardian||'',
     subject: data.subject||'', qualification: data.qualification||'',
     graduationYear: data.graduationYear||'', profession: data.profession||'',
     company: data.company||'', university: data.university||'',

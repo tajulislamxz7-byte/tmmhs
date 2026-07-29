@@ -233,7 +233,7 @@ export function renderStudentProfile(studentId) {
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Download ID Card
                   </button>
-                  <button class="btn btn-secondary" onclick="navigate('messages')">
+                  <button class="btn btn-secondary" onclick="navigate('messages');setTimeout(()=>startConversationWith('${student.id}','${student.name}','${student.avatar||''}'),300)">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
                     Message
                   </button>
@@ -314,19 +314,23 @@ function renderProfileOverviewTab(student) {
       <!-- Right: Stats & Achievements -->
       <div class="flex flex-col gap-4">
         <div class="grid-3 gap-4" style="grid-template-columns:repeat(3,1fr);">
-          ${[
-            {l:'Current GPA',v:student.gpa,i:'📊',c:'var(--primary)'},
-            {l:'Attendance',v:student.attendance+'%',i:'✅',c:'var(--success)'},
-            {l:'Class Rank',v:'#1',i:'🏆',c:'var(--warning)'},
-          ].map(s=>`
-            <div class="card text-center">
-              <div class="card-body p-6">
-                <div style="font-size:24px;margin-bottom:8px;">${s.i}</div>
-                <div style="font-size:28px;font-weight:800;color:${s.c};">${s.v}</div>
-                <div class="text-xs text-muted">${s.l}</div>
+          ${(()=>{
+            const myResults = JSON.parse(localStorage.getItem('gfa_results')||'[]').filter(r=>r.studentId===student.id);
+            const rank = myResults.length>0 ? '#'+myResults[0].position : '—';
+            return [
+              {l:'Current GPA',v:student.gpa,i:'📊',c:'var(--primary)'},
+              {l:'Attendance',v:student.attendance+'%',i:'✅',c:'var(--success)'},
+              {l:'Class Rank',v:rank,i:'🏆',c:'var(--warning)'},
+            ].map(s=>`
+              <div class="card text-center">
+                <div class="card-body p-6">
+                  <div style="font-size:24px;margin-bottom:8px;">${s.i}</div>
+                  <div style="font-size:28px;font-weight:800;color:${s.c};">${s.v}</div>
+                  <div class="text-xs text-muted">${s.l}</div>
+                </div>
               </div>
-            </div>
-          `).join('')}
+            `).join('');
+          })()}
         </div>
         <div class="card">
           <div class="card-header flex items-center justify-between">
@@ -345,17 +349,19 @@ function renderProfileOverviewTab(student) {
         <div class="card">
           <div class="card-header"><div class="font-semibold">Recent Results Summary</div></div>
           <div class="card-body">
-            <div class="result-bar-chart">
-              ${Object.entries({Physics:93,Chemistry:88,Mathematics:97,English:89,Bangla:84}).map(([sub,mark])=>`
+            ${(()=>{
+              const myResults = JSON.parse(localStorage.getItem('gfa_results')||'[]').filter(r=>r.studentId===student.id);
+              const latest = myResults[0];
+              if (!latest || !latest.subjects) return `<div class="text-center text-muted" style="padding:20px 0;font-size:13px;">No results published yet</div>`;
+              return `<div class="result-bar-chart">${Object.entries(latest.subjects).map(([sub,mark])=>`
                 <div class="result-bar-item">
                   <div class="result-bar-label">${sub}</div>
                   <div class="result-bar-track">
                     <div class="result-bar-fill" style="width:${mark}%;background:${mark>=90?'var(--success)':mark>=75?'var(--primary)':'var(--warning)'}"></div>
                   </div>
                   <div class="result-bar-value">${mark}</div>
-                </div>
-              `).join('')}
-            </div>
+                </div>`).join('')}</div>`;
+            })()}
           </div>
         </div>
       </div>

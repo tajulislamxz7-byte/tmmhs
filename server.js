@@ -52,6 +52,9 @@ app.post('/api/users/register', (req, res) => {
   const name = `${data.firstName} ${data.lastName}`.trim();
   const avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`;
 
+  // Strip "Select" placeholder values
+  const clean = (v) => (!v || v === 'Select' || v === 'select') ? '' : v;
+
   const user = {
     id, name,
     firstName: data.firstName,
@@ -63,10 +66,10 @@ app.post('/api/users/register', (req, res) => {
     avatar,
     status: 'pending',
     createdAt: new Date().toISOString(),
-    class: data.class || '',
-    section: data.section || '',
-    batch: data.batch || '',
-    bloodGroup: data.bloodGroup || '',
+    class: clean(data.class),
+    section: clean(data.section),
+    batch: clean(data.batch),
+    bloodGroup: clean(data.bloodGroup),
     guardian: data.guardian || '',
     subject: data.subject || '',
     qualification: data.qualification || '',

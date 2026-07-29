@@ -130,21 +130,26 @@ export function renderStudentDashboard(loggedInUser) {
           <div class="flex flex-col gap-6">
             <!-- KPI row -->
             <div class="kpi-grid">
-              ${[
-                {svg:`<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>`,l:'Current GPA',       v:student.gpa !== 'N/A' ? student.gpa : '—',      c:'var(--primary)',  t:'Academic standing',   up:true},
-                {svg:`<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>`,                                           l:'Attendance',        v:student.attendance ? student.attendance+'%' : '—', c:'var(--success)', t:'This month',          up:true},
-                {svg:`<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>`,                                         l:'Class Rank',        v:'#1',                                               c:'var(--warning)', t:'Top of the class',    up:true},
-                {svg:`<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>`,l:'Assignments Due',  v:2,                                                  c:'var(--danger)',  t:'Submit soon',         up:false},
-              ].map(s=>`
-                <div class="kpi-card">
-                  <div class="kpi-icon" style="background:${s.c}15;display:flex;align-items:center;justify-content:center;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${s.c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${s.svg}</svg>
+              ${(()=>{
+                const myResults = getResults().filter(r => r.studentId === student.id);
+                const assignmentsDue = JSON.parse(localStorage.getItem('gfa_assignments')||'[]').filter(a=>!a.done && (!a.class||!student.class||a.class===student.class)).length;
+                const classRank = myResults.length > 0 ? '#'+myResults[0].position : '—';
+                return [
+                  {svg:`<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>`,l:'Current GPA',       v:student.gpa !== 'N/A' ? student.gpa : '—',      c:'var(--primary)',  t:'Academic standing',   up:true},
+                  {svg:`<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>`,                                           l:'Attendance',        v:student.attendance ? student.attendance+'%' : '—', c:'var(--success)', t:'This month',          up:true},
+                  {svg:`<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>`,                                         l:'Class Rank',        v:classRank,                                          c:'var(--warning)', t:'Based on results',    up:true},
+                  {svg:`<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>`,l:'Assignments Due',  v:assignmentsDue,                                     c:'var(--danger)',  t:assignmentsDue>0?'Submit soon':'All done',     up:false},
+                ].map(s=>`
+                  <div class="kpi-card">
+                    <div class="kpi-icon" style="background:${s.c}15;display:flex;align-items:center;justify-content:center;">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${s.c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${s.svg}</svg>
+                    </div>
+                    <div class="kpi-value" style="color:${s.c};">${s.v}</div>
+                    <div class="kpi-label">${s.l}</div>
+                    <div class="kpi-trend ${s.up?'up':'down'}">${s.t}</div>
                   </div>
-                  <div class="kpi-value" style="color:${s.c};">${s.v}</div>
-                  <div class="kpi-label">${s.l}</div>
-                  <div class="kpi-trend ${s.up?'up':'down'}">${s.t}</div>
-                </div>
-              `).join('')}
+                `).join('');
+              })()}
             </div>
 
             ${latest ? renderMarksheetWidget(latest) : `
@@ -228,25 +233,24 @@ function renderMarksheetWidget(r) {
 }
 
 function renderAssignmentsWidget() {
-  const assignments = [
-    {s:'Physics',t:'Momentum Problem Set',due:'Aug 2, 2025',done:false},
-    {s:'Bangla',t:'প্রবন্ধ রচনা',due:'Aug 4, 2025',done:false},
-    {s:'Mathematics',t:'Trigonometry Sheet 4',due:'Submitted',done:true},
-    {s:'ICT',t:'Database Design Project',due:'Aug 8, 2025',done:false},
-  ];
+  const user = JSON.parse(localStorage.getItem('gfa_session') || 'null');
+  const all = JSON.parse(localStorage.getItem('gfa_assignments') || '[]');
+  const assignments = all.filter(a => !a.class || !user?.class || a.class === user.class).slice(0, 5);
   return `
     <div class="widget">
       <div class="widget-header"><div class="font-semibold">Assignments</div><span class="badge badge-danger">${assignments.filter(a=>!a.done).length} due</span></div>
       <div class="widget-body">
-        ${assignments.map(a=>`
+        ${assignments.length === 0
+          ? `<div class="text-center text-muted" style="padding:20px 0;font-size:13px;">No assignments yet</div>`
+          : assignments.map(a=>`
           <div class="flex items-center gap-3 mb-3">
             <div style="width:20px;height:20px;flex-shrink:0;">${a.done
               ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
               : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>`
             }</div>
             <div class="flex-1 min-w-0">
-              <div class="font-medium text-sm truncate">${a.t}</div>
-              <div class="text-xs text-muted">${a.s} · ${a.due}</div>
+              <div class="font-medium text-sm truncate">${a.title}</div>
+              <div class="text-xs text-muted">${a.subject} · ${a.dueDate||'No due date'}</div>
             </div>
             ${!a.done?`<span class="badge badge-warning">Pending</span>`:`<span class="badge badge-success">Done</span>`}
           </div>
@@ -257,21 +261,20 @@ function renderAssignmentsWidget() {
 }
 
 function renderRecentNoticesWidget() {
-  const notices = [
-    {t:'Half-Yearly Exam Routine',cat:'Exam',date:'2025-01-10'},
-    {t:'Sports Day Registration',cat:'Event',date:'2025-01-15'},
-    {t:'Scholarship Applications Open',cat:'Scholarship',date:'2025-01-08'},
-  ];
+  const allNotices = JSON.parse(localStorage.getItem('gfa_notices') || '[]');
+  const notices = allNotices.slice(0, 3);
   return `
     <div class="widget">
       <div class="widget-header"><div class="font-semibold">Recent Notices</div><button class="btn btn-ghost btn-sm" onclick="navigate('notices')">View all →</button></div>
       <div class="widget-body">
-        ${notices.map(n=>`
+        ${notices.length === 0
+          ? `<div class="text-center text-muted" style="padding:20px 0;font-size:13px;">No notices yet</div>`
+          : notices.map(n=>`
           <div class="flex items-start gap-3 mb-3 cursor-pointer" onclick="navigate('notices')">
             <div style="flex-shrink:0;margin-top:1px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
             <div>
-              <div class="font-medium text-sm">${n.t}</div>
-              <div class="flex gap-2 mt-1"><span class="badge badge-gray">${n.cat}</span><span class="text-xs text-muted">${n.date}</span></div>
+              <div class="font-medium text-sm">${n.title}</div>
+              <div class="flex gap-2 mt-1"><span class="badge badge-gray">${n.category}</span><span class="text-xs text-muted">${n.date}</span></div>
             </div>
           </div>
         `).join('')}

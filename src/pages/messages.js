@@ -6,12 +6,20 @@ import * as auth from '../utils/auth.js';
 
 const FALLBACK_AVATAR = 'https://api.dicebear.com/7.x/avataaars/svg?seed=default';
 
-// ── Storage helpers ──────────────────────────────
+// ── Storage helpers — write to both localStorage AND API server ──
 function getConversations() {
   return JSON.parse(localStorage.getItem('gfa_conversations') || '[]');
 }
 function saveConversations(list) {
   localStorage.setItem('gfa_conversations', JSON.stringify(list));
+  // Also sync each new/updated conversation to server
+  list.forEach(c => {
+    fetch('/api/conversations/' + c.id, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(c),
+    }).catch(()=>{});
+  });
 }
 function getMessages(convId) {
   return JSON.parse(localStorage.getItem('gfa_msgs_' + convId) || '[]');
@@ -19,16 +27,61 @@ function getMessages(convId) {
 function saveMessages(convId, msgs) {
   localStorage.setItem('gfa_msgs_' + convId, JSON.stringify(msgs));
 }
+// Send a message to server (for cross-browser sync)
+async function sendMsgToServer(convId, msg) {
+  try {
+    await fetch('/api/messages/' + convId, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(msg),
+    });
+  } catch(e) {}
+}
+// Poll server for new messages (cross-browser)
+async function syncFromServer(convId) {
+  try {
+    const res = await fetch('/api/messages/' + convId);
+    if (!res.ok) return null;
+    const serverMsgs = await res.json();
+    if (serverMsgs && serverMsgs.length > 0) {
+      localStorage.setItem('gfa_msgs_' + convId, JSON.stringify(serverMsgs));
+      return serverMsgs;
+    }
+  } catch(e) {}
+  return null;
+}
+async function syncConversationsFromServer(meId) {
+  try {
+    const res = await fetch('/api/conversations');
+    if (!res.ok) return;
+    const serverConvs = await res.json();
+    if (!serverConvs) return;
+    const myConvs = serverConvs.filter(c => c.participants && c.participants.includes(meId));
+    if (myConvs.length > 0) {
+      // Merge with localStorage convs
+      const local = JSON.parse(localStorage.getItem('gfa_conversations') || '[]');
+      myConvs.forEach(sc => {
+        const idx = local.findIndex(c => c.id === sc.id);
+        if (idx >= 0) { Object.assign(local[idx], sc); }
+        else { local.unshift(sc); }
+      });
+      localStorage.setItem('gfa_conversations', JSON.stringify(local));
+    }
+  } catch(e) {}
+}
 
-// Ensure admin welcome message exists for new users
+// Create a deterministic conversation ID — same for both participants regardless of who starts
+function makeConvId(id1, id2) {
+  return 'C_' + [id1, id2].sort().join('_');
+}
 function ensureWelcomeConv(meId) {
+  const convId = makeConvId('admin', meId);
   const convs = getConversations();
-  const existing = convs.find(c => c.participants.includes(meId) && c.participants.includes('admin'));
+  const existing = convs.find(c => c.id === convId);
   if (!existing) {
-    const convId = 'C_admin_' + meId;
     convs.unshift({
       id: convId,
-      participants: ['admin', meId],
+      participants: ['admin', meId].sort(),
       lastMsg: 'Welcome to Tiarkhali M.M High School portal.',
       lastTime: new Date().toISOString(),
       unread: { [meId]: 1 },
@@ -47,13 +100,23 @@ function ensureWelcomeConv(meId) {
   }
 }
 
-// Get display info for a user id
+// Get display info for a user id — reads from localStorage cache (always available)
 function getUserInfo(id) {
   if (id === 'admin') return { id:'admin', name:'Admin Office', role:'Administration', avatar:'https://api.dicebear.com/7.x/avataaars/svg?seed=AdminTMMH' };
-  // Read from localStorage (messages still uses localStorage for real-time polling)
-  const allUsers = JSON.parse(localStorage.getItem('gfa_users') || '[]');
-  const u = allUsers.find(x => x.id === id);
-  if (u) return { id: u.id, name: u.name, role: u.role, avatar: u.avatar || FALLBACK_AVATAR };
+  // Try all localStorage sources
+  const sources = ['gfa_users_cache', 'gfa_users'];
+  for (const key of sources) {
+    try {
+      const users = JSON.parse(localStorage.getItem(key) || '[]');
+      const u = users.find(x => x.id === id);
+      if (u) return { id: u.id, name: u.name, role: u.role, avatar: u.avatar || FALLBACK_AVATAR };
+    } catch(e) {}
+  }
+  // Last resort: use session if it matches
+  try {
+    const session = JSON.parse(localStorage.getItem('gfa_session') || 'null');
+    if (session && session.id === id) return { id: session.id, name: session.name, role: session.role, avatar: session.avatar || FALLBACK_AVATAR };
+  } catch(e) {}
   return { id, name: id, role: 'User', avatar: FALLBACK_AVATAR };
 }
 
@@ -272,7 +335,7 @@ window.selectConversation = function(convId) {
   }, 50);
 };
 
-window.sendMsg = function(convId) {
+window.sendMsg = async function(convId) {
   const me = auth.getCurrentUser();
   if (!me) return;
   const input = document.getElementById('msgInput');
@@ -287,7 +350,7 @@ window.sendMsg = function(convId) {
     time: new Date().toISOString(),
   };
 
-  // Save message
+  // Save to localStorage
   const msgs = getMessages(convId);
   msgs.push(msg);
   saveMessages(convId, msgs);
@@ -296,13 +359,15 @@ window.sendMsg = function(convId) {
   _renderedMsgIds.add(msg.id);
   _lastMsgCount[convId] = msgs.length;
 
+  // Push to server (cross-browser sync)
+  sendMsgToServer(convId, msg);
+
   // Update conversation last message
   const convs = getConversations();
   const conv = convs.find(c => c.id === convId);
   if (conv) {
     conv.lastMsg = text;
     conv.lastTime = msg.time;
-    // Mark unread for the other participant
     conv.participants.forEach(p => {
       if (p !== me.id) {
         if (!conv.unread) conv.unread = {};
@@ -315,7 +380,6 @@ window.sendMsg = function(convId) {
   // Append bubble to DOM
   const bubbles = document.getElementById('messageBubbles');
   if (bubbles) {
-    // Remove empty state if present
     const empty = bubbles.querySelector('.text-center');
     if (empty) empty.remove();
     const div = document.createElement('div');
@@ -329,8 +393,10 @@ window.sendMsg = function(convId) {
   // Update conv list item
   const convItem = document.getElementById('conv_' + convId);
   if (conv && convItem) {
-    convItem.querySelector('.text-xs.text-muted.truncate').textContent = text;
-    convItem.querySelector('.text-xs.text-muted[style]').textContent = 'Just now';
+    const truncEl = convItem.querySelector('.text-xs.text-muted.truncate');
+    const timeEl  = convItem.querySelector('.text-xs.text-muted[style]');
+    if (truncEl) truncEl.textContent = text;
+    if (timeEl)  timeEl.textContent = 'Just now';
   }
 };
 
@@ -384,7 +450,7 @@ window.clearSelectedUser = function() {
   if (chip) chip.style.display = 'none';
 };
 
-window.sendNewMessage = function() {
+window.sendNewMessage = async function() {
   const me = auth.getCurrentUser();
   if (!me) return;
   const toId   = document.getElementById('newMsgToId')?.value;
@@ -402,8 +468,8 @@ window.sendNewMessage = function() {
 
   if (!conv) {
     conv = {
-      id: 'C_' + me.id + '_' + toId + '_' + Date.now(),
-      participants: [me.id, toId],
+      id: makeConvId(me.id, toId),
+      participants: [me.id, toId].sort(),
       lastMsg: text,
       lastTime: new Date().toISOString(),
       unread: { [toId]: 1 },
@@ -437,6 +503,49 @@ window.sendNewMessage = function() {
   navigate('messages');
 };
 
+// Start a conversation with a specific user (from profile page)
+window.startConversationWith = function(userId, userName, userAvatar) {
+  const me = auth.getCurrentUser();
+  if (!me) { showToast('Please sign in to send messages', 'warning'); return; }
+  if (userId === me.id) return;
+
+  let convs = getConversations();
+  let conv = convs.find(c =>
+    c.participants.includes(me.id) && c.participants.includes(userId)
+  );
+
+  if (!conv) {
+    conv = {
+      id: makeConvId(me.id, userId),
+      participants: [me.id, userId].sort(),
+      lastMsg: '',
+      lastTime: new Date().toISOString(),
+      unread: {},
+    };
+    convs.unshift(conv);
+    saveConversations(convs);
+  }
+
+  activeConvId = conv.id;
+
+  // Re-render conv list and open the chat
+  const listEl = document.getElementById('convList');
+  const panel  = document.getElementById('messagePanel');
+  if (listEl) {
+    listEl.innerHTML = convs.map(c => renderConvItem(c, me.id)).join('');
+  }
+  if (panel) {
+    panel.innerHTML = renderChatPanel(conv, me);
+    setTimeout(() => {
+      const bubbles = document.getElementById('messageBubbles');
+      if (bubbles) bubbles.scrollTop = bubbles.scrollHeight;
+    }, 50);
+  }
+  // Sync poll baseline
+  _lastMsgCount[conv.id] = getMessages(conv.id).length;
+  _renderedMsgIds = new Set(getMessages(conv.id).map(m => m.id));
+};
+
 window.filterConvs = function(query) {
   const me = auth.getCurrentUser();
   if (!me) return;
@@ -462,101 +571,103 @@ function _pollMessages() {
   if (!me) return;
   if (!document.getElementById('messagePanel')) { stopMessagesPolling(); return; }
 
-  const convs = getConversations().filter(c => c.participants.includes(me.id));
+  // Sync conversations from server first (picks up convos started by others)
+  syncConversationsFromServer(me.id).then(() => {
+    const convs = getConversations().filter(c => c.participants.includes(me.id));
 
-  // Detect new conversations appearing in sidebar
-  const convHash = convs.map(c => c.id).join(',');
-  if (convHash !== _lastConvHash) {
-    _lastConvHash = convHash;
-    const listEl = document.getElementById('convList');
-    if (listEl) {
-      listEl.innerHTML = convs.length === 0
-        ? `<div class="text-center text-muted" style="padding:40px 16px;font-size:13px;">No conversations yet.<br>Start a new message.</div>`
-        : convs.map(c => renderConvItem(c, me.id)).join('');
+    // Detect new conversations
+    const convHash = convs.map(c => c.id).join(',');
+    if (convHash !== _lastConvHash) {
+      _lastConvHash = convHash;
+      const listEl = document.getElementById('convList');
+      if (listEl) {
+        listEl.innerHTML = convs.length === 0
+          ? `<div class="text-center text-muted" style="padding:40px 16px;font-size:13px;">No conversations yet.<br>Start a new message.</div>`
+          : convs.map(c => renderConvItem(c, me.id)).join('');
+      }
     }
-  }
 
-  // Update unread badges on sidebar items
-  convs.forEach(c => {
-    const item = document.getElementById('conv_' + c.id);
-    if (!item) return;
-    const unread = (c.unread || {})[me.id] || 0;
-    const dot = item.querySelector('[data-unread-badge]');
-    if (unread > 0) {
-      if (dot) { dot.textContent = unread; }
-      else {
-        const avatarWrap = item.querySelector('[style*="position:relative"]');
-        if (avatarWrap) {
-          const badge = document.createElement('div');
-          badge.setAttribute('data-unread-badge', '1');
-          badge.style.cssText = 'position:absolute;top:-2px;right:-2px;width:16px;height:16px;background:var(--primary);border-radius:50%;border:2px solid var(--bg-primary);font-size:9px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;';
-          badge.textContent = unread;
-          avatarWrap.appendChild(badge);
+    // Update unread badges
+    convs.forEach(c => {
+      const item = document.getElementById('conv_' + c.id);
+      if (!item) return;
+      const unread = (c.unread || {})[me.id] || 0;
+      const dot = item.querySelector('[data-unread-badge]');
+      if (unread > 0) {
+        if (dot) { dot.textContent = unread; }
+        else {
+          const avatarWrap = item.querySelector('[style*="position:relative"]');
+          if (avatarWrap) {
+            const badge = document.createElement('div');
+            badge.setAttribute('data-unread-badge', '1');
+            badge.style.cssText = 'position:absolute;top:-2px;right:-2px;width:16px;height:16px;background:var(--primary);border-radius:50%;border:2px solid var(--bg-primary);font-size:9px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;';
+            badge.textContent = unread;
+            avatarWrap.appendChild(badge);
+          }
+        }
+      } else if (dot) {
+        dot.remove();
+      }
+    });
+
+    if (!activeConvId) return;
+
+    // Sync messages from server for active conversation
+    syncFromServer(activeConvId).then(serverMsgs => {
+      const msgs = serverMsgs || getMessages(activeConvId);
+      const lastKnown = _lastMsgCount[activeConvId] || 0;
+      if (msgs.length <= lastKnown) return;
+
+      _lastMsgCount[activeConvId] = msgs.length;
+      const newMsgs = msgs.filter(m => !_renderedMsgIds.has(m.id));
+      if (newMsgs.length === 0) return;
+
+      const bubbles = document.getElementById('messageBubbles');
+      if (!bubbles) return;
+
+      const empty = bubbles.querySelector('.text-center');
+      if (empty) empty.remove();
+
+      newMsgs.forEach(m => {
+        _renderedMsgIds.add(m.id);
+        const div = document.createElement('div');
+        div.innerHTML = renderBubble(m, me.id);
+        bubbles.appendChild(div.firstElementChild);
+      });
+
+      bubbles.scrollTop = bubbles.scrollHeight;
+
+      if (newMsgs.some(m => m.senderId !== me.id)) {
+        const convs2 = getConversations();
+        const conv = convs2.find(c => c.id === activeConvId);
+        if (conv) {
+          if (!conv.unread) conv.unread = {};
+          conv.unread[me.id] = 0;
+          saveConversations(convs2);
         }
       }
-    } else if (dot) {
-      dot.remove();
-    }
+    });
   });
-
-  // If the active conversation is open, check for new messages
-  if (!activeConvId) return;
-  const msgs = getMessages(activeConvId);
-  const lastKnown = _lastMsgCount[activeConvId] || 0;
-  if (msgs.length <= lastKnown) return;
-
-  _lastMsgCount[activeConvId] = msgs.length;
-
-  // Only append messages not yet in the DOM (by ID)
-  const newMsgs = msgs.filter(m => !_renderedMsgIds.has(m.id));
-  if (newMsgs.length === 0) return;
-
-  const bubbles = document.getElementById('messageBubbles');
-  if (!bubbles) return;
-
-  // Remove empty-state placeholder if present
-  const empty = bubbles.querySelector('.text-center');
-  if (empty) empty.remove();
-
-  newMsgs.forEach(m => {
-    _renderedMsgIds.add(m.id);
-    const div = document.createElement('div');
-    div.innerHTML = renderBubble(m, me.id);
-    bubbles.appendChild(div.firstElementChild);
-  });
-
-  bubbles.scrollTop = bubbles.scrollHeight;
-
-  // Mark as read if incoming messages arrived
-  if (newMsgs.some(m => m.senderId !== me.id)) {
-    const convs2 = getConversations();
-    const conv = convs2.find(c => c.id === activeConvId);
-    if (conv) {
-      if (!conv.unread) conv.unread = {};
-      conv.unread[me.id] = 0;
-      saveConversations(convs2);
-    }
-  }
 }
 
 export function startMessagesPolling() {
   const me = auth.getCurrentUser();
   if (!me) return;
-  // Init last-known counts and rendered IDs
-  const convs = getConversations().filter(c => c.participants.includes(me.id));
-  convs.forEach(c => { _lastMsgCount[c.id] = getMessages(c.id).length; });
-  // Seed rendered IDs from the currently visible conversation
-  if (activeConvId) {
-    _renderedMsgIds = new Set(getMessages(activeConvId).map(m => m.id));
-  } else {
-    _renderedMsgIds = new Set();
-  }
-  _lastConvHash = convs.map(c => c.id).join(',');
+
+  // First sync conversations from server
+  syncConversationsFromServer(me.id).then(() => {
+    const convs = getConversations().filter(c => c.participants.includes(me.id));
+    convs.forEach(c => { _lastMsgCount[c.id] = getMessages(c.id).length; });
+    if (activeConvId) {
+      _renderedMsgIds = new Set(getMessages(activeConvId).map(m => m.id));
+    } else {
+      _renderedMsgIds = new Set();
+    }
+    _lastConvHash = convs.map(c => c.id).join(',');
+  });
 
   stopMessagesPolling();
   _pollInterval = setInterval(_pollMessages, 2000);
-
-  // Also react instantly when another tab writes to localStorage
   window.addEventListener('storage', _onStorageEvent);
 }
 

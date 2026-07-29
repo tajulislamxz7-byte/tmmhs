@@ -790,15 +790,12 @@ function renderNotificationsPage() {
   const savedTheme = localStorage.getItem('theme');
   if (savedTheme) document.documentElement.dataset.theme = savedTheme;
 
-  // IMPORTANT: Clear any stale "Demo Student" session from old code
-  // If the session has id 'STU-2025-0001' (old hardcoded demo), force fresh login
-  try {
-    const session = JSON.parse(localStorage.getItem('gfa_session') || 'null');
-    if (session && session.name === 'Demo Student' && session.email === 'demo@greenfield.edu') {
-      // Only clear if it was auto-seeded, not if user actually logged in as demo
-      // We keep it — user may have intentionally logged in as demo
+  // Sync users from API server to localStorage cache on startup
+  api.getUsers().then(users => {
+    if (users && users.length > 0) {
+      // Users are already cached in getUsers() — nothing extra needed
     }
-  } catch(e) {}
+  }).catch(() => {});
 
   render();
 })();
