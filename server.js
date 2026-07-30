@@ -79,7 +79,7 @@ app.post('/api/users/register', (req, res) => {
     university: data.university || '',
     position: data.position || '',
     department: data.department || '',
-    roll: '', address: '', skills: [], achievements: [], gpa: 'N/A', attendance: 0, bio: '',
+    roll: '', address: '', skills: [], achievements: [], gpa: 'N/A', bio: '',
   };
 
   users.push(user);
@@ -286,5 +286,5 @@ app.post('/api/settings', (req, res) => {
 
 // ── START ─────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`API Server running at http://localhost:${PORT}`);
+  console.log(`🎓 Tiarkhali M.M High School - API Server running at http://localhost:${PORT}`);
 });

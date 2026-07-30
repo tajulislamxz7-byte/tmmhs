@@ -39,11 +39,14 @@
 .user-dropdown-header { padding: 12px; display: flex; align-items: center; gap: 12px; }
 .hamburger { display: none; }
 .mobile-menu { display: none; position: fixed; top: var(--nav-height); left: 0; right: 0; bottom: 0; background: var(--bg-primary); z-index: 99; overflow-y: auto; }
+.mobile-menu.open { display: block !important; }
+.mobile-menu.hidden { display: none !important; }
 .mobile-menu-inner { padding: var(--space-4); display: flex; flex-direction: column; gap: 4px; }
 .mobile-nav-link { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: var(--radius-lg); font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all var(--transition); font-size: var(--text-base); }
 .mobile-nav-link:hover { background: var(--primary-50); color: var(--primary); }
 @media (max-width: 1024px) { .navbar-links { display: none; } .hamburger { display: flex; } }
-@media (max-width: 768px) { .mobile-menu.open { display: block; } }
+@media (max-width: 768px) { .hide-mobile { display: none !important; } }
+
 
 /* === SEARCH MODAL === */
 .search-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 500; display: flex; align-items: flex-start; justify-content: center; padding: 80px var(--space-4) var(--space-4); }

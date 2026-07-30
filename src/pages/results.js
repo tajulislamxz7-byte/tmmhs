@@ -37,7 +37,6 @@ function buildUserProfile(user) {
     phone:       user.phone  || 'N/A',
     address:     'N/A',
     gpa:         'N/A',
-    attendance:  0,
     skills:      [],
     achievements:[],
     bio:         'Account pending approval.',
@@ -99,7 +98,6 @@ export function renderStudentDashboard(loggedInUser) {
             ${[
               {i:'layout',       l:'Overview',    p:'student-dashboard', ico:true},
               {i:'fileText',     l:'My Results',  p:'results',           ico:true},
-              {i:'checkCircle',  l:'Attendance',  p:'attendance',        ico:true},
               {i:'clipboardList',l:'Assignments', p:'assignments',       ico:true},
               {i:'messageSquare',l:'Messages',    p:'messages',          ico:true},
               {i:'bell',         l:'Notices',     p:'notices',           ico:true},
@@ -136,7 +134,6 @@ export function renderStudentDashboard(loggedInUser) {
                 const classRank = myResults.length > 0 ? '#'+myResults[0].position : '—';
                 return [
                   {svg:`<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>`,l:'Current GPA',       v:student.gpa !== 'N/A' ? student.gpa : '—',      c:'var(--primary)',  t:'Academic standing',   up:true},
-                  {svg:`<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>`,                                           l:'Attendance',        v:student.attendance ? student.attendance+'%' : '—', c:'var(--success)', t:'This month',          up:true},
                   {svg:`<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>`,                                         l:'Class Rank',        v:classRank,                                          c:'var(--warning)', t:'Based on results',    up:true},
                   {svg:`<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>`,l:'Assignments Due',  v:assignmentsDue,                                     c:'var(--danger)',  t:assignmentsDue>0?'Submit soon':'All done',     up:false},
                 ].map(s=>`

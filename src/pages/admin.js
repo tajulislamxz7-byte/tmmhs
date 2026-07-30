@@ -17,7 +17,6 @@ const ICONS = {
   alumni:    `<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>`,
   batches:   `<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>`,
   results:   `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>`,
-  attendance:`<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>`,
   gallery:   `<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>`,
   notices:   `<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>`,
   events:    `<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>`,
@@ -36,7 +35,6 @@ const ADMIN_NAV = [
   {key:'staff',       label:'Staff',        icon:'staff'},
   {key:'alumni',      label:'Alumni',       icon:'alumni'},
   {key:'batches',     label:'Batches',      icon:'batches'},
-  {key:'attendance',  label:'Attendance',   icon:'attendance'},
   {key:'results',     label:'Results',      icon:'results'},
   {key:'notices',     label:'Notices',      icon:'notices'},
   {key:'events',      label:'Events',       icon:'events'},
@@ -138,7 +136,6 @@ function renderAdminTab(tab) {
     case 'staff':        return renderAdminStaff();
     case 'alumni':       return renderAdminAlumni();
     case 'batches':      return renderAdminBatches();
-    case 'attendance':   return renderAdminAttendance();
     case 'notices':      return renderAdminNoticesManager();
     case 'events':       return renderAdminEventsManager();
     case 'assignments':  return renderAdminAssignmentsManager();
@@ -302,14 +299,7 @@ function _alumniRow(a) {
     + '</tr>';
 }
 
-function _attendanceRow(s) {
-  return '<tr data-class="'+(s.class||'')+'">'
-    + '<td><div class="flex items-center gap-3"><img src="'+s.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://api.dicebear.com/7.x/avataaars/svg?seed=default\'"><div><div class="font-semibold text-sm">'+s.name+'</div><div class="text-xs text-muted">'+s.id+'</div></div></div></td>'
-    + '<td>'+(s.class||'—')+' '+(s.section?'· '+s.section:'')+'</td>'
-    + '<td><select class="form-input form-select att-status" data-id="'+s.id+'" style="width:auto;padding:4px 28px 4px 8px;font-size:12px;"><option value="present">Present</option><option value="absent">Absent</option><option value="late">Late</option><option value="excused">Excused</option></select></td>'
-    + '<td><input class="form-input" style="padding:6px 10px;font-size:12px;" placeholder="Optional note"></td>'
-    + '</tr>';
-}
+
 
 function _pendingUserRow(u) {
   const approveIcon = SVG('<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>', 13, 'white');
@@ -538,46 +528,6 @@ function renderAdminBatches() {
         : `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;">
             ${batches.map((b,i) => _batchCard(b,i)).join('')}
           </div>`
-      }
-    </div>
-  `;
-}
-
-function renderAdminAttendance() {
-  const allUsers = _cache.users;
-  const studentUsers = allUsers.filter(u => u.role === 'student' && u.status === 'active');
-  return `
-    <div>
-      <div class="flex items-center justify-between mb-6">
-        <h1 style="font-size:22px;font-weight:800;">Attendance Management</h1>
-        <button class="btn btn-primary" onclick="showToast('Attendance saved!','success')">Save Attendance</button>
-      </div>
-
-      <div class="card mb-4">
-        <div class="card-body" style="padding:14px 20px;">
-          <div class="flex gap-3 flex-wrap items-center">
-            <div class="form-group" style="margin:0;">
-              <label class="form-label">Class</label>
-              <select class="form-input form-select" id="att_class" style="width:auto;" onchange="filterAttendanceClass()">
-                <option value="">All Classes</option>
-                ${['Class 6','Class 7','Class 8','Class 9','Class 10'].map(c=>`<option>${c}</option>`).join('')}
-              </select>
-            </div>
-            <div class="form-group" style="margin:0;">
-              <label class="form-label">Date</label>
-              <input type="date" class="form-input" id="att_date" value="${new Date().toISOString().split('T')[0]}" style="width:auto;">
-            </div>
-            <button class="btn btn-secondary btn-sm" onclick="adminMarkAllPresent()">Mark All Present</button>
-          </div>
-        </div>
-      </div>
-
-      ${studentUsers.length === 0
-        ? `<div class="card"><div class="card-body text-center text-muted" style="padding:60px;">No active students yet.</div></div>`
-        : `<div class="card"><div class="table-container"><table>
-            <thead><tr><th>Student</th><th>Class</th><th>Status</th><th>Note</th></tr></thead>
-            <tbody id="attendanceAdminBody">${studentUsers.map(s => _attendanceRow(s)).join('')}</tbody>
-          </table></div></div>`
       }
     </div>
   `;
@@ -1347,15 +1297,3 @@ window.deleteBatch = async function(idx) {
   await _refreshTab('batches');
 };
 
-// ── Attendance Management ──
-window.filterAttendanceClass = function() {
-  const cls = document.getElementById('att_class')?.value || '';
-  document.querySelectorAll('#attendanceAdminBody tr').forEach(row => {
-    row.style.display = (!cls || row.dataset.class === cls) ? '' : 'none';
-  });
-};
-
-window.adminMarkAllPresent = function() {
-  document.querySelectorAll('.att-status').forEach(sel => sel.value = 'present');
-  showToast('All marked as Present', 'success');
-};

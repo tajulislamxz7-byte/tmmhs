@@ -1,0 +1,18 @@
+# Render.com Configuration for Tiarkhali M.M High School Backend API
+
+services:
+  # API Server
+  - type: web
+    name: tiarkhali-api
+    env: node
+    region: singapore  # or choose: oregon, frankfurt, singapore
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+    healthCheckPath: /api/settings
+    autoDeploy: true

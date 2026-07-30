@@ -18,7 +18,7 @@ async function fetchStudents() {
     guardian: u.guardian||'—', skills: u.skills||[],
     bio: u.bio||'', achievements: u.achievements||[],
     avatar: u.avatar||`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`,
-    gpa: u.gpa||'N/A', attendance: u.attendance||0, status: u.status,
+    gpa: u.gpa||'N/A', status: u.status,
   }));
   // Merge: sampleData first, then registered (skip duplicates)
   const merged = [...sampleStudents];
@@ -38,7 +38,7 @@ function getStudents() {
     guardian: u.guardian||'—', skills: u.skills||[],
     bio: u.bio||'', achievements: u.achievements||[],
     avatar: u.avatar||`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`,
-    gpa: u.gpa||'N/A', attendance: u.attendance||0, status: u.status,
+    gpa: u.gpa||'N/A', status: u.status,
   }));
   const merged = [...sampleStudents];
   registeredStudents.forEach(s => { if (!merged.find(x => x.id === s.id)) merged.push(s); });
@@ -51,9 +51,6 @@ export function renderStudents() {
   const activeStudents = students.filter(s => s.status !== 'inactive').length;
   const avgGpa = totalStudents > 0
     ? (students.reduce((sum, s) => sum + (parseFloat(s.gpa) || 0), 0) / totalStudents).toFixed(2)
-    : '—';
-  const avgAtt = totalStudents > 0
-    ? (students.reduce((sum, s) => sum + (parseFloat(s.attendance) || 0), 0) / totalStudents).toFixed(1) + '%'
     : '—';
   return `
     <div class="page-container">
@@ -110,12 +107,16 @@ export function renderStudents() {
         </div>
 
         <!-- Stats Row -->
-        <div class="grid-4 gap-4 mb-6">
-          ${[{l:'Total Students',v:totalStudents,i:'👨‍🎓',c:'var(--primary)'},{l:'Active',v:activeStudents,i:'✅',c:'var(--success)'},{l:'Avg GPA',v:avgGpa,i:'📊',c:'var(--warning)'},{l:'Avg Attendance',v:avgAtt,i:'📅',c:'var(--accent)'}].map(s=>`
+        <div class="grid-3 gap-4 mb-6">
+          ${[
+            {l:'Total Students',v:totalStudents,icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>',c:'var(--primary)'},
+            {l:'Active',v:activeStudents,icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',c:'var(--success)'},
+            {l:'Avg GPA',v:avgGpa,icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',c:'var(--warning)'}
+          ].map(s=>`
             <div class="card">
               <div class="card-body" style="padding:16px 20px;">
                 <div class="flex items-center gap-3">
-                  <div style="width:40px;height:40px;border-radius:12px;background:${s.c}15;display:flex;align-items:center;justify-content:center;font-size:20px;">${s.i}</div>
+                  <div style="width:40px;height:40px;border-radius:12px;background:${s.c}15;display:flex;align-items:center;justify-content:center;color:${s.c};">${s.icon}</div>
                   <div><div style="font-size:20px;font-weight:800;color:${s.c};">${s.v}</div><div class="text-xs text-muted">${s.l}</div></div>
                 </div>
               </div>
@@ -127,7 +128,7 @@ export function renderStudents() {
         <div class="students-grid" id="studentsGrid">
           ${students.length === 0
             ? `<div class="text-center text-muted" style="padding:60px 0;grid-column:1/-1;">
-                <div style="font-size:48px;margin-bottom:12px;">👨‍🎓</div>
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 16px;opacity:0.4;"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
                 <div class="font-semibold" style="font-size:18px;">No students enrolled yet</div>
                 <div class="text-sm mt-2">Add students from the Admin panel</div>
               </div>`
@@ -156,7 +157,6 @@ function renderStudentCard(s) {
         </div>
         <div class="student-card-stats">
           <div><div class="font-semibold text-sm">${s.gpa}</div><div class="text-xs text-muted">GPA</div></div>
-          <div><div class="font-semibold text-sm">${s.attendance}%</div><div class="text-xs text-muted">Attendance</div></div>
           <div><div class="font-semibold text-sm">Roll ${s.roll}</div><div class="text-xs text-muted">Roll</div></div>
         </div>
         <div class="skills-wrap mt-3">
@@ -185,7 +185,7 @@ export function renderStudentProfile(studentId) {
         guardian: u.guardian || '—', skills: u.skills || [],
         bio: u.bio || '', achievements: u.achievements || [],
         avatar: u.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`,
-        gpa: u.gpa || 'N/A', attendance: u.attendance || 0,
+        gpa: u.gpa || 'N/A',
         status: u.status,
       };
     }
@@ -216,11 +216,11 @@ export function renderStudentProfile(studentId) {
                 </div>
                 <div class="text-muted mb-4">${student.id} · Roll No. ${student.roll}</div>
                 <div class="profile-detail-chips">
-                  <span class="profile-chip"><span>🏫</span> ${student.class}</span>
-                  <span class="profile-chip"><span>📍</span> Section ${student.section}</span>
-                  <span class="profile-chip"><span>📚</span> ${student.batch}</span>
-                  <span class="profile-chip"><span>🩸</span> ${student.bloodGroup}</span>
-                  <span class="profile-chip"><span>🎂</span> ${student.birthday}</span>
+                  <span class="profile-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg> ${student.class}</span>
+                  <span class="profile-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Section ${student.section}</span>
+                  <span class="profile-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg> ${student.batch}</span>
+                  <span class="profile-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg> ${student.bloodGroup}</span>
+                  <span class="profile-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ${student.birthday}</span>
                 </div>
                 <p class="text-secondary mt-4" style="max-width:560px;line-height:1.7;">${student.bio}</p>
                 <div class="flex gap-3 mt-6 flex-wrap">
@@ -249,7 +249,6 @@ export function renderStudentProfile(studentId) {
         <div class="tabs mb-8" id="profileTabs">
           <button class="tab active" onclick="switchProfileTab('overview',this)">Overview</button>
           <button class="tab" onclick="switchProfileTab('results',this)">Results</button>
-          <button class="tab" onclick="switchProfileTab('attendance',this)">Attendance</button>
           <button class="tab" onclick="switchProfileTab('assignments',this)">Assignments</button>
           <button class="tab" onclick="switchProfileTab('achievements',this)">Achievements</button>
         </div>
@@ -271,13 +270,13 @@ function renderProfileOverviewTab(student) {
           <div class="card-header"><div class="font-semibold">Contact Information</div></div>
           <div class="card-body">
             ${[
-              {i:'📧', l:'Email', v:student.email},
-              {i:'📞', l:'Phone', v:student.phone},
-              {i:'📍', l:'Address', v:student.address},
-              {i:'👨‍👧', l:'Guardian', v:student.guardian},
+              {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>', l:'Email', v:student.email},
+              {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>', l:'Phone', v:student.phone},
+              {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>', l:'Address', v:student.address},
+              {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>', l:'Guardian', v:student.guardian},
             ].map(r=>`
               <div class="info-row">
-                <span class="info-icon">${r.i}</span>
+                <span class="info-icon" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:var(--primary-50);color:var(--primary);border-radius:8px;">${r.icon}</span>
                 <div><div class="text-xs text-muted">${r.l}</div><div class="font-medium text-sm">${r.v}</div></div>
               </div>
             `).join('')}
@@ -318,13 +317,12 @@ function renderProfileOverviewTab(student) {
             const myResults = JSON.parse(localStorage.getItem('gfa_results')||'[]').filter(r=>r.studentId===student.id);
             const rank = myResults.length>0 ? '#'+myResults[0].position : '—';
             return [
-              {l:'Current GPA',v:student.gpa,i:'📊',c:'var(--primary)'},
-              {l:'Attendance',v:student.attendance+'%',i:'✅',c:'var(--success)'},
-              {l:'Class Rank',v:rank,i:'🏆',c:'var(--warning)'},
+              {l:'Current GPA',v:student.gpa,icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',c:'var(--primary)'},
+              {l:'Class Rank',v:rank,icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg>',c:'var(--warning)'},
             ].map(s=>`
               <div class="card text-center">
                 <div class="card-body p-6">
-                  <div style="font-size:24px;margin-bottom:8px;">${s.i}</div>
+                  <div style="color:${s.c};margin-bottom:8px;display:flex;align-items:center;justify-content:center;">${s.icon}</div>
                   <div style="font-size:28px;font-weight:800;color:${s.c};">${s.v}</div>
                   <div class="text-xs text-muted">${s.l}</div>
                 </div>
@@ -340,7 +338,9 @@ function renderProfileOverviewTab(student) {
           <div class="card-body">
             ${student.achievements.map(a=>`
               <div class="flex items-center gap-3 mb-3">
-                <div style="width:36px;height:36px;border-radius:10px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🏆</div>
+                <div style="width:36px;height:36px;border-radius:10px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg>
+                </div>
                 <div class="font-medium text-sm">${a}</div>
               </div>
             `).join('')}
@@ -375,7 +375,7 @@ export function renderProfileTabContent(tab, studentId) {
   if (!student) {
     const allUsers = JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
     const u = allUsers.find(u => u.id === studentId);
-    if (u) student = { id:u.id, name:u.name, roll:u.roll||'—', class:u.class||'N/A', section:u.section||'N/A', batch:u.batch||'N/A', email:u.email, phone:u.phone||'—', address:u.address||'—', bloodGroup:u.bloodGroup||'—', birthday:u.birthday||'—', guardian:u.guardian||'—', skills:u.skills||[], bio:u.bio||'', achievements:u.achievements||[], avatar:u.avatar||`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`, gpa:u.gpa||'N/A', attendance:u.attendance||0 };
+    if (u) student = { id:u.id, name:u.name, roll:u.roll||'—', class:u.class||'N/A', section:u.section||'N/A', batch:u.batch||'N/A', email:u.email, phone:u.phone||'—', address:u.address||'—', bloodGroup:u.bloodGroup||'—', birthday:u.birthday||'—', guardian:u.guardian||'—', skills:u.skills||[], bio:u.bio||'', achievements:u.achievements||[], avatar:u.avatar||`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`, gpa:u.gpa||'N/A' };
   }
   if (!student) return '<p class="text-muted">No student data found.</p>';
 
@@ -392,7 +392,7 @@ export function renderProfileTabContent(tab, studentId) {
       </div>
       ${studentResults.length === 0
         ? `<div class="card-body text-center text-muted" style="padding:40px;">
-            <div style="font-size:32px;margin-bottom:8px;">📋</div>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 12px;opacity:0.5;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
             <div>No results published yet</div>
           </div>`
         : `<div class="table-container">
@@ -418,20 +418,6 @@ export function renderProfileTabContent(tab, studentId) {
   `;
   }
 
-  if (tab === 'attendance') return `
-    <div class="card">
-      <div class="card-header"><div class="font-semibold">Attendance Summary</div></div>
-      <div class="card-body">
-        <div class="grid-3 gap-4 text-center mb-6">
-          <div style="background:var(--bg-secondary);border-radius:12px;padding:16px;"><div style="font-size:28px;font-weight:900;color:var(--success);">20</div><div class="text-xs text-muted">Present</div></div>
-          <div style="background:var(--bg-secondary);border-radius:12px;padding:16px;"><div style="font-size:28px;font-weight:900;color:var(--danger);">3</div><div class="text-xs text-muted">Absent</div></div>
-          <div style="background:var(--bg-secondary);border-radius:12px;padding:16px;"><div style="font-size:28px;font-weight:900;color:var(--primary);">${student.attendance}%</div><div class="text-xs text-muted">Rate</div></div>
-        </div>
-        <button class="btn btn-secondary" onclick="navigate('attendance')">View Full Attendance →</button>
-      </div>
-    </div>
-  `;
-
   if (tab === 'assignments') return `
     <div class="card">
       <div class="card-header"><div class="font-semibold">Assignments</div></div>
@@ -447,7 +433,9 @@ export function renderProfileTabContent(tab, studentId) {
       <div class="card-body">
         ${student.achievements.map(a=>`
           <div class="flex items-center gap-3 mb-4">
-            <div style="width:44px;height:44px;border-radius:12px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏆</div>
+            <div style="width:44px;height:44px;border-radius:12px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg>
+            </div>
             <div>
               <div class="font-semibold">${a}</div>
               <div class="text-xs text-muted">Verified Achievement</div>

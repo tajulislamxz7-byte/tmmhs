@@ -58,7 +58,7 @@ function lsRegister(data) {
     graduationYear: data.graduationYear||'', profession: data.profession||'',
     company: data.company||'', university: data.university||'',
     position: data.position||'', department: data.department||'',
-    roll:'', address:'', skills:[], achievements:[], gpa:'N/A', attendance:0, bio:'',
+    roll:'', address:'', skills:[], achievements:[], gpa:'N/A', bio:'',
   };
   users.push(user);
   LS.set('gfa_users', users);

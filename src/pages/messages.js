@@ -8,7 +8,24 @@ const FALLBACK_AVATAR = 'https://api.dicebear.com/7.x/avataaars/svg?seed=default
 
 // ── Storage helpers — write to both localStorage AND API server ──
 function getConversations() {
-  return JSON.parse(localStorage.getItem('gfa_conversations') || '[]');
+  const convs = JSON.parse(localStorage.getItem('gfa_conversations') || '[]');
+  
+  // Remove duplicates by conversation ID
+  const uniqueConvs = [];
+  const seenIds = new Set();
+  convs.forEach(c => {
+    if (!seenIds.has(c.id)) {
+      seenIds.add(c.id);
+      uniqueConvs.push(c);
+    }
+  });
+  
+  // Save cleaned list back if we removed duplicates
+  if (uniqueConvs.length !== convs.length) {
+    localStorage.setItem('gfa_conversations', JSON.stringify(uniqueConvs));
+  }
+  
+  return uniqueConvs;
 }
 function saveConversations(list) {
   localStorage.setItem('gfa_conversations', JSON.stringify(list));
@@ -58,14 +75,30 @@ async function syncConversationsFromServer(meId) {
     if (!serverConvs) return;
     const myConvs = serverConvs.filter(c => c.participants && c.participants.includes(meId));
     if (myConvs.length > 0) {
-      // Merge with localStorage convs
+      // Merge with localStorage convs - avoid duplicates by conversation ID
       const local = JSON.parse(localStorage.getItem('gfa_conversations') || '[]');
+      
+      // Remove duplicates by keeping only unique conversation IDs
+      const merged = [];
+      const seenIds = new Set();
+      
+      // Add server conversations first (source of truth)
       myConvs.forEach(sc => {
-        const idx = local.findIndex(c => c.id === sc.id);
-        if (idx >= 0) { Object.assign(local[idx], sc); }
-        else { local.unshift(sc); }
+        if (!seenIds.has(sc.id)) {
+          seenIds.add(sc.id);
+          merged.push(sc);
+        }
       });
-      localStorage.setItem('gfa_conversations', JSON.stringify(local));
+      
+      // Add local conversations that aren't on server yet
+      local.forEach(lc => {
+        if (!seenIds.has(lc.id) && lc.participants.includes(meId)) {
+          seenIds.add(lc.id);
+          merged.push(lc);
+        }
+      });
+      
+      localStorage.setItem('gfa_conversations', JSON.stringify(merged));
     }
   } catch(e) {}
 }
@@ -74,35 +107,19 @@ async function syncConversationsFromServer(meId) {
 function makeConvId(id1, id2) {
   return 'C_' + [id1, id2].sort().join('_');
 }
-function ensureWelcomeConv(meId) {
-  const convId = makeConvId('admin', meId);
-  const convs = getConversations();
-  const existing = convs.find(c => c.id === convId);
-  if (!existing) {
-    convs.unshift({
-      id: convId,
-      participants: ['admin', meId].sort(),
-      lastMsg: 'Welcome to Tiarkhali M.M High School portal.',
-      lastTime: new Date().toISOString(),
-      unread: { [meId]: 1 },
-    });
-    saveConversations(convs);
-    const msgs = getMessages(convId);
-    if (msgs.length === 0) {
-      saveMessages(convId, [{
-        id: 'm_welcome',
-        senderId: 'admin',
-        senderName: 'Admin Office',
-        text: 'Welcome to Tiarkhali M.M High School and College portal. Use this messaging system to communicate with teachers and staff.',
-        time: new Date().toISOString(),
-      }]);
-    }
-  }
-}
 
 // Get display info for a user id — reads from localStorage cache (always available)
 function getUserInfo(id) {
-  if (id === 'admin') return { id:'admin', name:'Admin Office', role:'Administration', avatar:'https://api.dicebear.com/7.x/avataaars/svg?seed=AdminTMMH' };
+  // Normalize the ID (handle both 'admin' and 'ADM-0001')
+  if (id === 'admin' || id === 'ADM-0001') {
+    return { 
+      id: 'ADM-0001', 
+      name: 'Admin Office', 
+      role: 'Administration', 
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=AdminTMMH' 
+    };
+  }
+  
   // Try all localStorage sources
   const sources = ['gfa_users_cache', 'gfa_users'];
   for (const key of sources) {
@@ -149,8 +166,20 @@ export function renderMessages(loggedInUser) {
       <button class="btn btn-primary" onclick="navigate('login')">Sign In</button>
     </div>`;
 
-  ensureWelcomeConv(me.id);
-  const convs = getConversations().filter(c => c.participants.includes(me.id));
+  // Get conversations and remove duplicates by conversation ID
+  let convs = getConversations().filter(c => c.participants.includes(me.id));
+  
+  // Remove duplicates based on conversation ID
+  const uniqueConvs = [];
+  const seenIds = new Set();
+  convs.forEach(c => {
+    if (!seenIds.has(c.id)) {
+      seenIds.add(c.id);
+      uniqueConvs.push(c);
+    }
+  });
+  convs = uniqueConvs;
+  
   if (!activeConvId && convs.length > 0) activeConvId = convs[0].id;
 
   const activeConv = convs.find(c => c.id === activeConvId) || convs[0] || null;
@@ -569,11 +598,25 @@ let _lastConvHash = '';   // to detect new conversations for this user
 function _pollMessages() {
   const me = auth.getCurrentUser();
   if (!me) return;
-  if (!document.getElementById('messagePanel')) { stopMessagesPolling(); return; }
+  if (!document.getElementById('messagePanel')) { 
+    stopMessagesPolling(); 
+    return; 
+  }
 
   // Sync conversations from server first (picks up convos started by others)
   syncConversationsFromServer(me.id).then(() => {
-    const convs = getConversations().filter(c => c.participants.includes(me.id));
+    let convs = getConversations().filter(c => c.participants.includes(me.id));
+    
+    // Remove duplicates by conversation ID
+    const uniqueConvs = [];
+    const seenIds = new Set();
+    convs.forEach(c => {
+      if (!seenIds.has(c.id)) {
+        seenIds.add(c.id);
+        uniqueConvs.push(c);
+      }
+    });
+    convs = uniqueConvs;
 
     // Detect new conversations
     const convHash = convs.map(c => c.id).join(',');
@@ -654,6 +697,28 @@ export function startMessagesPolling() {
   const me = auth.getCurrentUser();
   if (!me) return;
 
+  // One-time cleanup: remove old duplicate conversations from localStorage
+  try {
+    const convs = JSON.parse(localStorage.getItem('gfa_conversations') || '[]');
+    const cleaned = [];
+    const seenIds = new Set();
+    
+    // Keep only conversations with proper format (no timestamps)
+    convs.forEach(c => {
+      // Only keep if ID format is correct (C_ID1_ID2) without timestamp suffix
+      if (c.id && c.id.match(/^C_[A-Z]{3}-\d{4}_[A-Z]{3}-\d{4}$/)) {
+        if (!seenIds.has(c.id)) {
+          seenIds.add(c.id);
+          cleaned.push(c);
+        }
+      }
+    });
+    
+    if (cleaned.length !== convs.length) {
+      localStorage.setItem('gfa_conversations', JSON.stringify(cleaned));
+    }
+  } catch(e) {}
+
   // First sync conversations from server
   syncConversationsFromServer(me.id).then(() => {
     const convs = getConversations().filter(c => c.participants.includes(me.id));
@@ -672,7 +737,10 @@ export function startMessagesPolling() {
 }
 
 export function stopMessagesPolling() {
-  if (_pollInterval) { clearInterval(_pollInterval); _pollInterval = null; }
+  if (_pollInterval) { 
+    clearInterval(_pollInterval); 
+    _pollInterval = null; 
+  }
   window.removeEventListener('storage', _onStorageEvent);
 }
 

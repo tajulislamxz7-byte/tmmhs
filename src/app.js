@@ -11,17 +11,16 @@ import { renderHome, renderHomeExtra }   from './pages/home.js';
 import { renderStudents, renderStudentProfile } from './pages/students.js';
 import { renderLogin, renderRegister, renderForgotPassword, renderResetPassword } from './pages/auth.js';
 import { renderTeachers, renderTeacherProfile, renderTeacherDashboard } from './pages/teachers.js';
-import { renderAlumni }         from './pages/alumni.js';
+import { renderAlumni, renderAlumniDashboard }         from './pages/alumni.js';
 import { renderBatches, renderBatchDetail } from './pages/batches.js';
 import { renderResults, renderStudentDashboard } from './pages/results.js';
-import { renderAttendance }     from './pages/attendance.js';
 import { renderNotices }        from './pages/notices.js';
 import { renderEvents }         from './pages/events.js';
 import { renderGallery }        from './pages/gallery.js';
 import { renderMessages, startMessagesPolling, stopMessagesPolling } from './pages/messages.js';
 import { renderAbout }          from './pages/about.js';
 import { renderAdminDashboard } from './pages/admin.js';
-import { renderStaff }          from './pages/staff.js';
+import { renderStaff, renderStaffDashboard }          from './pages/staff.js';
 import { renderAdmission }      from './pages/admission.js';
 import { renderComplaintBox }   from './pages/complaints.js';
 import { icon } from './utils/icons.js';
@@ -103,7 +102,9 @@ async function render() {
     pageRoot.innerHTML = html;
     bindGlobalActions();
   } else {
-    pageRoot.innerHTML      = getPageContent(user, role);
+    pageRoot.innerHTML = `<div class="container section-sm text-center" style="padding:60px 0;"><div class="text-muted">Loading...</div></div>`;
+    const html = await getPageContent(user, role);
+    pageRoot.innerHTML = html;
     pageRoot.style.paddingTop = AUTH_PAGES.includes(currentPage) ? '0' : 'var(--nav-height)';
     footerRoot.innerHTML = (['messages'].includes(currentPage)) ? '' : renderFooter();
     bindGlobalActions();
@@ -115,27 +116,30 @@ async function render() {
   document.getElementById('iconMoon')?.classList.toggle('hidden', !dark);
 }
 
-function getPageContent(user, role) {
+async function getPageContent(user, role) {
   switch (currentPage) {
     case 'home':              return renderHome() + renderHomeExtra();
     case 'students':          return renderStudents();
     case 'student-profile':   return renderStudentProfile(currentParam);
     case 'student-dashboard': return renderStudentDashboard(user);
-    case 'teachers':          return renderTeachers();
-    case 'teacher-profile':   return renderTeacherProfile(currentParam);
+    case 'teachers':          return await renderTeachers();
+    case 'teacher-profile':   return await renderTeacherProfile(currentParam);
     case 'teacher-dashboard': return renderTeacherDashboard(user);
-    case 'alumni':            return renderAlumni();
+    case 'alumni':            return await renderAlumni();
+    case 'alumni-dashboard':  return renderAlumniDashboard(user);
+    case 'staff':             return await renderStaff();
+    case 'staff-dashboard':   return renderStaffDashboard(user);
     case 'batches':           return renderBatches();
     case 'batch-detail':      return renderBatchDetail(currentParam);
     case 'results':           return renderResults(role, user);
-    case 'attendance':        return renderAttendance();
     case 'notices':           return renderNotices();
     case 'events':            return renderEvents();
     case 'gallery':           return renderGallery();
     case 'messages':          return renderMessages(user);
     case 'about':             return renderAbout();
     case 'admin':             return renderAdminDashboard();
-    case 'staff':             return renderStaff();
+    case 'staff':             return await renderStaff();
+    case 'staff-dashboard':   return renderStaffDashboard(user);
     case 'admission':         return renderAdmission();
     case 'complaints':        return renderComplaintBox();
     case 'assignments':       return renderAssignmentsPage();
@@ -178,6 +182,8 @@ function bindGlobalActions() {
     showToast(`Welcome back, ${result.user.name.split(' ')[0]}!`, 'success');
     if (result.user.role === 'admin') navigate('admin');
     else if (result.user.role === 'teacher') navigate('teacher-dashboard');
+    else if (result.user.role === 'alumni') navigate('alumni-dashboard');
+    else if (result.user.role === 'staff') navigate('staff-dashboard');
     else navigate('student-dashboard');
   };
 
@@ -239,6 +245,8 @@ function bindGlobalActions() {
           showToast(`Welcome, ${user.name.split(' ')[0]}!`, 'success');
           if (user.role === 'admin') navigate('admin');
           else if (user.role === 'teacher') navigate('teacher-dashboard');
+          else if (user.role === 'alumni') navigate('alumni-dashboard');
+          else if (user.role === 'staff') navigate('staff-dashboard');
           else navigate('student-dashboard');
 
         } catch (err) {

@@ -2,9 +2,199 @@
 // SUPPORT STAFF PAGE
 // ================================================
 
-import { supportStaff } from '../data/sampleData.js';
+import { api } from '../utils/api.js';
+import { icon } from '../utils/icons.js';
 
-export function renderStaff() {
+// Get all staff from API/localStorage
+async function fetchStaff() {
+  const apiUsers = await api.getUsers();
+  const users = apiUsers || JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
+  return users.filter(u => u.role === 'staff' && u.status === 'active').map(s => ({
+    id: s.id,
+    name: s.name,
+    email: s.email,
+    phone: s.phone || '—',
+    avatar: s.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(s.name)}`,
+    position: s.position || 'Staff Member',
+    department: s.department || 'General',
+    bio: s.bio || 'Dedicated staff member supporting school operations.',
+    skills: s.skills || [],
+    achievements: s.achievements || [],
+    address: s.address || '—',
+  }));
+}
+
+// Staff Dashboard
+export function renderStaffDashboard(user) {
+  return `
+    <div class="page-container">
+      <div class="page-header">
+        <div class="container">
+          <div class="page-header-content">
+            <div>
+              <div class="section-tag" style="background:rgba(255,255,255,0.2);color:white;">Dashboard</div>
+              <h1 class="page-title">Staff Profile</h1>
+              <p class="page-subtitle">Welcome back, ${user.name.split(' ')[0]}!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container section-sm">
+        <div class="dashboard-grid">
+          <!-- Sidebar -->
+          <div class="dashboard-sidebar">
+            <div class="sidebar-user">
+              <img src="${user.avatar}" alt="${user.name}" class="avatar avatar-xl mb-3">
+              <div class="font-bold">${user.name}</div>
+              <div class="text-xs text-muted mb-2">${user.id}</div>
+              <span class="badge badge-secondary">Staff</span>
+            </div>
+            <nav>
+              <div class="sidebar-nav-item active">
+                ${icon('user', 18)}
+                <span>Profile</span>
+              </div>
+              <div class="sidebar-nav-item" onclick="navigate('messages')">
+                ${icon('messageSquare', 18)}
+                <span>Messages</span>
+              </div>
+              <div class="sidebar-nav-item" onclick="navigate('staff')">
+                ${icon('users', 18)}
+                <span>Staff Team</span>
+              </div>
+              <div class="sidebar-nav-item" onclick="navigate('events')">
+                ${icon('calendar', 18)}
+                <span>Events</span>
+              </div>
+              <div class="sidebar-nav-item" onclick="navigate('notices')">
+                ${icon('bell', 18)}
+                <span>Notices</span>
+              </div>
+            </nav>
+          </div>
+
+          <!-- Main Content -->
+          <div>
+            <!-- Profile Card -->
+            <div class="card mb-6">
+              <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                <h3>Profile Information</h3>
+                <button class="btn btn-secondary btn-sm" onclick="editStaffProfile('${user.id}')">
+                  ${icon('edit', 14)} Edit Profile
+                </button>
+              </div>
+              <div class="card-body">
+                <div class="grid-2 gap-6">
+                  <div>
+                    <h4 class="text-sm font-bold text-muted mb-3">PERSONAL DETAILS</h4>
+                    <div class="flex flex-col gap-3">
+                      <div class="info-row">
+                        <div class="info-icon">${icon('mail', 18)}</div>
+                        <div><div class="text-xs text-muted">Email</div><div class="font-medium">${user.email}</div></div>
+                      </div>
+                      <div class="info-row">
+                        <div class="info-icon">${icon('phone', 18)}</div>
+                        <div><div class="text-xs text-muted">Phone</div><div class="font-medium">${user.phone || '—'}</div></div>
+                      </div>
+                      <div class="info-row">
+                        <div class="info-icon">${icon('mapPin', 18)}</div>
+                        <div><div class="text-xs text-muted">Address</div><div class="font-medium">${user.address || '—'}</div></div>
+                      </div>
+                      <div class="info-row">
+                        <div class="info-icon">${icon('droplet', 18)}</div>
+                        <div><div class="text-xs text-muted">Blood Group</div><div class="font-medium">${user.bloodGroup || '—'}</div></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-bold text-muted mb-3">WORK DETAILS</h4>
+                    <div class="flex flex-col gap-3">
+                      <div class="info-row">
+                        <div class="info-icon">${icon('briefcase', 18)}</div>
+                        <div><div class="text-xs text-muted">Position</div><div class="font-medium">${user.position || '—'}</div></div>
+                      </div>
+                      <div class="info-row">
+                        <div class="info-icon">${icon('building', 18)}</div>
+                        <div><div class="text-xs text-muted">Department</div><div class="font-medium">${user.department || '—'}</div></div>
+                      </div>
+                      <div class="info-row">
+                        <div class="info-icon">${icon('calendar', 18)}</div>
+                        <div><div class="text-xs text-muted">Status</div><div class="font-medium">${user.status || 'Active'}</div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                ${user.bio ? `
+                  <div class="mt-6 pt-6" style="border-top:1px solid var(--border);">
+                    <h4 class="text-sm font-bold text-muted mb-3">BIO</h4>
+                    <p class="text-secondary">${user.bio}</p>
+                  </div>
+                ` : ''}
+
+                ${user.skills && user.skills.length > 0 ? `
+                  <div class="mt-6 pt-6" style="border-top:1px solid var(--border);">
+                    <h4 class="text-sm font-bold text-muted mb-3">SKILLS</h4>
+                    <div class="flex flex-wrap gap-2">
+                      ${user.skills.map(s => `<span class="badge badge-secondary">${s}</span>`).join('')}
+                    </div>
+                  </div>
+                ` : ''}
+
+                ${user.achievements && user.achievements.length > 0 ? `
+                  <div class="mt-6 pt-6" style="border-top:1px solid var(--border);">
+                    <h4 class="text-sm font-bold text-muted mb-3">ACHIEVEMENTS</h4>
+                    <ul class="flex flex-col gap-2">
+                      ${user.achievements.map(a => `<li class="flex items-start gap-2"><span class="text-primary">•</span><span class="text-secondary">${a}</span></li>`).join('')}
+                    </ul>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="grid-2 gap-4">
+              <div class="card" style="cursor:pointer;" onclick="navigate('messages')">
+                <div class="card-body" style="padding:20px;">
+                  <div class="flex items-center gap-4">
+                    <div style="width:48px;height:48px;border-radius:12px;background:var(--primary-50);display:flex;align-items:center;justify-content:center;">
+                      ${icon('messageSquare', 24, 'var(--primary)')}
+                    </div>
+                    <div>
+                      <div class="font-bold">Messages</div>
+                      <div class="text-xs text-muted">Connect with team</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card" style="cursor:pointer;" onclick="navigate('events')">
+                <div class="card-body" style="padding:20px;">
+                  <div class="flex items-center gap-4">
+                    <div style="width:48px;height:48px;border-radius:12px;background:var(--success-50);display:flex;align-items:center;justify-content:center;">
+                      ${icon('calendar', 24, 'var(--success)')}
+                    </div>
+                    <div>
+                      <div class="font-bold">Events</div>
+                      <div class="text-xs text-muted">View school events</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+window.editStaffProfile = function(id) {
+  showToast('Profile editing feature coming soon!', 'info');
+};
+
+export async function renderStaff() {
+  const supportStaff = await fetchStaff();
   const departments = [...new Set(supportStaff.map(s => s.department))];
 
   return `
@@ -59,12 +249,9 @@ function renderStaffCard(s) {
         <div class="text-xs text-muted mb-3">${s.id}</div>
         <div class="flex gap-2 justify-center flex-wrap mb-3">
           <span class="badge badge-primary">${s.position}</span>
-          <span class="badge badge-${s.status==='Active'?'success':'gray'}">${s.status}</span>
+          <span class="badge badge-secondary">${s.department}</span>
         </div>
-        <div class="flex justify-around text-xs text-muted border-t border" style="padding-top:12px;margin-top:4px;">
-          <span class="flex items-center gap-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> ${s.department}</span>
-          <span class="flex items-center gap-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ${s.joiningDate}</span>
-        </div>
+        <p class="text-xs text-muted line-clamp-2">${s.bio}</p>
       </div>
     </div>
   `;

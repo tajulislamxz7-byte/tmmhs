@@ -59,9 +59,6 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
             <div class="dropdown-item" onclick="navigate('results')" style="cursor:pointer;">
               ${icon('fileText', 15)} <span>Results</span>
             </div>
-            <div class="dropdown-item" onclick="navigate('attendance')" style="cursor:pointer;">
-              ${icon('checkCircle', 15)} <span>Attendance</span>
-            </div>
             <div class="dropdown-item" onclick="navigate('assignments')" style="cursor:pointer;">
               ${icon('clipboardList', 15)} <span>Assignments</span>
             </div>
@@ -119,9 +116,15 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
             ` : role === 'teacher' ? `
             <div class="dropdown-item" onclick="navigate('teacher-dashboard')" style="cursor:pointer;">${icon('layout', 14)} <span>Dashboard</span></div>
             <div class="dropdown-item" onclick="navigate('teacher-profile','${user.id}')" style="cursor:pointer;">${icon('user', 14)} <span>My Profile</span></div>
+            ` : role === 'alumni' ? `
+            <div class="dropdown-item" onclick="navigate('alumni-dashboard')" style="cursor:pointer;">${icon('layout', 14)} <span>Dashboard</span></div>
+            <div class="dropdown-item" onclick="navigate('alumni')" style="cursor:pointer;">${icon('users', 14)} <span>Alumni Network</span></div>
+            ` : role === 'staff' ? `
+            <div class="dropdown-item" onclick="navigate('staff-dashboard')" style="cursor:pointer;">${icon('layout', 14)} <span>Dashboard</span></div>
+            <div class="dropdown-item" onclick="navigate('staff')" style="cursor:pointer;">${icon('users', 14)} <span>Staff Team</span></div>
             ` : ''}
             <div class="dropdown-item" onclick="navigate('messages')" style="cursor:pointer;">${icon('messageSquare', 14)} <span>Messages</span></div>
-            <div class="dropdown-item" onclick="navigate('assignments')" style="cursor:pointer;">${icon('clipboardList', 14)} <span>Assignments</span></div>
+            ${role !== 'alumni' && role !== 'staff' ? `<div class="dropdown-item" onclick="navigate('assignments')" style="cursor:pointer;">${icon('clipboardList', 14)} <span>Assignments</span></div>` : ''}
             ${role === 'admin' ? `<div class="dropdown-item" onclick="navigate('admin')" style="cursor:pointer;">${icon('settings', 14)} <span>Admin Panel</span></div>` : ''}
             <div class="divider"></div>
             <div class="dropdown-item" onclick="signOut()" style="cursor:pointer;color:var(--danger);">${icon('logOut', 14)} <span>Sign Out</span></div>
@@ -167,7 +170,6 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
         <div class="mobile-nav-link" onclick="navigate('alumni');toggleMobileMenu()">${icon('globe',16)} Alumni</div>
         <div class="mobile-nav-link" onclick="navigate('batches');toggleMobileMenu()">${icon('bookOpen',16)} Batches</div>
         <div class="mobile-nav-link" onclick="navigate('results');toggleMobileMenu()">${icon('fileText',16)} Results</div>
-        <div class="mobile-nav-link" onclick="navigate('attendance');toggleMobileMenu()">${icon('checkCircle',16)} Attendance</div>
         <div class="mobile-nav-link" onclick="navigate('notices');toggleMobileMenu()">${icon('bell',16)} Notices</div>
         <div class="mobile-nav-link" onclick="navigate('events');toggleMobileMenu()">${icon('calendar',16)} Events</div>
         <div class="mobile-nav-link" onclick="navigate('gallery');toggleMobileMenu()">${icon('image',16)} Gallery</div>
@@ -177,8 +179,9 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
         <div class="mobile-nav-link" onclick="navigate('messages');toggleMobileMenu()">${icon('messageSquare',16)} Messages</div>
         ${role==='student'?`<div class="mobile-nav-link" onclick="navigate('student-dashboard');toggleMobileMenu()">${icon('layout',16)} Dashboard</div>`:''}
         ${role==='teacher'?`<div class="mobile-nav-link" onclick="navigate('teacher-dashboard');toggleMobileMenu()">${icon('layout',16)} Dashboard</div>`:''}
-        ${role==='admin'?`<div class="mobile-nav-link" onclick="navigate('admin');toggleMobileMenu()">${icon('settings',16)} Admin Panel</div>`:''}
-        <div style="padding:12px 0 0;">
+        ${role==='alumni'?`<div class="mobile-nav-link" onclick="navigate('alumni-dashboard');toggleMobileMenu()">${icon('layout',16)} Dashboard</div>`:''}
+        ${role==='staff'?`<div class="mobile-nav-link" onclick="navigate('staff-dashboard');toggleMobileMenu()">${icon('layout',16)} Dashboard</div>`:''}
+        ${role==='admin'?`<div class="mobile-nav-link" onclick="navigate('admin');toggleMobileMenu()">${icon('settings',16)} Admin Panel</div>`:''}        <div style="padding:12px 0 0;">
           <button class="btn btn-danger w-full" onclick="signOut()">${icon('logOut',14)} Sign Out</button>
         </div>
         ` : `

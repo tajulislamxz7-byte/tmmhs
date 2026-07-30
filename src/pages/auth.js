@@ -32,12 +32,11 @@ export function renderLogin() {
             Welcome back to<br>your school portal
           </h2>
           <p style="color:rgba(255,255,255,0.75);font-size:14px;line-height:1.9;margin-bottom:32px;">
-            Sign in to access your dashboard, results,<br>attendance, messages and more.
+            Sign in to access your dashboard, results,<br>messages and more.
           </p>
           <div style="display:flex;flex-direction:column;gap:12px;">
             ${[
               ['View Results & Marksheets', 'fileText'],
-              ['Track Daily Attendance', 'checkCircle'],
               ['Download Study Materials', 'download'],
               ['Message Your Teachers', 'messageSquare'],
               ['Get Real-time Notifications', 'bell'],

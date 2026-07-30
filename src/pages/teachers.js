@@ -2,9 +2,35 @@
 // TEACHERS PAGE & PROFILE
 // ================================================
 
-import { teachers, batches, notices } from '../data/sampleData.js';
+import { batches, notices } from '../data/sampleData.js';
+import { api } from '../utils/api.js';
 
-export function renderTeachers() {
+// Get all teachers from API/localStorage
+async function fetchTeachers() {
+  const apiUsers = await api.getUsers();
+  const users = apiUsers || JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
+  return users.filter(u => u.role === 'teacher' && u.status === 'active').map(t => ({
+    id: t.id,
+    name: t.name,
+    email: t.email,
+    phone: t.phone || '—',
+    avatar: t.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(t.name)}`,
+    subject: t.subject || 'General',
+    qualification: t.qualification || 'B.Ed.',
+    position: t.position || 'Teacher',
+    department: t.department || 'General',
+    experience: '5+ years',
+    status: 'Working',
+    bio: t.bio || 'Dedicated educator committed to student success.',
+    skills: t.skills || [],
+    achievements: t.achievements || [],
+    address: t.address || '—',
+  }));
+}
+
+export async function renderTeachers() {
+  const teachers = await fetchTeachers();
+  
   return `
     <div class="page-container">
       <div class="page-header">
@@ -43,7 +69,7 @@ export function renderTeachers() {
 }
 
 function renderTeacherCard(t) {
-  const subjectColor = { Physics:'#2563eb', Mathematics:'#7c3aed', English:'#059669', Chemistry:'#d97706', Biology:'#dc2626', ICT:'#0891b2', Bangla:'#be185d', History:'#6b7280' };
+  const subjectColor = { Physics:'#2563eb', Mathematics:'#7c3aed', English:'#059669', Chemistry:'#d97706', Biology:'#dc2626', ICT:'#0891b2', Bangla:'#be185d', History:'#6b7280', 'English Literature':'#059669' };
   const color = subjectColor[t.subject] || '#2563eb';
   return `
     <div class="card teacher-card" data-name="${t.name.toLowerCase()}" data-subject="${t.subject.toLowerCase()}" data-status="${t.status}" onclick="navigate('teacher-profile','${t.id}')">
@@ -54,19 +80,16 @@ function renderTeacherCard(t) {
         <span class="badge" style="background:${color}15;color:${color};margin-bottom:12px;">${t.subject}</span>
         <div class="flex justify-center gap-2 mb-4 flex-wrap">
           <span class="badge badge-${t.status==='Working'?'success':'gray'}">${t.status}</span>
-          <span class="badge badge-gray">${t.experience}</span>
+          <span class="badge badge-gray">${t.experience || '5+ years'}</span>
         </div>
         <p class="text-xs text-muted line-clamp-2">${t.bio}</p>
-        <div class="flex justify-center gap-4 mt-4 text-xs text-muted border-t border" style="padding-top:12px;margin-top:12px;">
-          <span>📚 ${t.subject}</span>
-          <span>🎓 ${t.qualification.split(',')[0]}</span>
-        </div>
       </div>
     </div>
   `;
 }
 
-export function renderTeacherProfile(teacherId) {
+export async function renderTeacherProfile(teacherId) {
+  const teachers = await fetchTeachers();
   const teacher = teachers.find(t => t.id === teacherId);
   if (!teacher) return `<div class="container section-sm"><div class="card"><div class="card-body text-center text-muted">Teacher not found.</div></div></div>`;
   return `
@@ -168,7 +191,6 @@ function buildTeacherProfile(user) {
 
 const TCH_SIDEBAR_ITEMS = [
   {i:'layout',       l:'Overview',         p:'teacher-dashboard'},
-  {i:'checkCircle',  l:'Take Attendance',  p:'attendance'},
   {i:'fileText',     l:'Results',           p:'results'},
   {i:'clipboardList',l:'Assignments',       p:'assignments'},
   {i:'messageSquare',l:'Messages',          p:'messages'},
@@ -187,9 +209,7 @@ const TCH_SVG_MAP = {
 };
 
 export function renderTeacherDashboard(loggedInUser) {
-  const teacher = (loggedInUser && loggedInUser.id)
-    ? (teachers.find(t => t.id === loggedInUser.id) || buildTeacherProfile(loggedInUser))
-    : buildTeacherProfile({ id:'TCH-000', name:'Teacher', email:'', subject:'', qualification:'', experience:'', avatar:'https://api.dicebear.com/7.x/avataaars/svg?seed=Teacher', role:'Teacher', status:'Working' });
+  const teacher = buildTeacherProfile(loggedInUser);
 
   const myClass = batches.find(b => b.classTeacher === teacher.name) || { name:'No Batch', id:'', totalStudents:0, achievements:[], passingYear:'—' };
   const totalStudents = myClass ? myClass.totalStudents : 0;
@@ -206,7 +226,6 @@ export function renderTeacherDashboard(loggedInUser) {
 
   const kpiCards = [
     {svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>', l:'My Students', v:totalStudents, c:'var(--primary)', t:'In your batch', up:true},
-    {svg:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>', l:'Attendance', v:'94%', c:'var(--success)', t:'This month', up:true},
     {svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>', l:'Classes', v:3, c:'var(--accent)', t:'Active classes', up:true},
     {svg:'<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>', l:'Pending Tasks', v:4, c:'var(--warning)', t:'Requires action', up:false},
   ];
@@ -259,14 +278,39 @@ export function renderTeacherDashboard(loggedInUser) {
           </div>
           <div class="flex flex-col gap-6">
             <div class="kpi-grid">${kpiHtml}</div>
+            <div class="card">
+              <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                <div class="font-semibold">Profile Information</div>
+                <button class="btn btn-secondary btn-sm" onclick="editTeacherProfile('${teacher.id}')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  Edit Profile
+                </button>
+              </div>
+              <div class="card-body">
+                <div class="grid-2 gap-4">
+                  <div class="info-row">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <div><div class="text-xs text-muted">Subject</div><div class="font-medium text-sm">${teacher.subject}</div></div>
+                  </div>
+                  <div class="info-row">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                    <div><div class="text-xs text-muted">Qualification</div><div class="font-medium text-sm">${teacher.qualification}</div></div>
+                  </div>
+                  <div class="info-row">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <div><div class="text-xs text-muted">Experience</div><div class="font-medium text-sm">${teacher.experience}</div></div>
+                  </div>
+                  <div class="info-row">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+                    <div><div class="text-xs text-muted">Status</div><div class="font-medium text-sm">${teacher.status}</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="grid" style="grid-template-columns:1fr 1fr;gap:20px;">
               <div class="card">
                 <div class="card-header"><div class="font-semibold">Quick Actions</div></div>
                 <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
-                  <button class="btn btn-primary w-full" onclick="navigate('attendance')">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    Take Attendance
-                  </button>
                   <button class="btn btn-secondary w-full" onclick="navigate('results')">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                     Publish Results
@@ -297,3 +341,8 @@ export function renderTeacherDashboard(loggedInUser) {
     </div>
   `;
 }
+
+
+window.editTeacherProfile = function(id) {
+  showToast('Profile editing feature coming soon!', 'info');
+};
