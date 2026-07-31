@@ -69,7 +69,7 @@ export function renderLogin() {
             ${[
               {label:'Student', role:'student', ico:'users'},
               {label:'Teacher', role:'teacher', ico:'graduationCap'},
-              {label:'Admin',   role:'admin',   ico:'settings'},
+              {label:'Staff',   role:'staff',   ico:'briefcase'},
               {label:'Alumni',  role:'alumni',  ico:'globe'},
             ].map((r,i) => `
               <button

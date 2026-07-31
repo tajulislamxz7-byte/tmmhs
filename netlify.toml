@@ -1,15 +1,11 @@
 # Netlify Configuration for Tiarkhali M.M High School Frontend
 
 [build]
-  # Build command
   command = "npm run build"
-  
-  # Output directory
   publish = "dist"
-  
-  # Build environment
-  [build.environment]
-    NODE_VERSION = "18"
+
+[build.environment]
+  NODE_VERSION = "18"
 
 # Redirect all requests to index.html for SPA routing
 [[redirects]]
@@ -30,10 +26,3 @@
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
-
-# Development redirects (optional - for testing API locally)
-# [[redirects]]
-#   from = "/api/*"
-#   to = "http://localhost:3001/api/:splat"
-#   status = 200
-#   force = true

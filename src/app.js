@@ -195,6 +195,9 @@ function bindGlobalActions() {
       return;
     }
 
+    // Get selected role from login form (defaults to 'student' if not found)
+    const selectedRole = document.querySelector('.role-btn.active')?.textContent?.toLowerCase() || 'student';
+
     google.accounts.oauth2.initTokenClient({
       client_id: CLIENT_ID,
       scope: 'email profile openid',
@@ -215,8 +218,11 @@ function bindGlobalActions() {
           let user = users.find(u => u.email.toLowerCase() === gUser.email.toLowerCase());
 
           if (!user) {
-            // Auto-register new Google user as student
-            const id = `STU-${new Date().getFullYear()}-G${String(users.length + 1).padStart(4,'0')}`;
+            // Auto-register new Google user with selected role
+            const rolePrefixes = { student: 'STU', teacher: 'TCH', alumni: 'ALU', staff: 'STF', admin: 'ADM' };
+            const prefix = rolePrefixes[selectedRole] || 'STU';
+            const id = `${prefix}-${new Date().getFullYear()}-G${String(users.length + 1).padStart(4,'0')}`;
+            
             user = {
               id,
               name: gUser.name,
@@ -225,11 +231,14 @@ function bindGlobalActions() {
               email: gUser.email.toLowerCase(),
               phone: '',
               password: '',
-              role: 'student',
+              role: selectedRole,
               avatar: gUser.picture,
               status: 'active',
               class: '', section: '', batch: '',
               bloodGroup: '', guardian: '',
+              subject: '', qualification: '', experience: '',
+              position: '', department: '',
+              graduationYear: '', profession: '', company: '', university: '',
               createdAt: new Date().toISOString(),
               googleAuth: true,
             };
