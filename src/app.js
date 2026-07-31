@@ -128,7 +128,7 @@ async function getPageContent(user, role) {
     case 'alumni':            return await renderAlumni();
     case 'alumni-dashboard':  return renderAlumniDashboard(user);
     case 'staff':             return await renderStaff();
-    case 'staff-dashboard':   return renderStaffDashboard(user);
+    case 'staff-dashboard':   return await renderStaffDashboard(user);
     case 'batches':           return renderBatches();
     case 'batch-detail':      return renderBatchDetail(currentParam);
     case 'results':           return renderResults(role, user);
@@ -139,7 +139,7 @@ async function getPageContent(user, role) {
     case 'about':             return renderAbout();
     case 'admin':             return renderAdminDashboard();
     case 'staff':             return await renderStaff();
-    case 'staff-dashboard':   return renderStaffDashboard(user);
+    case 'staff-dashboard':   return await renderStaffDashboard(user);
     case 'admission':         return renderAdmission();
     case 'complaints':        return renderComplaintBox();
     case 'assignments':       return renderAssignmentsPage();

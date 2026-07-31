@@ -25,7 +25,21 @@ async function fetchStaff() {
 }
 
 // Staff Dashboard
-export function renderStaffDashboard(user) {
+export async function renderStaffDashboard(user) {
+  // Fetch fresh user data from API to ensure we have latest info
+  try {
+    const apiUsers = await api.getUsers();
+    const users = apiUsers || JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
+    const freshUser = users.find(u => u.id === user.id);
+    if (freshUser) {
+      // Update session with fresh data
+      localStorage.setItem('gfa_session', JSON.stringify(freshUser));
+      user = freshUser;
+    }
+  } catch(e) {
+    console.warn('Could not fetch fresh user data:', e);
+  }
+
   return `
     <div class="page-container">
       <div class="page-header">
