@@ -128,14 +128,14 @@ export function renderAlumniDashboard(user) {
                 </div>
 
                 ${user.bio ? `
-                  <div class="mt-6 pt-6" style="border-top:1px solid var(--border);">
+                  <div class="mt-6 pt-6">
                     <h4 class="text-sm font-bold text-muted mb-3">BIO</h4>
                     <p class="text-secondary">${user.bio}</p>
                   </div>
                 ` : ''}
 
                 ${user.skills && user.skills.length > 0 ? `
-                  <div class="mt-6 pt-6" style="border-top:1px solid var(--border);">
+                  <div class="mt-6 pt-6">
                     <h4 class="text-sm font-bold text-muted mb-3">SKILLS</h4>
                     <div class="flex flex-wrap gap-2">
                       ${user.skills.map(s => `<span class="badge badge-primary">${s}</span>`).join('')}
@@ -144,7 +144,7 @@ export function renderAlumniDashboard(user) {
                 ` : ''}
 
                 ${user.achievements && user.achievements.length > 0 ? `
-                  <div class="mt-6 pt-6" style="border-top:1px solid var(--border);">
+                  <div class="mt-6 pt-6">
                     <h4 class="text-sm font-bold text-muted mb-3">ACHIEVEMENTS</h4>
                     <ul class="flex flex-col gap-2">
                       ${user.achievements.map(a => `<li class="flex items-start gap-2"><span class="text-primary">•</span><span class="text-secondary">${a}</span></li>`).join('')}
