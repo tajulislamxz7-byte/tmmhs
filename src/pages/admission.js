@@ -2,7 +2,7 @@
 // ONLINE ADMISSION PAGE
 // ================================================
 
-import { classes } from '../data/sampleData.js';
+import { classes } from '../data/schoolConfig.js';
 
 export function renderAdmission() {
   return `

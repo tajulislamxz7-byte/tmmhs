@@ -2,7 +2,7 @@
 // STUDENTS PAGE & PROFILE
 // ================================================
 
-import { students as sampleStudents, classes } from '../data/sampleData.js';
+import { students as sampleStudents, classes } from '../data/schoolConfig.js';
 import { api } from '../utils/api.js';
 
 // Get all students: sampleData + registered users from API/localStorage

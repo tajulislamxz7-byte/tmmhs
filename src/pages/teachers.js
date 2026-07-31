@@ -2,7 +2,7 @@
 // TEACHERS PAGE & PROFILE
 // ================================================
 
-import { batches, notices } from '../data/sampleData.js';
+import { batches, notices } from '../data/schoolConfig.js';
 import { api } from '../utils/api.js';
 
 // Get all teachers from API/localStorage

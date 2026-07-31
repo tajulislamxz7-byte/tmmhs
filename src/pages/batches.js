@@ -2,7 +2,7 @@
 // BATCHES PAGE
 // ================================================
 
-import { batches as sampleBatches, students } from '../data/sampleData.js';
+import { batches as sampleBatches, students } from '../data/schoolConfig.js';
 
 // Get batches from localStorage (admin-created) or sampleData fallback
 function getBatches() {

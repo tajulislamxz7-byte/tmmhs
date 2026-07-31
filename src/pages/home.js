@@ -2,7 +2,7 @@
 // HOME PAGE
 // ================================================
 
-import { schoolInfo, stats, notices, events, testimonials, gallery, batches } from '../data/sampleData.js';
+import { schoolInfo, stats, notices, events, testimonials, gallery, batches } from '../data/schoolConfig.js';
 
 export function renderHome() {
   // Read admin-saved settings from localStorage
@@ -16,6 +16,7 @@ export function renderHome() {
   const totalTeachers = S.totalTeachers != null ? S.totalTeachers : schoolInfo.totalTeachers;
   const passRate      = S.passRate || '100%';
   const yearsExcel    = new Date().getFullYear() - parseInt(schoolFounded || 1985);
+  const achievements  = S.achievements && S.achievements.length > 0 ? S.achievements : [];
 
   const heroStats = [
     { label: 'Students',         value: totalStudents, svg: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
@@ -137,6 +138,7 @@ export function renderHomeExtra() {
   const principalName = S.principal || schoolInfo.principalName;
   const principalMsg  = S.message  || schoolInfo.principalMessage;
   const schoolName    = S.name     || schoolInfo.name;
+  const achievements  = S.achievements && S.achievements.length > 0 ? S.achievements : [];
 
   return `
     <!-- NOTICES & EVENTS -->
@@ -298,7 +300,8 @@ export function renderHomeExtra() {
       </div>
     </section>
 
-    <!-- ACHIEVEMENTS -->
+    <!-- ACHIEVEMENTS (only show if achievements exist) -->
+    ${achievements.length > 0 ? `
     <section class="section" style="background:linear-gradient(135deg,#1e3a5f,#1e293b);">
       <div class="container">
         <div class="section-header" style="color:white;">
@@ -307,22 +310,18 @@ export function renderHomeExtra() {
           <p class="section-subtitle" style="color:rgba(255,255,255,0.7);">Excellence recognized nationally and internationally</p>
         </div>
         <div class="achievements-grid">
-          ${[
-            {svg:'<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>', text:'National Science Olympiad Champions 2024'},
-            {svg:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>', text:'100% SSC Pass Rate 2023'},
-            {svg:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>', text:'UNESCO Excellence Award 2022'},
-            {svg:'<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>', text:'Best School Award – Dhaka 2023'},
-            {svg:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>', text:'Digital Library of the Year 2023'},
-            {svg:'<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>', text:'Sports Meet Champions 2024'},
-          ].map((a,i) => `
+          ${achievements.map((achievement, i) => `
             <div class="achievement-card" style="animation-delay:${i*0.1}s;display:flex;align-items:center;gap:12px;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2" style="flex-shrink:0;">${a.svg}</svg>
-              <span>${a.text}</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2" style="flex-shrink:0;">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              <span>${achievement}</span>
             </div>
           `).join('')}
         </div>
       </div>
     </section>
+    ` : ''}
 
     <!-- TESTIMONIALS -->
     <section class="section bg-secondary">

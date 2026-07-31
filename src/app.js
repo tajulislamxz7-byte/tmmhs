@@ -24,7 +24,7 @@ import { renderStaff, renderStaffDashboard }          from './pages/staff.js';
 import { renderAdmission }      from './pages/admission.js';
 import { renderComplaintBox }   from './pages/complaints.js';
 import { icon } from './utils/icons.js';
-import { students } from './data/sampleData.js';
+import { students } from './data/schoolConfig.js';
 
 // ── App State ──────────────────────────────────────
 let currentPage  = 'home';
@@ -344,16 +344,50 @@ function bindGlobalActions() {
     e.preventDefault();
     const form    = document.getElementById('registerForm');
     const errBox  = document.getElementById('regError');
+    const emailErrorDiv = document.getElementById('emailError');
+    const phoneErrorDiv = document.getElementById('phoneError');
+    const passwordErrorDiv = document.getElementById('passwordError');
+    const confirmPasswordErrorDiv = document.getElementById('confirmPasswordError');
+    const emailInput = document.getElementById('regEmail');
+    const phoneInput = document.getElementById('regPhone');
+    const passwordInput = document.getElementById('regPwd');
+    const confirmPasswordInput = document.getElementById('regConfirmPwd');
     const data    = Object.fromEntries(new FormData(form));
 
-    if (data.password !== data.confirmPassword) {
-      errBox.textContent = 'Passwords do not match.';
-      errBox.style.display = 'block';
+    // Clear previous errors
+    errBox.style.display = 'none';
+    errBox.textContent = '';
+    
+    [
+      { div: emailErrorDiv, input: emailInput },
+      { div: phoneErrorDiv, input: phoneInput },
+      { div: passwordErrorDiv, input: passwordInput },
+      { div: confirmPasswordErrorDiv, input: confirmPasswordInput }
+    ].forEach(({ div, input }) => {
+      if (div) {
+        div.style.display = 'none';
+        div.textContent = '';
+      }
+      if (input) input.style.borderColor = '';
+    });
+
+    // Validate password length
+    if (data.password.length < 6) {
+      if (passwordErrorDiv) {
+        passwordErrorDiv.textContent = 'Password must be at least 6 characters.';
+        passwordErrorDiv.style.display = 'block';
+        passwordInput.style.borderColor = '#dc2626';
+      }
       return;
     }
-    if (data.password.length < 6) {
-      errBox.textContent = 'Password must be at least 6 characters.';
-      errBox.style.display = 'block';
+
+    // Validate password match
+    if (data.password !== data.confirmPassword) {
+      if (confirmPasswordErrorDiv) {
+        confirmPasswordErrorDiv.textContent = 'Passwords do not match.';
+        confirmPasswordErrorDiv.style.display = 'block';
+        confirmPasswordInput.style.borderColor = '#dc2626';
+      }
       return;
     }
 
@@ -366,8 +400,27 @@ function bindGlobalActions() {
     if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
 
     if (!result.ok) {
-      errBox.textContent = result.error;
-      errBox.style.display = 'block';
+      // Check if it's an email error
+      if (result.error && result.error.toLowerCase().includes('email')) {
+        if (emailErrorDiv) {
+          emailErrorDiv.textContent = result.error;
+          emailErrorDiv.style.display = 'block';
+          emailInput.style.borderColor = '#dc2626';
+        }
+      } 
+      // Check if it's a phone error
+      else if (result.error && result.error.toLowerCase().includes('phone')) {
+        if (phoneErrorDiv) {
+          phoneErrorDiv.textContent = result.error;
+          phoneErrorDiv.style.display = 'block';
+          phoneInput.style.borderColor = '#dc2626';
+        }
+      }
+      // Other errors show at top
+      else {
+        errBox.textContent = result.error;
+        errBox.style.display = 'block';
+      }
       return;
     }
 
@@ -811,6 +864,13 @@ function renderNotificationsPage() {
   api.getUsers().then(users => {
     if (users && users.length > 0) {
       // Users are already cached in getUsers() — nothing extra needed
+    }
+  }).catch(() => {});
+
+  // Sync settings from API server to localStorage on startup
+  api.getSettings().then(settings => {
+    if (settings) {
+      // Settings are already cached in getSettings() — nothing extra needed
     }
   }).catch(() => {});
 

@@ -2,7 +2,7 @@
 // GALLERY PAGE
 // ================================================
 
-import { gallery } from '../data/sampleData.js';
+import { gallery } from '../data/schoolConfig.js';
 
 export function renderGallery() {
   return `

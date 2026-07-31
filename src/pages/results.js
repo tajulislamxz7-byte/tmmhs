@@ -2,7 +2,7 @@
 // RESULTS PAGE — Student Marksheet + Admin/Teacher View
 // ================================================
 
-import { students as sampleStudents, teachers } from '../data/sampleData.js';
+import { students as sampleStudents, teachers } from '../data/schoolConfig.js';
 
 function getStudentById(id) {
   // Check API cache first, then sampleData

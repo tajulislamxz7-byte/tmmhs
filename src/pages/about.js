@@ -2,7 +2,7 @@
 // ABOUT / SCHOOL INFO PAGE
 // ================================================
 
-import { schoolInfo } from '../data/sampleData.js';
+import { schoolInfo } from '../data/schoolConfig.js';
 
 const FAQS = [
   { q:'What is the admission process for Class 6?', a:'Applications open in August each year, followed by a written test and interview. Results are published within two weeks of the test date.' },
@@ -23,6 +23,7 @@ export function renderAbout() {
   const email    = S.email     || schoolInfo.email;
   const principal= S.principal || schoolInfo.principalName;
   const message  = S.message   || schoolInfo.principalMessage;
+  const achievements = S.achievements && S.achievements.length > 0 ? S.achievements : [];
 
   return `
     <div class="page-container">
@@ -98,21 +99,25 @@ export function renderAbout() {
           </div>
         </div>
 
-        <!-- Achievements -->
+        <!-- Achievements (only show if achievements exist) -->
+        ${achievements.length > 0 ? `
         <div class="mb-12" style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:var(--radius-2xl);padding:var(--space-10);">
           <div class="section-header" style="text-align:left;max-width:none;margin-bottom:var(--space-6);">
             <div class="section-tag" style="background:rgba(255,255,255,0.15);color:white;margin-bottom:8px;">Recognition</div>
             <h2 style="font-size:var(--text-3xl);font-weight:800;color:white;">Our Achievements</h2>
           </div>
           <div class="achievements-grid">
-            ${schoolInfo.achievements.concat(['Digital Library of the Year 2023','Sports Meet Champions 2024']).map((a,i)=>`
+            ${achievements.map((achievement, i) => `
               <div class="achievement-card" style="animation-delay:${i*0.1}s;display:flex;align-items:center;gap:10px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
-                ${a}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2" style="flex-shrink:0;">
+                  <circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+                </svg>
+                ${achievement}
               </div>
             `).join('')}
           </div>
         </div>
+        ` : ''}
 
         <!-- FAQ -->
         <div class="mb-12">

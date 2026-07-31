@@ -2,7 +2,7 @@
 // EVENTS PAGE
 // ================================================
 
-import { events as sampleEvents } from '../data/sampleData.js';
+import { events as sampleEvents } from '../data/schoolConfig.js';
 
 function getEvents() {
   const stored = JSON.parse(localStorage.getItem('gfa_events') || 'null');

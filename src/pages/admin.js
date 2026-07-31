@@ -2,7 +2,7 @@
 // ADMIN DASHBOARD
 // ================================================
 
-import { students, teachers, supportStaff, alumni, batches, notices, events, results } from '../data/sampleData.js';
+import { students, teachers, supportStaff, alumni, batches, notices, events, results } from '../data/schoolConfig.js';
 import * as auth from '../utils/auth.js';
 import { api } from '../utils/api.js';
 
@@ -771,7 +771,7 @@ function renderAdminSettings() {
   const s = _cache.settings;
   return `
     <div>
-      <h1 style="font-size:22px;font-weight:800;margin-bottom:24px;">Website Settings</h1>
+      <h1 style="font-size:22px;font-weight:800;margin-bottom:24px;">School Settings</h1>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
 
         <div class="card">
@@ -792,9 +792,9 @@ function renderAdminSettings() {
             <div class="form-group"><label class="form-label">Founded Year</label>
               <input class="form-input" id="s_founded" value="${s.founded || '1985'}"></div>
             <div class="form-group"><label class="form-label">Principal Name</label>
-              <input class="form-input" id="s_principal" value="${s.principal || ''}"></div>
+              <input class="form-input" id="s_principalName" value="${s.principalName || ''}"></div>
             <div class="form-group"><label class="form-label">Principal's Message</label>
-              <textarea class="form-input" id="s_message" rows="4" style="resize:vertical;">${s.message || ''}</textarea></div>
+              <textarea class="form-input" id="s_principalMessage" rows="4" style="resize:vertical;">${s.principalMessage || ''}</textarea></div>
             <button class="btn btn-primary" onclick="saveSettings()">Save School Info</button>
           </div>
         </div>
@@ -807,9 +807,9 @@ function renderAdminSettings() {
                 <input class="form-input" id="s_year" value="${s.year || '2025–2026'}"></div>
               <div class="form-group"><label class="form-label">Current Term</label>
                 <select class="form-input form-select" id="s_term">
-                  <option ${s.term==='First'?'selected':''}>First Term</option>
-                  <option ${(!s.term||s.term==='Second')?'selected':''}>Second Term</option>
-                  <option ${s.term==='Final'?'selected':''}>Final Term</option>
+                  <option ${s.term==='First'?'selected':''}>First</option>
+                  <option ${(!s.term||s.term==='Second')?'selected':''}>Second</option>
+                  <option ${s.term==='Final'?'selected':''}>Final</option>
                 </select></div>
               <button class="btn btn-primary" onclick="saveSettings()">Update</button>
             </div>
@@ -827,6 +827,24 @@ function renderAdminSettings() {
               <div class="form-group"><label class="form-label">Pass Rate</label>
                 <input class="form-input" id="s_passrate" value="${s.passRate || '—'}"></div>
               <button class="btn btn-primary" onclick="saveSettings()">Update Stats</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="font-semibold">Facilities</div></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+              <div class="form-group"><label class="form-label">School Facilities (comma-separated)</label>
+                <textarea class="form-input" id="s_facilities" rows="3" style="resize:vertical;">${(s.facilities || []).join(', ')}</textarea></div>
+              <button class="btn btn-primary" onclick="saveSettings()">Update Facilities</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="font-semibold">Achievements</div></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+              <div class="form-group"><label class="form-label">School Achievements (comma-separated)</label>
+                <textarea class="form-input" id="s_achievements" rows="3" style="resize:vertical;">${(s.achievements || []).join(', ')}</textarea></div>
+              <button class="btn btn-primary" onclick="saveSettings()">Update Achievements</button>
             </div>
           </div>
         </div>
@@ -1048,26 +1066,32 @@ window.switchAdminTab = async function(tab, btn) {
 
 // ── Admin Settings ──
 window.saveSettings = async function() {
+  const facilitiesText = document.getElementById('s_facilities')?.value || '';
+  const achievementsText = document.getElementById('s_achievements')?.value || '';
+  
   const s = {
-    name:          document.getElementById('s_name')?.value,
-    tagline:       document.getElementById('s_tagline')?.value,
-    address:       document.getElementById('s_address')?.value,
-    phone:         document.getElementById('s_phone')?.value,
-    email:         document.getElementById('s_email')?.value,
-    website:       document.getElementById('s_website')?.value,
-    founded:       document.getElementById('s_founded')?.value,
-    principal:     document.getElementById('s_principal')?.value,
-    message:       document.getElementById('s_message')?.value,
-    year:          document.getElementById('s_year')?.value,
-    term:          document.getElementById('s_term')?.value,
-    totalStudents: document.getElementById('s_students')?.value,
-    totalTeachers: document.getElementById('s_teachers')?.value,
-    totalAlumni:   document.getElementById('s_alumni')?.value,
-    passRate:      document.getElementById('s_passrate')?.value,
+    name:           document.getElementById('s_name')?.value,
+    tagline:        document.getElementById('s_tagline')?.value,
+    address:        document.getElementById('s_address')?.value,
+    phone:          document.getElementById('s_phone')?.value,
+    email:          document.getElementById('s_email')?.value,
+    website:        document.getElementById('s_website')?.value,
+    founded:        document.getElementById('s_founded')?.value,
+    principalName:  document.getElementById('s_principalName')?.value,
+    principalMessage: document.getElementById('s_principalMessage')?.value,
+    year:           document.getElementById('s_year')?.value,
+    term:           document.getElementById('s_term')?.value,
+    totalStudents:  parseInt(document.getElementById('s_students')?.value) || 0,
+    totalTeachers:  parseInt(document.getElementById('s_teachers')?.value) || 0,
+    totalAlumni:    parseInt(document.getElementById('s_alumni')?.value) || 0,
+    passRate:       document.getElementById('s_passrate')?.value,
+    facilities:     facilitiesText.split(',').map(f => f.trim()).filter(f => f),
+    achievements:   achievementsText.split(',').map(a => a.trim()).filter(a => a),
   };
   Object.keys(s).forEach(k => s[k] === undefined && delete s[k]);
   await api.saveSettings(s);
   showToast('Settings saved successfully!', 'success');
+  await _refreshTab('settings');
 };
 
 // ── Admin Notices ──

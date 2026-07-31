@@ -6,12 +6,21 @@
   "email": "info@tiarkhali-mmhs.edu.bd",
   "website": "www.tiarkhali-mmhs.edu.bd",
   "founded": "1985",
-  "principal": "",
-  "message": "",
+  "principalName": "Principal Name",
+  "principalMessage": "At Tiarkhali M.M High School and College, we believe every student carries within them an extraordinary potential. Our mission is to unlock that potential through quality education, compassionate mentorship, and a vibrant community.",
   "year": "2025-2026",
   "term": "Second",
   "totalStudents": 0,
   "totalTeachers": 0,
   "totalAlumni": 0,
-  "passRate": "—"
+  "passRate": "—",
+  "facilities": [
+    "Science Lab",
+    "Library",
+    "Computer Lab",
+    "Sports Ground"
+  ],
+  "achievements": [
+    "1111"
+  ]
 }

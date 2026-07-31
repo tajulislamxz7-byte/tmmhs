@@ -2,7 +2,7 @@
 // GLOBAL SEARCH COMPONENT
 // ================================================
 
-import { students, teachers, alumni, batches, notices, events, supportStaff } from '../data/sampleData.js';
+import { students, teachers, alumni, batches, notices, events, supportStaff } from '../data/schoolConfig.js';
 
 export function renderSearchModal() {
   return `

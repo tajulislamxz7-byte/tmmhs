@@ -24,30 +24,6 @@
     "bio": "School Administrator"
   },
   {
-    "id": "STU-2026-0001",
-    "name": "Tajul Islam",
-    "firstName": "Tajul",
-    "lastName": "Islam",
-    "email": "tajulislam67637@gmail.com",
-    "phone": "+8801727517598",
-    "password": "111111",
-    "role": "student",
-    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Tajul%20Islam",
-    "status": "active",
-    "createdAt": "2026-07-29T18:59:03.579Z",
-    "class": "Class 10",
-    "section": "A",
-    "batch": "2026",
-    "bloodGroup": "A+",
-    "guardian": "Tania Begum",
-    "roll": "101",
-    "address": "Tiarkhali, Khulna",
-    "skills": ["Programming", "Mathematics", "Science Projects"],
-    "achievements": ["Science Fair Winner 2025", "Math Olympiad Regional Finalist"],
-    "gpa": "5.00",
-    "bio": "Passionate about science and technology. Aspiring software engineer."
-  },
-  {
     "id": "STU-2026-0002",
     "name": "Nusrat Jahan",
     "firstName": "Nusrat",
@@ -66,8 +42,15 @@
     "guardian": "Rahman Ahmed",
     "roll": "102",
     "address": "Tiarkhali Village, Khulna",
-    "skills": ["Literature", "English", "Creative Writing"],
-    "achievements": ["1st Prize in Essay Competition 2025", "Best Debater Award"],
+    "skills": [
+      "Literature",
+      "English",
+      "Creative Writing"
+    ],
+    "achievements": [
+      "1st Prize in Essay Competition 2025",
+      "Best Debater Award"
+    ],
     "gpa": "4.95",
     "bio": "Love reading and writing. Dream of becoming a journalist."
   },
@@ -90,8 +73,15 @@
     "guardian": "Hasan Ali",
     "roll": "201",
     "address": "Modinabad, Khulna",
-    "skills": ["Football", "Physics", "Sports"],
-    "achievements": ["District Football Champion 2025", "Sports Captain"],
+    "skills": [
+      "Football",
+      "Physics",
+      "Sports"
+    ],
+    "achievements": [
+      "District Football Champion 2025",
+      "Sports Captain"
+    ],
     "gpa": "4.75",
     "bio": "Football enthusiast and sports captain. Balancing academics with sports."
   },
@@ -114,8 +104,15 @@
     "guardian": "Karim Rahman",
     "roll": "301",
     "address": "Tiarkhali Bazar, Khulna",
-    "skills": ["Art", "Music", "Mathematics"],
-    "achievements": ["Art Competition Winner", "School Choir Member"],
+    "skills": [
+      "Art",
+      "Music",
+      "Mathematics"
+    ],
+    "achievements": [
+      "Art Competition Winner",
+      "School Choir Member"
+    ],
     "gpa": "4.85",
     "bio": "Creative artist and musician. Love combining art with academics."
   },
@@ -142,8 +139,15 @@
     "department": "Science",
     "roll": "",
     "address": "Khulna City",
-    "skills": ["Advanced Mathematics", "Computer Programming", "Research"],
-    "achievements": ["Best Teacher Award 2025", "Published 5 research papers"],
+    "skills": [
+      "Advanced Mathematics",
+      "Computer Programming",
+      "Research"
+    ],
+    "achievements": [
+      "Best Teacher Award 2025",
+      "Published 5 research papers"
+    ],
     "gpa": "N/A",
     "bio": "15 years of teaching experience. Passionate about making mathematics fun and accessible."
   },
@@ -170,8 +174,15 @@
     "department": "Arts",
     "roll": "",
     "address": "Daulatpur, Khulna",
-    "skills": ["Literature Analysis", "Creative Writing", "Public Speaking"],
-    "achievements": ["Teacher of the Year 2024", "Organized Literature Festival"],
+    "skills": [
+      "Literature Analysis",
+      "Creative Writing",
+      "Public Speaking"
+    ],
+    "achievements": [
+      "Teacher of the Year 2024",
+      "Organized Literature Festival"
+    ],
     "gpa": "N/A",
     "bio": "Inspiring young minds through literature and language. 10 years of teaching experience."
   },
@@ -198,8 +209,15 @@
     "department": "Science",
     "roll": "",
     "address": "Tiarkhali",
-    "skills": ["Experimental Physics", "Lab Management", "Electronics"],
-    "achievements": ["Science Fair Coordinator", "Lab Innovation Award"],
+    "skills": [
+      "Experimental Physics",
+      "Lab Management",
+      "Electronics"
+    ],
+    "achievements": [
+      "Science Fair Coordinator",
+      "Lab Innovation Award"
+    ],
     "gpa": "N/A",
     "bio": "Making physics practical and exciting through hands-on experiments."
   },
@@ -224,7 +242,11 @@
     "department": "Administration",
     "roll": "",
     "address": "Tiarkhali",
-    "skills": ["Office Management", "Administration", "Student Records"],
+    "skills": [
+      "Office Management",
+      "Administration",
+      "Student Records"
+    ],
     "achievements": [],
     "gpa": "N/A",
     "bio": "Managing school office operations and student records for 8 years."
@@ -250,8 +272,15 @@
     "department": "Library",
     "roll": "",
     "address": "Khulna City",
-    "skills": ["Library Management", "Cataloging", "Student Support"],
-    "achievements": ["Digitalized Library Catalog", "Reading Club Coordinator"],
+    "skills": [
+      "Library Management",
+      "Cataloging",
+      "Student Support"
+    ],
+    "achievements": [
+      "Digitalized Library Catalog",
+      "Reading Club Coordinator"
+    ],
     "gpa": "N/A",
     "bio": "Passionate about promoting reading culture among students."
   },
@@ -281,8 +310,15 @@
     "country": "USA",
     "roll": "",
     "address": "California, USA",
-    "skills": ["Python", "Machine Learning", "Cloud Computing"],
-    "achievements": ["Google Code Jam Finalist", "Published AI Research Papers"],
+    "skills": [
+      "Python",
+      "Machine Learning",
+      "Cloud Computing"
+    ],
+    "achievements": [
+      "Google Code Jam Finalist",
+      "Published AI Research Papers"
+    ],
     "gpa": "N/A",
     "bio": "Working on cutting-edge AI technologies at Google. Proud graduate of Tiarkhali M.M High School.",
     "socialMedia": {
@@ -316,8 +352,15 @@
     "country": "Bangladesh",
     "roll": "",
     "address": "Khulna City",
-    "skills": ["Internal Medicine", "Patient Care", "Medical Research"],
-    "achievements": ["MBBS Gold Medalist", "Community Health Award"],
+    "skills": [
+      "Internal Medicine",
+      "Patient Care",
+      "Medical Research"
+    ],
+    "achievements": [
+      "MBBS Gold Medalist",
+      "Community Health Award"
+    ],
     "gpa": "N/A",
     "bio": "Serving the community as a physician at Khulna Medical College Hospital.",
     "socialMedia": {
@@ -351,8 +394,15 @@
     "country": "Bangladesh",
     "roll": "",
     "address": "Dhaka City",
-    "skills": ["Data Analysis", "Market Research", "Business Strategy"],
-    "achievements": ["Employee of the Year 2024", "MBA with Distinction"],
+    "skills": [
+      "Data Analysis",
+      "Market Research",
+      "Business Strategy"
+    ],
+    "achievements": [
+      "Employee of the Year 2024",
+      "MBA with Distinction"
+    ],
     "gpa": "N/A",
     "bio": "Business professional with expertise in data-driven decision making.",
     "socialMedia": {
@@ -386,8 +436,15 @@
     "country": "Bangladesh",
     "roll": "",
     "address": "Dhaka City",
-    "skills": ["Architectural Design", "3D Modeling", "Sustainable Architecture"],
-    "achievements": ["Best Design Award 2024", "Green Building Certification"],
+    "skills": [
+      "Architectural Design",
+      "3D Modeling",
+      "Sustainable Architecture"
+    ],
+    "achievements": [
+      "Best Design Award 2024",
+      "Green Building Certification"
+    ],
     "gpa": "N/A",
     "bio": "Creating sustainable and innovative architectural designs for Bangladesh.",
     "socialMedia": {
@@ -421,8 +478,15 @@
     "country": "Bangladesh",
     "roll": "",
     "address": "Khulna City",
-    "skills": ["Structural Engineering", "Project Management", "Construction"],
-    "achievements": ["Led Bridge Construction Projects", "Safety Excellence Award"],
+    "skills": [
+      "Structural Engineering",
+      "Project Management",
+      "Construction"
+    ],
+    "achievements": [
+      "Led Bridge Construction Projects",
+      "Safety Excellence Award"
+    ],
     "gpa": "N/A",
     "bio": "Building infrastructure for the community through engineering excellence.",
     "socialMedia": {

@@ -2,6 +2,12 @@
 // TIARKHALI M.M HIGH SCHOOL AND COLLEGE — DATA
 // ===================================================
 
+// ===================================================
+// TIARKHALI M.M HIGH SCHOOL AND COLLEGE — CONFIG
+// Static configuration data that doesn't change often
+// School info is loaded from settings.json via API
+// ===================================================
+
 export const schoolInfo = {
   name: "Tiarkhali M.M High School and College",
   tagline: "Nurturing Excellence, Inspiring Futures",
@@ -14,8 +20,8 @@ export const schoolInfo = {
   totalTeachers: 0,
   totalAlumni: 0,
   totalBatches: 0,
-  principalName: "Principal Name",
-  principalMessage: "At Tiarkhali M.M High School and College, we believe every student carries within them an extraordinary potential. Our mission is to unlock that potential through quality education, compassionate mentorship, and a vibrant community.",
+  principalName: "",
+  principalMessage: "",
   achievements: [],
   facilities: ["Science Lab", "Library", "Computer Lab", "Sports Ground"],
 };

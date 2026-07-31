@@ -21,10 +21,19 @@ async function req(method, path, body) {
       method,
       headers: { 'Content-Type': 'application/json' },
       body: body ? JSON.stringify(body) : undefined,
-      signal: AbortSignal.timeout(3000), // 3s timeout
+      signal: AbortSignal.timeout(30000), // 30s timeout for Render.com cold starts
     });
     _serverOnline = true;
-    return await res.json();
+    
+    // Always parse JSON response, even for error status codes
+    const json = await res.json();
+    
+    // If response is not ok (4xx, 5xx), return the error JSON
+    if (!res.ok) {
+      return json; // Server error responses still contain { ok: false, error: "..." }
+    }
+    
+    return json;
   } catch (e) {
     _serverOnline = false;
     console.warn('API offline, using localStorage fallback:', path);

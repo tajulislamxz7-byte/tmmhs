@@ -2,7 +2,7 @@
 // AUTH PAGES — Login / Register / Forgot Password
 // Uses real localStorage auth store
 // ================================================
-import { classes, batches } from '../data/sampleData.js';
+import { classes, batches } from '../data/schoolConfig.js';
 import { icon } from '../utils/icons.js';
 
 export function renderLogin() {
@@ -293,12 +293,14 @@ export function renderRegister() {
 
             <div class="form-group">
               <label class="form-label">${icon('mail',12)} Email Address *</label>
-              <input type="email" name="email" class="form-input" placeholder="tajul@email.com" required>
+              <input type="email" name="email" id="regEmail" class="form-input" placeholder="tajul@email.com" required>
+              <div id="emailError" style="display:none;color:#dc2626;font-size:12px;margin-top:4px;"></div>
             </div>
 
             <div class="form-group">
               <label class="form-label">${icon('phone',12)} Phone Number *</label>
-              <input type="tel" name="phone" class="form-input" placeholder="+880 17XX-XXXXXX" required>
+              <input type="tel" name="phone" id="regPhone" class="form-input" placeholder="+880 17XX-XXXXXX" required>
+              <div id="phoneError" style="display:none;color:#dc2626;font-size:12px;margin-top:4px;"></div>
             </div>
 
             <!-- Role-specific fields container -->
@@ -322,10 +324,12 @@ export function renderRegister() {
                   <input type="password" name="password" id="regPwd" class="form-input" placeholder="Min. 6 characters" required minlength="6" style="padding-right:44px;">
                   <button type="button" onclick="togglePassword('regPwd','eyeRegBtn')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;" id="eyeRegBtn">${icon('eye',16)}</button>
                 </div>
+                <div id="passwordError" style="display:none;color:#dc2626;font-size:12px;margin-top:4px;"></div>
               </div>
               <div class="form-group">
                 <label class="form-label">${icon('lock',12)} Confirm Password *</label>
-                <input type="password" name="confirmPassword" class="form-input" placeholder="Repeat password" required>
+                <input type="password" name="confirmPassword" id="regConfirmPwd" class="form-input" placeholder="Repeat password" required>
+                <div id="confirmPasswordError" style="display:none;color:#dc2626;font-size:12px;margin-top:4px;"></div>
               </div>
             </div>
 

@@ -2,7 +2,7 @@
 // NOTICES PAGE
 // ================================================
 
-import { notices as sampleNotices } from '../data/sampleData.js';
+import { notices as sampleNotices } from '../data/schoolConfig.js';
 
 // Get notices from localStorage (admin-managed) falling back to empty
 function getNotices() {
