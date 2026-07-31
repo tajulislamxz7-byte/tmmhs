@@ -434,6 +434,15 @@ window.editAlumniProfile = async function(id) {
 
     const result = await api.updateUser(id, data);
     if (result && result.ok !== false) {
+      // Update session if editing own profile
+      try {
+        const session = JSON.parse(localStorage.getItem('gfa_session') || 'null');
+        if (session && session.id === id) {
+          Object.assign(session, data);
+          localStorage.setItem('gfa_session', JSON.stringify(session));
+        }
+      } catch(e) {}
+      
       showToast('Profile updated successfully!', 'success');
       modal.remove();
       window.location.reload();
