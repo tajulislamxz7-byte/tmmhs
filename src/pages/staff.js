@@ -189,8 +189,117 @@ export function renderStaffDashboard(user) {
   `;
 }
 
-window.editStaffProfile = function(id) {
-  showToast('Profile editing feature coming soon!', 'info');
+window.editStaffProfile = async function(id) {
+  const apiUsers = await api.getUsers();
+  const users = apiUsers || JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
+  const user = users.find(u => u.id === id);
+  if (!user) return;
+
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.onclick = e => { if(e.target === modal) modal.remove(); };
+  modal.innerHTML = `
+    <div class="modal" style="max-width:600px;">
+      <div class="modal-header">
+        <div class="font-semibold">Edit Profile</div>
+        <button class="btn btn-ghost btn-icon" onclick="this.closest('.modal-overlay').remove()">✕</button>
+      </div>
+      <form id="editStaffForm" class="modal-body" style="max-height:70vh;overflow-y:auto;">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" name="firstName" value="${user.firstName || ''}" required>
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" name="lastName" value="${user.lastName || ''}" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" value="${user.email || ''}" required>
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" name="phone" value="${user.phone || ''}">
+        </div>
+        <div class="form-group">
+          <label>Position</label>
+          <input type="text" name="position" value="${user.position || ''}" placeholder="e.g., Office Manager, Librarian">
+        </div>
+        <div class="form-group">
+          <label>Department</label>
+          <select name="department">
+            <option value="">Select Department</option>
+            <option value="Administration" ${user.department === 'Administration' ? 'selected' : ''}>Administration</option>
+            <option value="Library" ${user.department === 'Library' ? 'selected' : ''}>Library</option>
+            <option value="Maintenance" ${user.department === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
+            <option value="Security" ${user.department === 'Security' ? 'selected' : ''}>Security</option>
+            <option value="ICT" ${user.department === 'ICT' ? 'selected' : ''}>ICT</option>
+            <option value="Science Lab" ${user.department === 'Science Lab' ? 'selected' : ''}>Science Lab</option>
+            <option value="General" ${user.department === 'General' ? 'selected' : ''}>General</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Blood Group</label>
+          <select name="bloodGroup">
+            <option value="">Select</option>
+            ${['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => 
+              `<option value="${bg}" ${user.bloodGroup === bg ? 'selected' : ''}>${bg}</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <textarea name="address" rows="2" placeholder="Enter address">${user.address || ''}</textarea>
+        </div>
+        <div class="form-group">
+          <label>Bio</label>
+          <textarea name="bio" rows="3" placeholder="Write a short bio...">${user.bio || ''}</textarea>
+        </div>
+        <div class="form-group">
+          <label>Skills (comma-separated)</label>
+          <input type="text" name="skills" value="${(user.skills || []).join(', ')}" placeholder="e.g., Office Management, Administration">
+        </div>
+        <div class="form-group">
+          <label>Achievements (comma-separated)</label>
+          <textarea name="achievements" rows="2" placeholder="e.g., Best Employee 2024, 10 Years Service">${(user.achievements || []).join(', ')}</textarea>
+        </div>
+        <div class="flex gap-3 justify-end mt-4">
+          <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  document.getElementById('editStaffForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const data = {
+      firstName: form.firstName.value.trim(),
+      lastName: form.lastName.value.trim(),
+      name: `${form.firstName.value.trim()} ${form.lastName.value.trim()}`,
+      email: form.email.value.trim(),
+      phone: form.phone.value.trim(),
+      position: form.position.value.trim(),
+      department: form.department.value,
+      bloodGroup: form.bloodGroup.value,
+      address: form.address.value.trim(),
+      bio: form.bio.value.trim(),
+      skills: form.skills.value.split(',').map(s => s.trim()).filter(Boolean),
+      achievements: form.achievements.value.split(',').map(a => a.trim()).filter(Boolean),
+    };
+
+    const result = await api.updateUser(id, data);
+    if (result && result.ok !== false) {
+      showToast('Profile updated successfully!', 'success');
+      modal.remove();
+      // Reload the page to show updated data
+      window.location.reload();
+    } else {
+      showToast(result?.error || 'Failed to update profile', 'error');
+    }
+  };
 };
 
 export async function renderStaff() {
