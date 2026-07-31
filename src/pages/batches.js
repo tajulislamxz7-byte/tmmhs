@@ -92,13 +92,16 @@ function renderBatchCard(b, i) {
   `;
 }
 
-export function renderBatchDetail(batchId) {
+export async function renderBatchDetail(batchId) {
   const batches = getBatches();
   const batch = batches.find(b => b.id === batchId) || batches[0];
   
-  // Get all users and filter for students with matching batch
-  const allUsers = JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
-  const registeredStudents = allUsers.filter(u => u.role === 'student' && u.batch === batchId).map(u => ({
+  // Fetch fresh data from API first
+  const apiUsers = await api.getUsers();
+  const allUsers = apiUsers || JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
+  
+  // Filter for students with matching batch (batch is stored as string like "2026", "2027", "2028")
+  const registeredStudents = allUsers.filter(u => u.role === 'student' && String(u.batch) === String(batchId)).map(u => ({
     id: u.id,
     name: u.name,
     roll: u.roll || '—',
@@ -110,7 +113,7 @@ export function renderBatchDetail(batchId) {
   }));
   
   // Merge with sample students from config (if any)
-  const sampleBatchStudents = students.filter(s => s.batch === batch.id);
+  const sampleBatchStudents = students.filter(s => String(s.batch) === String(batch.id));
   const batchStudents = [...sampleBatchStudents];
   registeredStudents.forEach(s => { 
     if (!batchStudents.find(x => x.id === s.id)) batchStudents.push(s); 
@@ -151,14 +154,22 @@ export function renderBatchDetail(batchId) {
               </div>
             </div>
             <div class="card">
-              <div class="card-header"><div class="font-semibold">Achievements</div></div>
+              <div class="card-header flex items-center justify-between">
+                <div class="font-semibold">Achievements</div>
+                <span class="badge badge-success">${batch.achievements.length}</span>
+              </div>
               <div class="card-body">
-                ${batch.achievements.map(a=>`
-                  <div class="flex items-center gap-3 mb-3">
-                    <div style="width:32px;height:32px;border-radius:8px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                ${batch.achievements.map((a, idx) => `
+                  <div class="achievement-item" style="display:flex;align-items:start;gap:12px;padding:12px;background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);border-radius:12px;border-left:4px solid #f59e0b;margin-bottom:10px;">
+                    <div style="width:36px;height:36px;border-radius:10px;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px rgba(245,158,11,0.2);">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                      </svg>
                     </div>
-                    <div class="text-sm font-medium">${a}</div>
+                    <div style="flex:1;min-width:0;">
+                      <div class="font-medium" style="font-size:13px;color:#92400e;line-height:1.4;">${a}</div>
+                      <div style="font-size:10px;color:#b45309;opacity:0.8;margin-top:2px;">Batch Achievement • #${idx + 1}</div>
+                    </div>
                   </div>
                 `).join('')}
               </div>

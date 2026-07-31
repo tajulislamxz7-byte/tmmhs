@@ -25,6 +25,7 @@ import { renderAdmission }      from './pages/admission.js';
 import { renderComplaintBox }   from './pages/complaints.js';
 import { icon } from './utils/icons.js';
 import { students } from './data/schoolConfig.js';
+import { generateStudentIDCard } from './utils/idCardGenerator.js';
 
 // ── App State ──────────────────────────────────────
 let currentPage  = 'home';
@@ -571,10 +572,38 @@ function bindGlobalActions() {
   // ── Nav ──
   window.toggleMobileMenu = function() {
     const menu = document.getElementById('mobileMenu');
-    if (!menu) return;
-    const open = !menu.classList.contains('hidden');
-    menu.classList.toggle('hidden', open);
-    menu.classList.toggle('open', !open);
+    const hamburger = document.getElementById('hamburgerBtn');
+    
+    if (!menu) {
+      console.error('Mobile menu element not found');
+      return;
+    }
+    
+    const isCurrentlyHidden = menu.classList.contains('hidden') || menu.style.display === 'none';
+    
+    if (isCurrentlyHidden) {
+      // Show menu
+      menu.classList.remove('hidden');
+      menu.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+      
+      // Change hamburger to X icon
+      if (hamburger) {
+        hamburger.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+      }
+    } else {
+      // Hide menu
+      menu.classList.add('hidden');
+      menu.style.display = 'none';
+      document.body.style.overflow = '';
+      
+      // Change back to hamburger icon
+      if (hamburger) {
+        hamburger.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
+      }
+      
+      console.log('✅ Menu closed');
+    }
   };
 
   window.toggleTheme = function() {
@@ -629,65 +658,48 @@ function bindGlobalActions() {
     showToast('QR service unavailable — using placeholder', 'info');
   };
 
-  window.downloadStudentID = function(studentId) {
-    // Get all users from API cache or localStorage
+  window.downloadStudentID = async function(studentId) {
     const allUsers = JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
     let s = allUsers.find(u => u.id === studentId && u.role === 'student');
-    
-    // Fallback to sample students from config
-    if (!s) {
-      s = students.find(st => st.id === studentId);
-    }
-    
+    if (!s) s = students.find(st => st.id === studentId);
     if (!s) { showToast('Student not found', 'error'); return; }
-    const win = window.open('', '_blank');
-    win.document.write(`
-      <!DOCTYPE html><html><head>
-      <title>Student ID - ${s.name}</title>
-      <style>
-        @page { margin:0; size:85.6mm 54mm; }
-        * { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
-        body { display:flex; justify-content:center; align-items:center; min-height:100vh; background:#f0f0f0; }
-        .id-card { width:340px; background:linear-gradient(135deg,#2563eb,#1e40af); border-radius:12px; padding:3px; }
-        .id-inner { background:white; border-radius:10px; padding:16px; }
-        .id-header { display:flex; align-items:center; gap:12px; border-bottom:2px solid #e5e7eb; padding-bottom:10px; }
-        .id-header img { width:64px; height:64px; border-radius:8px; object-fit:cover; }
-        .id-header h2 { font-size:16px; color:#111827; }
-        .id-header .id-num { font-size:11px; color:#6b7280; margin-top:2px; }
-        .id-body { padding-top:10px; display:flex; gap:12px; }
-        .id-body table { width:100%; font-size:11px; }
-        .id-body td { padding:2px 0; color:#374151; }
-        .id-body td:first-child { color:#9ca3af; width:65px; }
-        .id-qr { width:72px; height:72px; flex-shrink:0; border-radius:6px; border:1px solid #e5e7eb; padding:4px; background:white; }
-        .id-qr img { width:100%; height:100%; }
-        .id-footer { font-size:9px; color:#9ca3af; text-align:center; margin-top:8px; border-top:1px solid #e5e7eb; padding-top:6px; }
-      </style></head><body>
-      <div class="id-card"><div class="id-inner">
-        <div class="id-header">
-          <img src="${s.avatar}" onerror="this.style.display='none'">
-          <div>
-            <h2>${s.name}</h2>
-            <div class="id-num">${s.id} · Roll ${s.roll}</div>
-          </div>
-        </div>
-        <div class="id-body">
-          <table>
-            <tr><td>Class</td><td>${s.class}</td></tr>
-            <tr><td>Section</td><td>${s.section}</td></tr>
-            <tr><td>Batch</td><td>${s.batch || '—'}</td></tr>
-            <tr><td>Blood</td><td>${s.bloodGroup}</td></tr>
-            <tr><td>Guardian</td><td>${s.guardian}</td></tr>
-          </table>
-          <div class="id-qr">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=GFA%7C${s.id}%7C${encodeURIComponent(s.name)}" alt="QR">
-          </div>
-        </div>
-        <div class="id-footer">Tiarkhali M.M High School · Student Identity Card</div>
-      </div></div>
-      window.onload=function(){window.print();window.close()};<\/script>
-    `);
-    win.document.close();
-    showToast('ID card opened for print', 'success');
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:99999;';
+    modal.innerHTML = `<div style="background:white;border-radius:16px;padding:32px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);"><div style="text-align:center;margin-bottom:24px;"><div style="width:64px;height:64px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><h3 style="font-size:20px;font-weight:800;color:#111827;margin-bottom:8px;">Student ID Card</h3><p style="font-size:14px;color:#6b7280;">${s.name} • ${s.id}</p></div><div style="display:flex;gap:12px;"><button id="btnDownloadID" style="flex:1;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:white;border:none;padding:14px 24px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;">Download</button><button id="btnPrintID" style="flex:1;background:white;color:#4f46e5;border:2px solid #4f46e5;padding:14px 24px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;">Print</button></div><button id="btnCancelID" style="width:100%;background:transparent;color:#6b7280;border:none;padding:12px;margin-top:12px;font-size:14px;cursor:pointer;">Cancel</button></div>`;
+    document.body.appendChild(modal);
+
+    document.getElementById('btnDownloadID').onclick = async function() {
+      this.textContent = 'Generating...'; this.disabled = true;
+      const canvas = await generateStudentIDCard(s);
+      if (canvas) {
+        canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Student_ID_${s.name.replace(/\s+/g, '_')}.png`;
+          a.click();
+          URL.revokeObjectURL(url);
+          modal.remove();
+          showToast('ID card downloaded!', 'success');
+        });
+      } else { this.textContent = 'Download'; this.disabled = false; }
+    };
+
+    document.getElementById('btnPrintID').onclick = async function() {
+      this.textContent = 'Generating...'; this.disabled = true;
+      const canvas = await generateStudentIDCard(s);
+      if (canvas) {
+        const win = window.open('', '_blank');
+        if (!win) { showToast('Allow popups to print', 'warning'); this.textContent = 'Print'; this.disabled = false; return; }
+        win.document.write(`<html><head><title>Print ID</title><style>@media print{body{margin:0;}img{max-width:100%;}}</style></head><body><img src="${canvas.toDataURL()}" style="max-width:100%;"/><script>setTimeout(()=>window.print(),500);</script></body></html>`);
+        win.document.close();
+        modal.remove();
+      } else { this.textContent = 'Print'; this.disabled = false; }
+    };
+
+    document.getElementById('btnCancelID').onclick = () => modal.remove();
+    modal.onclick = e => { if (e.target === modal) modal.remove(); };
   };
 
   // ── Stat counters ──

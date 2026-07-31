@@ -144,53 +144,62 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
         `}
 
         <!-- Hamburger -->
-        <button class="btn btn-ghost btn-icon hamburger" onclick="toggleMobileMenu()" id="hamburgerBtn">
+        <button class="hamburger" onclick="toggleMobileMenu()" id="hamburgerBtn">
           ${icon('menu', 22)}
         </button>
       </div>
     </div>
-
-    <!-- Mobile Menu -->
-    <div class="mobile-menu hidden" id="mobileMenu">
-      <div class="mobile-menu-inner">
-        ${isLoggedIn && user ? `
-        <div style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--primary-50);border-radius:12px;margin-bottom:8px;">
-          <img src="${user.avatar}" class="avatar avatar-md">
-          <div>
-            <div style="font-weight:700;">${user.name}</div>
-            <div style="font-size:12px;color:var(--text-muted);">${user.email}</div>
-          </div>
-        </div>` : ''}
-
-        <div class="mobile-nav-link" onclick="navigate('home');toggleMobileMenu()">${icon('home',16)} Home</div>
-        <div class="mobile-nav-link" onclick="navigate('about');toggleMobileMenu()">${icon('info',16)} About</div>
-        <div class="mobile-nav-link" onclick="navigate('students');toggleMobileMenu()">${icon('users',16)} Students</div>
-        <div class="mobile-nav-link" onclick="navigate('teachers');toggleMobileMenu()">${icon('graduationCap',16)} Teachers</div>
-        <div class="mobile-nav-link" onclick="navigate('staff');toggleMobileMenu()">${icon('briefcase',16)} Support Staff</div>
-        <div class="mobile-nav-link" onclick="navigate('alumni');toggleMobileMenu()">${icon('globe',16)} Alumni</div>
-        <div class="mobile-nav-link" onclick="navigate('batches');toggleMobileMenu()">${icon('bookOpen',16)} Batches</div>
-        <div class="mobile-nav-link" onclick="navigate('results');toggleMobileMenu()">${icon('fileText',16)} Results</div>
-        <div class="mobile-nav-link" onclick="navigate('notices');toggleMobileMenu()">${icon('bell',16)} Notices</div>
-        <div class="mobile-nav-link" onclick="navigate('events');toggleMobileMenu()">${icon('calendar',16)} Events</div>
-        <div class="mobile-nav-link" onclick="navigate('gallery');toggleMobileMenu()">${icon('image',16)} Gallery</div>
-        <div class="mobile-nav-link" onclick="navigate('admission');toggleMobileMenu()">${icon('clipboardList',16)} Admission</div>
-
-        ${isLoggedIn ? `
-        <div class="mobile-nav-link" onclick="navigate('messages');toggleMobileMenu()">${icon('messageSquare',16)} Messages</div>
-        ${role==='student'?`<div class="mobile-nav-link" onclick="navigate('student-dashboard');toggleMobileMenu()">${icon('layout',16)} Dashboard</div>`:''}
-        ${role==='teacher'?`<div class="mobile-nav-link" onclick="navigate('teacher-dashboard');toggleMobileMenu()">${icon('layout',16)} Dashboard</div>`:''}
-        ${role==='alumni'?`<div class="mobile-nav-link" onclick="navigate('alumni-dashboard');toggleMobileMenu()">${icon('layout',16)} Dashboard</div>`:''}
-        ${role==='staff'?`<div class="mobile-nav-link" onclick="navigate('staff-dashboard');toggleMobileMenu()">${icon('layout',16)} Dashboard</div>`:''}
-        ${role==='admin'?`<div class="mobile-nav-link" onclick="navigate('admin');toggleMobileMenu()">${icon('settings',16)} Admin Panel</div>`:''}        <div style="padding:12px 0 0;">
-          <button class="btn btn-danger w-full" onclick="signOut()">${icon('logOut',14)} Sign Out</button>
+  </nav>
+  
+  <!-- Mobile Menu (outside navbar) -->
+  <div class="mobile-menu hidden" id="mobileMenu">
+    <div class="mobile-menu-inner">
+      ${isLoggedIn && user ? `
+      <div class="user-profile-section">
+        <img src="${user.avatar}" class="avatar avatar-md" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=default'">
+        <div>
+          <div class="user-name">${user.name}</div>
+          <div class="user-email">${user.email}</div>
         </div>
-        ` : `
-        <div style="display:flex;gap:10px;padding:12px 0 0;border-top:1px solid var(--border);margin-top:8px;">
-          <button class="btn btn-secondary w-full" onclick="navigate('login');toggleMobileMenu()">${icon('logIn',14)} Sign In</button>
-          <button class="btn btn-primary w-full" onclick="navigate('register');toggleMobileMenu()">${icon('plus',14)} Register</button>
-        </div>
-        `}
+      </div>` : ''}
+
+      <div class="mobile-nav-link" onclick="navigate('home');toggleMobileMenu()">${icon('home',20)} Home</div>
+      <div class="mobile-nav-link" onclick="navigate('about');toggleMobileMenu()">${icon('info',20)} About</div>
+      
+      <div class="mobile-menu-section-title">People</div>
+      <div class="mobile-nav-link" onclick="navigate('students');toggleMobileMenu()">${icon('users',20)} Students</div>
+      <div class="mobile-nav-link" onclick="navigate('teachers');toggleMobileMenu()">${icon('graduationCap',20)} Teachers</div>
+      <div class="mobile-nav-link" onclick="navigate('staff');toggleMobileMenu()">${icon('briefcase',20)} Support Staff</div>
+      <div class="mobile-nav-link" onclick="navigate('alumni');toggleMobileMenu()">${icon('globe',20)} Alumni</div>
+      
+      <div class="mobile-menu-section-title">Academic</div>
+      <div class="mobile-nav-link" onclick="navigate('batches');toggleMobileMenu()">${icon('bookOpen',20)} Batches</div>
+      <div class="mobile-nav-link" onclick="navigate('results');toggleMobileMenu()">${icon('fileText',20)} Results</div>
+      <div class="mobile-nav-link" onclick="navigate('assignments');toggleMobileMenu()">${icon('clipboardList',20)} Assignments</div>
+      
+      <div class="mobile-menu-section-title">Updates</div>
+      <div class="mobile-nav-link" onclick="navigate('notices');toggleMobileMenu()">${icon('bell',20)} Notices</div>
+      <div class="mobile-nav-link" onclick="navigate('events');toggleMobileMenu()">${icon('calendar',20)} Events</div>
+      <div class="mobile-nav-link" onclick="navigate('gallery');toggleMobileMenu()">${icon('image',20)} Gallery</div>
+      <div class="mobile-nav-link" onclick="navigate('admission');toggleMobileMenu()">${icon('clipboardList',20)} Admission</div>
+
+      ${isLoggedIn ? `
+      <div class="mobile-menu-section-title">Account</div>
+      <div class="mobile-nav-link" onclick="navigate('messages');toggleMobileMenu()">${icon('messageSquare',20)} Messages</div>
+      ${role==='student'?`<div class="mobile-nav-link" onclick="navigate('student-dashboard');toggleMobileMenu()">${icon('layout',20)} My Dashboard</div>`:''}
+      ${role==='teacher'?`<div class="mobile-nav-link" onclick="navigate('teacher-dashboard');toggleMobileMenu()">${icon('layout',20)} My Dashboard</div>`:''}
+      ${role==='alumni'?`<div class="mobile-nav-link" onclick="navigate('alumni-dashboard');toggleMobileMenu()">${icon('layout',20)} My Dashboard</div>`:''}
+      ${role==='staff'?`<div class="mobile-nav-link" onclick="navigate('staff-dashboard');toggleMobileMenu()">${icon('layout',20)} My Dashboard</div>`:''}
+      ${role==='admin'?`<div class="mobile-nav-link" onclick="navigate('admin');toggleMobileMenu()">${icon('settings',20)} Admin Panel</div>`:''}
+      <div class="buttons-container">
+        <button class="btn btn-danger w-full" onclick="signOut()">${icon('logOut',16)} Sign Out</button>
       </div>
+      ` : `
+      <div class="buttons-container">
+        <button class="btn btn-secondary w-full" onclick="navigate('login');toggleMobileMenu()">${icon('logIn',16)} Sign In</button>
+        <button class="btn btn-primary w-full" onclick="navigate('register');toggleMobileMenu()">${icon('plus',16)} Register</button>
+      </div>
+      `}
     </div>
-  </nav>`;
+  </div>`;
 }

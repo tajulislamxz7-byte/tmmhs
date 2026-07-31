@@ -1,5 +1,6 @@
 /* ================================================
-   GREENFIELD ACADEMY — COMPONENT STYLES
+   GREENFIELD ACADEMY — COMPONENT STYLES v1.1
+   Updated: Mobile Menu Enhancement
    ================================================ */
 
 /* === NAVBAR === */
@@ -33,19 +34,274 @@
 .notification-dot { position: absolute; top: 8px; right: 8px; width: 7px; height: 7px; background: var(--danger); border-radius: 50%; border: 1.5px solid var(--bg-primary); }
 
 /* User Menu */
-.user-avatar-btn { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: var(--radius-full); background: var(--bg-secondary); border: 1.5px solid var(--border); cursor: pointer; transition: all var(--transition); }
+.user-avatar-btn { 
+  display: flex; align-items: center; gap: 8px; padding: 6px 10px; 
+  border-radius: var(--radius-full); background: var(--bg-secondary); 
+  border: 1.5px solid var(--border); cursor: pointer; 
+  transition: all var(--transition); 
+}
 .user-avatar-btn:hover { border-color: var(--primary); }
-.user-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: var(--bg-primary); border: 1.5px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow-xl); min-width: 220px; padding: 8px; z-index: 200; }
+.user-dropdown { 
+  position: absolute; top: calc(100% + 8px); right: 0; 
+  background: var(--bg-primary); border: 1.5px solid var(--border); 
+  border-radius: var(--radius-xl); box-shadow: var(--shadow-xl); 
+  min-width: 220px; padding: 8px; z-index: 200; 
+}
 .user-dropdown-header { padding: 12px; display: flex; align-items: center; gap: 12px; }
-.hamburger { display: none; }
-.mobile-menu { display: none; position: fixed; top: var(--nav-height); left: 0; right: 0; bottom: 0; background: var(--bg-primary); z-index: 99; overflow-y: auto; }
-.mobile-menu.open { display: block !important; }
-.mobile-menu.hidden { display: none !important; }
-.mobile-menu-inner { padding: var(--space-4); display: flex; flex-direction: column; gap: 4px; }
-.mobile-nav-link { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: var(--radius-lg); font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all var(--transition); font-size: var(--text-base); }
-.mobile-nav-link:hover { background: var(--primary-50); color: var(--primary); }
-@media (max-width: 1024px) { .navbar-links { display: none; } .hamburger { display: flex; } }
-@media (max-width: 768px) { .hide-mobile { display: none !important; } }
+
+/* Hamburger Menu Button */
+.hamburger { 
+  display: none;
+  background: #2563eb;
+  border: 2px solid #2563eb;
+  color: white;
+  padding: 12px;
+  border-radius: 10px;
+  width: 48px;
+  height: 48px;
+  z-index: 1001;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  cursor: pointer;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.hamburger svg {
+  display: block;
+  margin: 0 auto;
+  color: white;
+  stroke: white;
+  width: 24px;
+  height: 24px;
+}
+
+.hamburger:hover { 
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  transform: scale(1.05);
+}
+
+.hamburger:active {
+  transform: scale(0.95);
+}
+
+/* Show hamburger on tablets and mobile */
+@media (max-width: 1024px) { 
+  .navbar-links { display: none !important; } 
+  .hamburger { 
+    display: flex !important;
+  } 
+  
+  .navbar-actions {
+    gap: 8px;
+  }
+  
+  .navbar-inner {
+    gap: 12px;
+  }
+}
+
+/* Mobile Menu - Beautiful and Functional */
+.mobile-menu { 
+  position: fixed; 
+  top: 72px;
+  left: 0; 
+  right: 0; 
+  bottom: 0; 
+  background: var(--bg-primary);
+  z-index: 99999;
+  overflow-y: auto;
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -2px 20px rgba(0,0,0,0.1);
+  pointer-events: auto;
+}
+
+[data-theme="dark"] .mobile-menu {
+  background: #0f172a;
+  border-top-color: #334155;
+}
+
+.mobile-menu.hidden { 
+  display: none;
+}
+
+.mobile-menu-inner { 
+  padding: 24px 16px 40px 16px;
+}
+
+.mobile-nav-link { 
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 15px;
+  margin-bottom: 4px;
+  background: transparent;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.mobile-nav-link:hover,
+.mobile-nav-link:active { 
+  background: var(--primary-50);
+  color: var(--primary);
+  border-color: var(--primary);
+  transform: translateX(4px);
+}
+
+.mobile-nav-link svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+/* Section dividers for better organization */
+.mobile-menu-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.mobile-menu-section:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.mobile-menu-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 16px 8px 16px;
+  margin-bottom: 4px;
+}
+
+/* Make sure buttons show properly */
+.mobile-menu .btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 12px;
+  margin-top: 4px;
+}
+
+/* User profile section in mobile menu */
+.mobile-menu .user-profile-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--primary-50);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 2px solid var(--primary-100);
+}
+
+.mobile-menu .user-profile-section img {
+  flex-shrink: 0;
+}
+
+.mobile-menu .user-profile-section div {
+  min-width: 0;
+  flex: 1;
+}
+
+.mobile-menu .user-profile-section .user-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.mobile-menu .user-profile-section .user-email {
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Buttons container */
+.mobile-menu .buttons-container {
+  display: flex;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  margin-top: 16px;
+}
+
+/* Mobile Responsive Rules */
+/* Mobile viewport specific rules */
+@media (max-width: 768px) { 
+  .hide-mobile { display: none !important; } 
+  
+  /* Mobile navbar spacing */
+  .navbar-inner { 
+    gap: 8px;
+    padding: 0 12px;
+  }
+  
+  /* Mobile logo adjustments */
+  .navbar-logo {
+    font-size: 14px;
+    gap: 8px;
+  }
+  
+  .navbar-logo svg {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .logo-tagline {
+    display: none;
+  }
+  
+  /* Reduce button sizes on mobile */
+  .navbar-actions .btn-icon {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 8px;
+  }
+  
+  /* User avatar on mobile */
+  .user-avatar-btn {
+    padding: 4px 8px;
+  }
+  
+  /* Mobile dropdown positioning */
+  .user-dropdown {
+    right: 8px;
+    min-width: calc(100vw - 32px);
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 var(--space-3);
+  }
+  
+  .navbar-inner {
+    gap: var(--space-1);
+    padding: 0 var(--space-3);
+  }
+  
+  .logo-name {
+    font-size: 14px;
+  }
+}
 
 
 /* === SEARCH MODAL === */

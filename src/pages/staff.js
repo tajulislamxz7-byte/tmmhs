@@ -159,9 +159,24 @@ export async function renderStaffDashboard(user) {
                 ${user.achievements && user.achievements.length > 0 ? `
                   <div class="mt-6 pt-6">
                     <h4 class="text-sm font-bold text-muted mb-3">ACHIEVEMENTS</h4>
-                    <ul class="flex flex-col gap-2">
-                      ${user.achievements.map(a => `<li class="flex items-start gap-2"><span class="text-primary">•</span><span class="text-secondary">${a}</span></li>`).join('')}
-                    </ul>
+                    <div class="flex flex-col gap-3">
+                      ${user.achievements.map((a, idx) => `
+                        <div style="display:flex;align-items:start;gap:12px;padding:12px;background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);border-radius:12px;border-left:4px solid #f59e0b;">
+                          <div style="width:36px;height:36px;border-radius:10px;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px rgba(245,158,11,0.2);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5">
+                              <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
+                              <path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                              <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                              <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
+                            </svg>
+                          </div>
+                          <div style="flex:1;min-width:0;">
+                            <div class="font-medium" style="font-size:13px;color:#92400e;line-height:1.4;">${a}</div>
+                            <div style="font-size:10px;color:#b45309;opacity:0.8;margin-top:2px;">Achievement #${idx + 1}</div>
+                          </div>
+                        </div>
+                      `).join('')}
+                    </div>
                   </div>
                 ` : ''}
               </div>

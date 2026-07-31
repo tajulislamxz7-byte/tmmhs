@@ -5,10 +5,17 @@
     "class": "Class 10",
     "section": "A",
     "date": "2026-08-20",
-    "subjects": ["Mathematics", "English", "Physics", "Chemistry", "Biology", "Bangla"],
+    "subjects": [
+      "Mathematics",
+      "English",
+      "Physics",
+      "Chemistry",
+      "Biology",
+      "Bangla"
+    ],
     "totalMarks": 100,
     "passingMarks": 33,
-    "status": "Upcoming",
+    "status": "Draft",
     "createdAt": "2026-07-15T00:00:00.000Z"
   },
   {
@@ -17,7 +24,14 @@
     "class": "Class 9",
     "section": "B",
     "date": "2026-08-20",
-    "subjects": ["Mathematics", "English", "Physics", "Chemistry", "Biology", "Bangla"],
+    "subjects": [
+      "Mathematics",
+      "English",
+      "Physics",
+      "Chemistry",
+      "Biology",
+      "Bangla"
+    ],
     "totalMarks": 100,
     "passingMarks": 33,
     "status": "Upcoming",
@@ -29,7 +43,13 @@
     "class": "Class 8",
     "section": "A",
     "date": "2026-08-20",
-    "subjects": ["Mathematics", "English", "Science", "Social Studies", "Bangla"],
+    "subjects": [
+      "Mathematics",
+      "English",
+      "Science",
+      "Social Studies",
+      "Bangla"
+    ],
     "totalMarks": 100,
     "passingMarks": 33,
     "status": "Upcoming",

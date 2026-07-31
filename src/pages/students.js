@@ -293,19 +293,52 @@ function renderProfileOverviewTab(student) {
         <div class="card">
           <div class="card-header"><div class="font-semibold">Digital Student ID</div></div>
           <div class="card-body text-center" id="studentIdCard">
-            <div style="background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:16px;padding:20px;color:white;">
-              <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;opacity:0.8;margin-bottom:8px;">TIARKHALI M.M HIGH SCHOOL</div>
-              <img src="${student.avatar}" alt="${student.name}" style="width:64px;height:64px;border-radius:50%;border:3px solid rgba(255,255,255,0.5);margin:0 auto 8px;">
-              <div style="font-weight:700;font-size:16px;">${student.name}</div>
-              <div style="opacity:0.8;font-size:12px;">${student.id}</div>
-              <div style="display:flex;justify-content:space-around;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.2);">
-                <div><div style="font-size:11px;opacity:0.7;">Class</div><div style="font-weight:600;font-size:12px;">${student.class}</div></div>
-                <div><div style="font-size:11px;opacity:0.7;">Section</div><div style="font-weight:600;font-size:12px;">${student.section}</div></div>
-                <div><div style="font-size:11px;opacity:0.7;">Roll</div><div style="font-weight:600;font-size:12px;">${student.roll}</div></div>
+            <div style="background:linear-gradient(135deg, #4f46e5, #7c3aed);border-radius:20px;padding:24px;color:white;box-shadow:0 8px 24px rgba(79, 70, 229, 0.3);position:relative;overflow:hidden;">
+              <!-- Decorative corner pattern -->
+              <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(255,255,255,0.1);border-radius:50%;"></div>
+              <div style="position:absolute;bottom:-30px;left:-30px;width:100px;height:100px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
+              
+              <!-- School Name -->
+              <div style="font-size:10px;font-weight:800;letter-spacing:0.15em;opacity:0.9;margin-bottom:12px;text-transform:uppercase;">TIARKHALI M.M HIGH SCHOOL</div>
+              
+              <!-- Student Avatar -->
+              <div style="position:relative;display:inline-block;margin-bottom:12px;">
+                <img src="${student.avatar}" alt="${student.name}" style="width:72px;height:72px;border-radius:50%;border:4px solid rgba(255,255,255,0.6);background:white;box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+                <div style="position:absolute;bottom:0;right:0;width:24px;height:24px;background:#22c55e;border-radius:50%;border:3px solid white;"></div>
               </div>
-              <div style="margin-top:12px;font-size:10px;opacity:0.6;">Valid for Academic Year 2024-25</div>
+              
+              <!-- Student Info -->
+              <div style="font-weight:800;font-size:18px;margin-bottom:4px;letter-spacing:0.02em;">${student.name}</div>
+              <div style="opacity:0.85;font-size:12px;font-weight:500;background:rgba(255,255,255,0.15);display:inline-block;padding:4px 12px;border-radius:12px;margin-bottom:16px;">${student.id}</div>
+              
+              <!-- Details Grid -->
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.25);">
+                <div>
+                  <div style="font-size:10px;opacity:0.7;margin-bottom:4px;font-weight:600;text-transform:uppercase;">Class</div>
+                  <div style="font-weight:800;font-size:14px;">${student.class}</div>
+                </div>
+                <div>
+                  <div style="font-size:10px;opacity:0.7;margin-bottom:4px;font-weight:600;text-transform:uppercase;">Section</div>
+                  <div style="font-weight:800;font-size:14px;">${student.section}</div>
+                </div>
+                <div>
+                  <div style="font-size:10px;opacity:0.7;margin-bottom:4px;font-weight:600;text-transform:uppercase;">Roll</div>
+                  <div style="font-weight:800;font-size:14px;">${student.roll}</div>
+                </div>
+              </div>
+              
+              <!-- Validity Badge -->
+              <div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.15);">
+                <div style="font-size:9px;opacity:0.7;display:flex;align-items:center;justify-content:center;gap:4px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  <span style="font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Valid for Academic Year 2024-25</span>
+                </div>
+              </div>
             </div>
-            <button class="btn btn-secondary w-full mt-3 btn-sm" onclick="downloadStudentID('${student.id}')">Download ID Card</button>
+            <button class="btn btn-secondary w-full mt-4" onclick="downloadStudentID('${student.id}')" style="font-weight:600;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download ID Card
+            </button>
           </div>
         </div>
       </div>
@@ -332,18 +365,40 @@ function renderProfileOverviewTab(student) {
         </div>
         <div class="card">
           <div class="card-header flex items-center justify-between">
-            <div class="font-semibold">Achievements</div>
+            <div class="font-semibold">Achievements & Awards</div>
             <span class="badge badge-primary">${student.achievements.length}</span>
           </div>
           <div class="card-body">
-            ${student.achievements.map(a=>`
-              <div class="flex items-center gap-3 mb-3">
-                <div style="width:36px;height:36px;border-radius:10px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg>
-                </div>
-                <div class="font-medium text-sm">${a}</div>
+            ${student.achievements.length > 0 ? `
+              <div class="flex flex-col gap-3">
+                ${student.achievements.map((a, idx) => `
+                  <div class="achievement-item" style="display:flex;align-items:start;gap:12px;padding:12px;background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);border-radius:12px;border-left:4px solid #f59e0b;">
+                    <div style="width:40px;height:40px;border-radius:10px;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(245,158,11,0.2);">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5">
+                        <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
+                        <path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                        <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
+                      </svg>
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                      <div class="font-semibold" style="font-size:14px;color:#92400e;margin-bottom:2px;">${a}</div>
+                      <div style="font-size:11px;color:#b45309;opacity:0.8;">Achievement #${idx + 1}</div>
+                    </div>
+                  </div>
+                `).join('')}
               </div>
-            `).join('')}
+            ` : `
+              <div class="text-center text-muted" style="padding:20px;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 12px;opacity:0.3;">
+                  <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
+                  <path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                  <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                  <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
+                </svg>
+                <div style="font-size:13px;">No achievements recorded yet</div>
+              </div>
+            `}
           </div>
         </div>
         <div class="card">
@@ -429,19 +484,45 @@ export function renderProfileTabContent(tab, studentId) {
 
   if (tab === 'achievements') return `
     <div class="card">
-      <div class="card-header"><div class="font-semibold">Achievements & Awards</div></div>
+      <div class="card-header flex items-center justify-between">
+        <div class="font-semibold">Achievements & Awards</div>
+        <span class="badge badge-success">${student.achievements.length} Total</span>
+      </div>
       <div class="card-body">
-        ${student.achievements.map(a=>`
-          <div class="flex items-center gap-3 mb-4">
-            <div style="width:44px;height:44px;border-radius:12px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg>
-            </div>
-            <div>
-              <div class="font-semibold">${a}</div>
-              <div class="text-xs text-muted">Verified Achievement</div>
-            </div>
+        ${student.achievements.length > 0 ? `
+          <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;">
+            ${student.achievements.map((a, idx) => `
+              <div class="achievement-card" style="display:flex;align-items:start;gap:14px;padding:16px;background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);border-radius:14px;border-left:5px solid #f59e0b;box-shadow:0 2px 8px rgba(245,158,11,0.15);transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(245,158,11,0.25)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(245,158,11,0.15)'">
+                <div style="width:48px;height:48px;border-radius:12px;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(245,158,11,0.2);">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5">
+                    <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
+                    <path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                    <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
+                  </svg>
+                </div>
+                <div style="flex:1;min-width:0;">
+                  <div class="font-bold" style="font-size:15px;color:#92400e;margin-bottom:4px;line-height:1.4;">${a}</div>
+                  <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#b45309;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span>Verified • Achievement #${idx + 1}</span>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
           </div>
-        `).join('')}
+        ` : `
+          <div class="text-center text-muted" style="padding:40px;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 16px;opacity:0.3;">
+              <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
+              <path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+              <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+              <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
+            </svg>
+            <div style="font-size:15px;font-weight:600;margin-bottom:8px;">No achievements yet</div>
+            <div style="font-size:13px;">Start earning achievements by excelling in academics and extra-curricular activities!</div>
+          </div>
+        `}
       </div>
     </div>
   `;
