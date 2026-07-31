@@ -458,37 +458,115 @@ window.openEditProfile = function(studentId) {
   modal.className = 'modal-overlay';
   modal.onclick = e => { if (e.target === modal) modal.remove(); };
   modal.innerHTML = `
-    <div class="modal" style="max-width:500px;">
+    <div class="modal" style="max-width:600px;">
       <div class="modal-header">
         <div class="font-semibold">Edit My Profile</div>
         <button class="btn btn-ghost btn-icon" onclick="this.closest('.modal-overlay').remove()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-      <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;">
+      <div class="modal-body" style="max-height:70vh;overflow-y:auto;display:flex;flex-direction:column;gap:14px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div class="form-group"><label class="form-label">First Name</label>
-            <input id="ep_first" class="form-input" value="${u.firstName||u.name.split(' ')[0]||''}"></div>
-          <div class="form-group"><label class="form-label">Last Name</label>
-            <input id="ep_last" class="form-input" value="${u.lastName||u.name.split(' ').slice(1).join(' ')||''}"></div>
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input id="ep_first" class="form-input" value="${u.firstName||u.name.split(' ')[0]||''}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input id="ep_last" class="form-input" value="${u.lastName||u.name.split(' ').slice(1).join(' ')||''}">
+          </div>
         </div>
-        <div class="form-group"><label class="form-label">Phone</label>
-          <input id="ep_phone" class="form-input" value="${u.phone||''}"></div>
-        <div class="form-group"><label class="form-label">Address</label>
-          <input id="ep_address" class="form-input" value="${u.address||''}"></div>
-        <div class="form-group"><label class="form-label">Bio</label>
-          <textarea id="ep_bio" class="form-input" rows="3">${u.bio||''}</textarea></div>
+        
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div class="form-group"><label class="form-label">Blood Group</label>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input id="ep_email" type="email" class="form-input" value="${u.email||''}" readonly style="background:var(--bg-secondary);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input id="ep_phone" class="form-input" value="${u.phone||''}">
+          </div>
+        </div>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label class="form-label">Class</label>
+            <select id="ep_class" class="form-input form-select">
+              <option value="">Select</option>
+              <option value="Class 6" ${u.class === 'Class 6' ? 'selected' : ''}>Class 6</option>
+              <option value="Class 7" ${u.class === 'Class 7' ? 'selected' : ''}>Class 7</option>
+              <option value="Class 8" ${u.class === 'Class 8' ? 'selected' : ''}>Class 8</option>
+              <option value="Class 9" ${u.class === 'Class 9' ? 'selected' : ''}>Class 9</option>
+              <option value="Class 10" ${u.class === 'Class 10' ? 'selected' : ''}>Class 10</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Section</label>
+            <select id="ep_section" class="form-input form-select">
+              <option value="">Select</option>
+              <option value="A" ${u.section === 'A' ? 'selected' : ''}>A</option>
+              <option value="B" ${u.section === 'B' ? 'selected' : ''}>B</option>
+              <option value="C" ${u.section === 'C' ? 'selected' : ''}>C</option>
+              <option value="D" ${u.section === 'D' ? 'selected' : ''}>D</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Roll</label>
+            <input id="ep_roll" class="form-input" value="${u.roll||''}">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Batch</label>
+          <select id="ep_batch" class="form-input form-select">
+            <option value="">Select</option>
+            <option value="2026" ${u.batch === '2026' ? 'selected' : ''}>Batch 2026</option>
+            <option value="2027" ${u.batch === '2027' ? 'selected' : ''}>Batch 2027</option>
+            <option value="2028" ${u.batch === '2028' ? 'selected' : ''}>Batch 2028</option>
+            <option value="2029" ${u.batch === '2029' ? 'selected' : ''}>Batch 2029</option>
+            <option value="2030" ${u.batch === '2030' ? 'selected' : ''}>Batch 2030</option>
+          </select>
+        </div>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label class="form-label">Blood Group</label>
             <select id="ep_blood" class="form-input form-select">
               ${['—','A+','A-','B+','B-','AB+','AB-','O+','O-'].map(b=>`<option ${(u.bloodGroup||'—')===b?'selected':''}>${b}</option>`).join('')}
-            </select></div>
-          <div class="form-group"><label class="form-label">Guardian Name</label>
-            <input id="ep_guardian" class="form-input" value="${u.guardian||''}"></div>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Birthday</label>
+            <input id="ep_birthday" type="date" class="form-input" value="${u.birthday||''}">
+          </div>
         </div>
-        <div class="form-group"><label class="form-label">Skills (comma separated)</label>
-          <input id="ep_skills" class="form-input" value="${(u.skills||[]).join(', ')}"></div>
-        <div class="flex gap-3 justify-end">
+        
+        <div class="form-group">
+          <label class="form-label">Guardian Name</label>
+          <input id="ep_guardian" class="form-input" value="${u.guardian||''}">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Address</label>
+          <textarea id="ep_address" class="form-input" rows="2">${u.address||''}</textarea>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Bio</label>
+          <textarea id="ep_bio" class="form-input" rows="3">${u.bio||''}</textarea>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Skills (comma separated)</label>
+          <input id="ep_skills" class="form-input" value="${(u.skills||[]).join(', ')}" placeholder="e.g., Mathematics, Science, Sports">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Achievements (comma separated)</label>
+          <textarea id="ep_achievements" class="form-input" rows="2" placeholder="e.g., First Prize Science Fair, Best Student Award">${(u.achievements||[]).join(', ')}</textarea>
+        </div>
+        
+        <div class="flex gap-3 justify-end" style="border-top:1px solid var(--border);padding-top:16px;margin-top:8px;">
           <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
           <button class="btn btn-primary" onclick="saveEditProfile('${studentId}')">Save Changes</button>
         </div>
@@ -505,11 +583,17 @@ window.saveEditProfile = async function(studentId) {
     firstName, lastName,
     name: `${firstName} ${lastName}`.trim(),
     phone:    get('ep_phone'),
+    class:    get('ep_class'),
+    section:  get('ep_section'),
+    batch:    get('ep_batch'),
+    roll:     get('ep_roll'),
     address:  get('ep_address'),
     bio:      get('ep_bio'),
+    birthday: get('ep_birthday'),
     bloodGroup: get('ep_blood') === '—' ? '' : get('ep_blood'),
     guardian: get('ep_guardian'),
     skills:   get('ep_skills').split(',').map(s=>s.trim()).filter(Boolean),
+    achievements: get('ep_achievements').split(',').map(a=>a.trim()).filter(Boolean),
   };
 
   // Import and use API

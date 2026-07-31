@@ -119,7 +119,7 @@ async function render() {
 async function getPageContent(user, role) {
   switch (currentPage) {
     case 'home':              return renderHome() + renderHomeExtra();
-    case 'students':          return renderStudents();
+    case 'students':          return await renderStudents();
     case 'student-profile':   return renderStudentProfile(currentParam);
     case 'student-dashboard': return renderStudentDashboard(user);
     case 'teachers':          return await renderTeachers();
@@ -129,7 +129,7 @@ async function getPageContent(user, role) {
     case 'alumni-dashboard':  return renderAlumniDashboard(user);
     case 'staff':             return await renderStaff();
     case 'staff-dashboard':   return await renderStaffDashboard(user);
-    case 'batches':           return renderBatches();
+    case 'batches':           return await renderBatches();
     case 'batch-detail':      return renderBatchDetail(currentParam);
     case 'results':           return renderResults(role, user);
     case 'notices':           return renderNotices();
