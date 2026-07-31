@@ -5,7 +5,7 @@
 
 // Detect environment and set API base URL
 const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const BASE = isDevelopment ? '/api' : 'https://school-project-g1dm.onrender.com/api';
+const BASE = isDevelopment ? '/api' : 'https://school-project-qi8m.onrender.com/api';
 
 // ── localStorage fallback helpers ────────────────
 const LS = {
