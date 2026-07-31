@@ -14,8 +14,20 @@ const app = express();
 const DATA_DIR = path.join(__dirname, 'data');
 const PORT = 3001;
 
-app.use(cors());
+// Configure CORS to allow Netlify domain
+app.use(cors({
+  origin: '*', // Allow all origins (or specify your Netlify domain)
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
 app.use(express.json());
+
+// ── Health check endpoint ──────────────────────────
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'online', timestamp: new Date().toISOString() });
+});
 
 // ── File helpers ──────────────────────────────────
 function readJSON(file) {
