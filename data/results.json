@@ -1,1 +1,67 @@
-[]
+[
+  {
+    "examId": "EX1735632000000",
+    "exam": "Annual Examination 2025",
+    "studentId": "STU-2026-0001",
+    "studentName": "Ayesha Rahman",
+    "class": "Class 10",
+    "section": "A",
+    "roll": "101",
+    "subjects": {
+      "Mathematics": 95,
+      "English": 92,
+      "Physics": 98,
+      "Chemistry": 94,
+      "Biology": 96,
+      "Bangla": 90
+    },
+    "totalMarks": 600,
+    "obtainedMarks": 565,
+    "gpa": "5.00",
+    "grade": "A+",
+    "position": 1
+  },
+  {
+    "examId": "EX1735632000000",
+    "exam": "Annual Examination 2025",
+    "studentId": "STU-2026-0002",
+    "studentName": "Mohammad Karim",
+    "class": "Class 9",
+    "section": "B",
+    "roll": "205",
+    "subjects": {
+      "Mathematics": 85,
+      "English": 80,
+      "Physics": 88,
+      "Chemistry": 82,
+      "Biology": 79,
+      "Bangla": 84
+    },
+    "totalMarks": 600,
+    "obtainedMarks": 498,
+    "gpa": "4.75",
+    "grade": "A",
+    "position": 5
+  },
+  {
+    "examId": "EX1735632000000",
+    "exam": "Annual Examination 2025",
+    "studentId": "STU-2026-0003",
+    "studentName": "Fatima Begum",
+    "class": "Class 8",
+    "section": "A",
+    "roll": "115",
+    "subjects": {
+      "Mathematics": 88,
+      "English": 90,
+      "Science": 92,
+      "Social Studies": 85,
+      "Bangla": 87
+    },
+    "totalMarks": 500,
+    "obtainedMarks": 442,
+    "gpa": "4.85",
+    "grade": "A+",
+    "position": 2
+  }
+]

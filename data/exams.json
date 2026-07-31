@@ -1,1 +1,38 @@
-[]
+[
+  {
+    "id": "EX1738224000000",
+    "name": "First Terminal Examination 2026",
+    "class": "Class 10",
+    "section": "A",
+    "date": "2026-08-20",
+    "subjects": ["Mathematics", "English", "Physics", "Chemistry", "Biology", "Bangla"],
+    "totalMarks": 100,
+    "passingMarks": 33,
+    "status": "Upcoming",
+    "createdAt": "2026-07-15T00:00:00.000Z"
+  },
+  {
+    "id": "EX1738224000001",
+    "name": "First Terminal Examination 2026",
+    "class": "Class 9",
+    "section": "B",
+    "date": "2026-08-20",
+    "subjects": ["Mathematics", "English", "Physics", "Chemistry", "Biology", "Bangla"],
+    "totalMarks": 100,
+    "passingMarks": 33,
+    "status": "Upcoming",
+    "createdAt": "2026-07-15T00:00:00.000Z"
+  },
+  {
+    "id": "EX1738224000002",
+    "name": "First Terminal Examination 2026",
+    "class": "Class 8",
+    "section": "A",
+    "date": "2026-08-20",
+    "subjects": ["Mathematics", "English", "Science", "Social Studies", "Bangla"],
+    "totalMarks": 100,
+    "passingMarks": 33,
+    "status": "Upcoming",
+    "createdAt": "2026-07-15T00:00:00.000Z"
+  }
+]

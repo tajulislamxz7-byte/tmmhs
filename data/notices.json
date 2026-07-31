@@ -1,1 +1,47 @@
-[]
+[
+  {
+    "id": "N1738310400000",
+    "title": "Annual Sports Day 2026",
+    "content": "Annual Sports Day will be held on August 15, 2026. All students are requested to participate actively in various sports events.",
+    "category": "Event",
+    "priority": "high",
+    "date": "2026-08-01",
+    "postedBy": "Admin"
+  },
+  {
+    "id": "N1738224000000",
+    "title": "First Terminal Examination Schedule",
+    "content": "First Terminal Examination will start from August 20, 2026. Students should prepare accordingly and check the detailed schedule on the notice board.",
+    "category": "Exam",
+    "priority": "urgent",
+    "date": "2026-07-28",
+    "postedBy": "Admin"
+  },
+  {
+    "id": "N1738137600000",
+    "title": "Independence Day Celebration",
+    "content": "School will remain closed on August 15, 2026 for Independence Day. Cultural programs will be organized on August 14.",
+    "category": "Holiday",
+    "priority": "normal",
+    "date": "2026-08-10",
+    "postedBy": "Admin"
+  },
+  {
+    "id": "N1738051200000",
+    "title": "Science Fair 2026",
+    "content": "Science Fair will be organized on September 5, 2026. Students interested in participating should submit their project proposals by August 25.",
+    "category": "Event",
+    "priority": "high",
+    "date": "2026-08-05",
+    "postedBy": "Admin"
+  },
+  {
+    "id": "N1737964800000",
+    "title": "Parent-Teacher Meeting",
+    "content": "Parent-Teacher Meeting is scheduled for August 18, 2026. All guardians are requested to attend and discuss their child's progress.",
+    "category": "Meeting",
+    "priority": "high",
+    "date": "2026-08-12",
+    "postedBy": "Admin"
+  }
+]

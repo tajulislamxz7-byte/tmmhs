@@ -405,35 +405,78 @@ window.viewStaffProfile = async function(id) {
   modal.className = 'modal-overlay';
   modal.onclick = e => { if(e.target === modal) modal.remove(); };
   modal.innerHTML = `
-    <div class="modal">
+    <div class="modal" style="max-width:500px;">
       <div class="modal-header">
         <div class="font-semibold">Staff Profile</div>
         <button class="btn btn-ghost btn-icon" onclick="this.closest('.modal-overlay').remove()">✕</button>
       </div>
       <div class="modal-body">
-        <div class="text-center mb-5">
-          <img src="${member.avatar}" alt="${member.name}" class="avatar avatar-xl mx-auto mb-3">
-          <div class="font-bold" style="font-size:20px;">${member.name}</div>
-          <div class="text-muted text-sm">${member.id}</div>
+        <div style="text-align:center;margin-bottom:24px;">
+          <img src="${member.avatar}" alt="${member.name}" class="avatar avatar-xl" style="margin:0 auto 12px;">
+          <div class="font-bold" style="font-size:18px;margin-bottom:4px;">${member.name}</div>
+          <div class="text-xs text-muted mb-3">${member.id}</div>
+          <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+            <span class="badge badge-primary">${member.position}</span>
+            <span class="badge badge-secondary">${member.department}</span>
+          </div>
         </div>
-        <div class="grid-2 gap-3">
-          ${[['Position',member.position],['Department',member.department],['Phone',member.phone],['Email',member.email]].map(([l,v])=>`
-            <div style="background:var(--bg-secondary);border-radius:10px;padding:12px;">
-              <div class="text-xs text-muted">${l}</div>
-              <div class="font-medium text-sm">${v}</div>
+        
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="info-row">
+            <div class="info-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
             </div>
-          `).join('')}
-        </div>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-};">
-              <div class="text-xs text-muted">${l}</div>
-              <div class="font-medium text-sm">${v}</div>
+            <div>
+              <div class="text-xs text-muted">Position</div>
+              <div class="font-medium text-sm">${member.position}</div>
             </div>
-          `).join('')}
+          </div>
+          
+          <div class="info-row">
+            <div class="info-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+              </svg>
+            </div>
+            <div>
+              <div class="text-xs text-muted">Department</div>
+              <div class="font-medium text-sm">${member.department}</div>
+            </div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="text-xs text-muted">Phone</div>
+              <div class="font-medium text-sm">${member.phone}</div>
+            </div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>
+              </svg>
+            </div>
+            <div>
+              <div class="text-xs text-muted">Email</div>
+              <div class="font-medium text-sm" style="word-break:break-all;">${member.email}</div>
+            </div>
+          </div>
         </div>
+        
+        ${member.bio ? `
+          <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+            <div class="text-xs font-bold text-muted mb-2">BIO</div>
+            <p class="text-sm text-secondary" style="line-height:1.6;">${member.bio}</p>
+          </div>
+        ` : ''}
       </div>
     </div>
   `;

@@ -1,1 +1,48 @@
-[]
+[
+  {
+    "id": "2026",
+    "name": "Batch 2026",
+    "year": "2026",
+    "class": "Class 10",
+    "description": "SSC examination batch with focus on science and mathematics excellence.",
+    "totalStudents": 45,
+    "classTeacher": "Dr. Abdullah Khan",
+    "passingYear": "2026",
+    "achievements": [
+      "100% Pass Rate in 2025",
+      "5 Students scored GPA 5.00",
+      "District Science Fair Winners"
+    ],
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "2027",
+    "name": "Batch 2027",
+    "year": "2027",
+    "class": "Class 9",
+    "description": "Rising stars showing great promise in academics and sports.",
+    "totalStudents": 52,
+    "classTeacher": "Nasrin Akter",
+    "passingYear": "2027",
+    "achievements": [
+      "District Sports Champions",
+      "Best Cultural Performance 2025"
+    ],
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "2028",
+    "name": "Batch 2028",
+    "year": "2028",
+    "class": "Class 8",
+    "description": "Energetic learners with strong academic foundation and curiosity.",
+    "totalStudents": 48,
+    "classTeacher": "Md. Kamal Uddin",
+    "passingYear": "2028",
+    "achievements": [
+      "Inter-School Quiz Winners",
+      "Best Attendance Record"
+    ],
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  }
+]

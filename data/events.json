@@ -1,1 +1,52 @@
-[]
+[
+  {
+    "id": "EV1738396800000",
+    "title": "Annual Sports Day 2026",
+    "description": "Join us for an exciting day of sports competitions, including athletics, football, cricket, and more. Prizes for winners!",
+    "date": "2026-08-15",
+    "time": "9:00 AM",
+    "location": "School Sports Ground",
+    "category": "Sports",
+    "organizer": "Physical Education Department"
+  },
+  {
+    "id": "EV1738569600000",
+    "title": "Science Fair 2026",
+    "description": "Students will showcase innovative science projects. Open to all classes. Judges from local universities will evaluate projects.",
+    "date": "2026-09-05",
+    "time": "10:00 AM",
+    "location": "School Auditorium",
+    "category": "Academic",
+    "organizer": "Science Department"
+  },
+  {
+    "id": "EV1738310400000",
+    "title": "Cultural Program - Independence Day",
+    "description": "Cultural performances including songs, dances, drama, and poetry recitation celebrating Independence Day.",
+    "date": "2026-08-14",
+    "time": "4:00 PM",
+    "location": "School Auditorium",
+    "category": "Cultural",
+    "organizer": "Cultural Committee"
+  },
+  {
+    "id": "EV1738742400000",
+    "title": "Parent-Teacher Meeting",
+    "description": "Discuss student progress, academic performance, and future plans with teachers. All parents are encouraged to attend.",
+    "date": "2026-08-18",
+    "time": "3:00 PM",
+    "location": "School Hall",
+    "category": "Meeting",
+    "organizer": "Administration"
+  },
+  {
+    "id": "EV1738915200000",
+    "title": "Inter-School Debate Competition",
+    "description": "Students from 5 schools will compete in English and Bangla debate. Topics will be announced on the day.",
+    "date": "2026-09-10",
+    "time": "11:00 AM",
+    "location": "School Auditorium",
+    "category": "Competition",
+    "organizer": "English Department"
+  }
+]

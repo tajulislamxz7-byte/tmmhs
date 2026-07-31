@@ -3,15 +3,22 @@
 // ================================================
 
 import { batches as sampleBatches, students } from '../data/schoolConfig.js';
+import { api } from '../utils/api.js';
 
-// Get batches from localStorage (admin-created) or sampleData fallback
-function getBatches() {
-  const stored = JSON.parse(localStorage.getItem('gfa_batches') || 'null');
-  return stored !== null ? stored : sampleBatches;
+// Get batches from API or localStorage fallback
+async function fetchBatches() {
+  const batches = await api.getBatches();
+  return batches && batches.length > 0 ? batches : sampleBatches;
 }
 
-export function renderBatches() {
-  const batches = getBatches();
+// Sync version for immediate use
+function getBatches() {
+  const stored = JSON.parse(localStorage.getItem('gfa_batches') || 'null');
+  return stored && stored.length > 0 ? stored : sampleBatches;
+}
+
+export async function renderBatches() {
+  const batches = await fetchBatches();
   return `
     <div class="page-container">
       <div class="page-header">
@@ -76,7 +83,7 @@ function renderBatchCard(b, i) {
             </span>
           `).join('')}
         </div>
-        <div class="flex items-center justify-between border-t border" style="padding-top:12px;">
+        <div class="flex items-center justify-between" style="padding-top:12px;margin-top:12px;">
           <span class="text-xs text-muted">View batch details</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:${color};"><path d="M9 18l6-6-6-6"/></svg>
         </div>
@@ -88,7 +95,26 @@ function renderBatchCard(b, i) {
 export function renderBatchDetail(batchId) {
   const batches = getBatches();
   const batch = batches.find(b => b.id === batchId) || batches[0];
-  const batchStudents = students.filter(s => s.batch === batch.id);
+  
+  // Get all users and filter for students with matching batch
+  const allUsers = JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
+  const registeredStudents = allUsers.filter(u => u.role === 'student' && u.batch === batchId).map(u => ({
+    id: u.id,
+    name: u.name,
+    roll: u.roll || '—',
+    class: u.class || 'N/A',
+    section: u.section || 'N/A',
+    batch: u.batch || 'N/A',
+    avatar: u.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`,
+    gpa: u.gpa || 'N/A'
+  }));
+  
+  // Merge with sample students from config (if any)
+  const sampleBatchStudents = students.filter(s => s.batch === batch.id);
+  const batchStudents = [...sampleBatchStudents];
+  registeredStudents.forEach(s => { 
+    if (!batchStudents.find(x => x.id === s.id)) batchStudents.push(s); 
+  });
 
   return `
     <div class="page-container">

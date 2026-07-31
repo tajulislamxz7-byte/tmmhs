@@ -35,7 +35,13 @@ export const stats = [
   { label: "Pass Rate", value: "—", svg: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>', color: "#0891b2" },
 ];
 
-export const batches = [];
+export const batches = [
+  { id: "2026", name: "Batch 2026", year: "2026", class: "Class 10" },
+  { id: "2027", name: "Batch 2027", year: "2027", class: "Class 9" },
+  { id: "2028", name: "Batch 2028", year: "2028", class: "Class 8" },
+  { id: "2029", name: "Batch 2029", year: "2029", class: "Class 7" },
+  { id: "2030", name: "Batch 2030", year: "2030", class: "Class 6" },
+];
 
 export const classes = [
   { id: "C6",  name: "Class 6",  sections: ["A", "B", "C"],      subjects: ["Bangla", "English", "Mathematics", "Science", "Social Studies", "Religion"] },

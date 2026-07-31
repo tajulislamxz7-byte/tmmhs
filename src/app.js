@@ -630,7 +630,15 @@ function bindGlobalActions() {
   };
 
   window.downloadStudentID = function(studentId) {
-    const s = students.find(st => st.id === studentId);
+    // Get all users from API cache or localStorage
+    const allUsers = JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
+    let s = allUsers.find(u => u.id === studentId && u.role === 'student');
+    
+    // Fallback to sample students from config
+    if (!s) {
+      s = students.find(st => st.id === studentId);
+    }
+    
     if (!s) { showToast('Student not found', 'error'); return; }
     const win = window.open('', '_blank');
     win.document.write(`
