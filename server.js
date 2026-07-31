@@ -22,6 +22,14 @@ app.use(cors({
   credentials: true
 }));
 
+// Disable caching for all API responses
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+});
+
 app.use(express.json());
 
 // ── Health check endpoint ──────────────────────────
