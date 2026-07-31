@@ -25,20 +25,20 @@
   },
   {
     "id": "STF-2026-0002",
-    "name": "tajul islam",
-    "firstName": "tajul",
-    "lastName": "islam",
+    "name": "Rasel Khan",
+    "firstName": "Rasel",
+    "lastName": "Khan",
     "email": "habibur.rahman@staff.tiarkhali.edu.bd",
     "phone": "11111111444444",
     "password": "staff123",
     "role": "staff",
     "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=tajul%20islam",
-    "status": "pending",
+    "status": "active",
     "createdAt": "2026-07-31T07:02:36.617Z",
     "class": "",
     "section": "",
     "batch": "",
-    "bloodGroup": "",
+    "bloodGroup": "A+",
     "guardian": "",
     "subject": "",
     "qualification": "",
@@ -49,10 +49,14 @@
     "position": "Peon",
     "department": "Maintenance",
     "roll": "",
-    "address": "",
-    "skills": [],
-    "achievements": [],
+    "address": "Tiarkhali",
+    "skills": [
+      "Nothing useless"
+    ],
+    "achievements": [
+      "Employee of the year"
+    ],
     "gpa": "N/A",
-    "bio": ""
+    "bio": "Tiarkhali mei dada giri kori"
   }
 ]

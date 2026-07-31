@@ -512,27 +512,24 @@ window.saveEditProfile = async function(studentId) {
     skills:   get('ep_skills').split(',').map(s=>s.trim()).filter(Boolean),
   };
 
-  // Update via API (with localStorage fallback built into api.js)
-  try {
-    const { api } = await import('../utils/api.js');
-    await api.updateUser(studentId, updates);
-  } catch(e) {
-    // Direct localStorage fallback
-    const users = JSON.parse(localStorage.getItem('gfa_users') || '[]');
-    const idx = users.findIndex(u => u.id === studentId);
-    if (idx >= 0) { Object.assign(users[idx], updates); localStorage.setItem('gfa_users', JSON.stringify(users)); localStorage.setItem('gfa_users_cache', JSON.stringify(users)); }
+  // Import and use API
+  const { api } = await import('../utils/api.js');
+  const result = await api.updateUser(studentId, updates);
+  
+  if (result && result.ok !== false) {
+    // Update session if editing own profile
+    try {
+      const session = JSON.parse(localStorage.getItem('gfa_session') || 'null');
+      if (session && session.id === studentId) {
+        Object.assign(session, updates);
+        localStorage.setItem('gfa_session', JSON.stringify(session));
+      }
+    } catch(e) {}
+
+    document.querySelector('.modal-overlay')?.remove();
+    showToast('Profile updated successfully!', 'success');
+    window.location.reload();
+  } else {
+    showToast(result?.error || 'Failed to update profile', 'error');
   }
-
-  // Update session if editing own profile
-  try {
-    const session = JSON.parse(localStorage.getItem('gfa_session') || 'null');
-    if (session && session.id === studentId) {
-      Object.assign(session, updates);
-      localStorage.setItem('gfa_session', JSON.stringify(session));
-    }
-  } catch(e) {}
-
-  document.querySelector('.modal-overlay')?.remove();
-  showToast('Profile updated!', 'success');
-  navigate('student-profile', studentId);
 };

@@ -325,6 +325,120 @@ window.filterAlumni = function() {
   });
 };
 
-window.editAlumniProfile = function(id) {
-  showToast('Profile editing feature coming soon!', 'info');
+window.editAlumniProfile = async function(id) {
+  const apiUsers = await api.getUsers();
+  const users = apiUsers || JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
+  const user = users.find(u => u.id === id);
+  if (!user) return;
+
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.onclick = e => { if(e.target === modal) modal.remove(); };
+  modal.innerHTML = `
+    <div class="modal" style="max-width:600px;">
+      <div class="modal-header">
+        <div class="font-semibold">Edit Profile</div>
+        <button class="btn btn-ghost btn-icon" onclick="this.closest('.modal-overlay').remove()">✕</button>
+      </div>
+      <form id="editAlumniForm" class="modal-body" style="max-height:70vh;overflow-y:auto;">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" name="firstName" value="${user.firstName || ''}" required>
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" name="lastName" value="${user.lastName || ''}" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" value="${user.email || ''}" required>
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" name="phone" value="${user.phone || ''}">
+        </div>
+        <div class="form-group">
+          <label>Profession</label>
+          <input type="text" name="profession" value="${user.profession || ''}" placeholder="e.g., Software Engineer, Doctor">
+        </div>
+        <div class="form-group">
+          <label>Company</label>
+          <input type="text" name="company" value="${user.company || ''}" placeholder="e.g., Google, Microsoft">
+        </div>
+        <div class="form-group">
+          <label>University</label>
+          <input type="text" name="university" value="${user.university || ''}" placeholder="e.g., BUET, Dhaka University">
+        </div>
+        <div class="form-group">
+          <label>Graduation Year</label>
+          <input type="text" name="graduationYear" value="${user.graduationYear || ''}" placeholder="e.g., 2020">
+        </div>
+        <div class="form-group">
+          <label>Location</label>
+          <input type="text" name="location" value="${user.location || ''}" placeholder="e.g., Dhaka, Bangladesh">
+        </div>
+        <div class="form-group">
+          <label>Blood Group</label>
+          <select name="bloodGroup">
+            <option value="">Select</option>
+            ${['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => 
+              `<option value="${bg}" ${user.bloodGroup === bg ? 'selected' : ''}>${bg}</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <textarea name="address" rows="2" placeholder="Enter address">${user.address || ''}</textarea>
+        </div>
+        <div class="form-group">
+          <label>Bio</label>
+          <textarea name="bio" rows="3" placeholder="Write a short bio...">${user.bio || ''}</textarea>
+        </div>
+        <div class="form-group">
+          <label>Skills (comma-separated)</label>
+          <input type="text" name="skills" value="${(user.skills || []).join(', ')}" placeholder="e.g., Python, Machine Learning">
+        </div>
+        <div class="form-group">
+          <label>Achievements (comma-separated)</label>
+          <textarea name="achievements" rows="2" placeholder="e.g., Published Papers, Awards">${(user.achievements || []).join(', ')}</textarea>
+        </div>
+        <div class="flex gap-3 justify-end mt-4">
+          <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  document.getElementById('editAlumniForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const data = {
+      firstName: form.firstName.value.trim(),
+      lastName: form.lastName.value.trim(),
+      name: `${form.firstName.value.trim()} ${form.lastName.value.trim()}`,
+      email: form.email.value.trim(),
+      phone: form.phone.value.trim(),
+      profession: form.profession.value.trim(),
+      company: form.company.value.trim(),
+      university: form.university.value.trim(),
+      graduationYear: form.graduationYear.value.trim(),
+      location: form.location.value.trim(),
+      bloodGroup: form.bloodGroup.value,
+      address: form.address.value.trim(),
+      bio: form.bio.value.trim(),
+      skills: form.skills.value.split(',').map(s => s.trim()).filter(Boolean),
+      achievements: form.achievements.value.split(',').map(a => a.trim()).filter(Boolean),
+    };
+
+    const result = await api.updateUser(id, data);
+    if (result && result.ok !== false) {
+      showToast('Profile updated successfully!', 'success');
+      modal.remove();
+      window.location.reload();
+    } else {
+      showToast(result?.error || 'Failed to update profile', 'error');
+    }
+  };
 };
