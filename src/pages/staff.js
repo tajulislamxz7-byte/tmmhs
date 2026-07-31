@@ -397,8 +397,9 @@ window.filterStaff = function(dept, btn) {
   });
 };
 
-window.viewStaffProfile = function(id) {
-  const member = supportStaff.find(s => s.id === id);
+window.viewStaffProfile = async function(id) {
+  const staff = await fetchStaff();
+  const member = staff.find(s => s.id === id);
   if (!member) return;
   const modal = document.createElement('div');
   modal.className = 'modal-overlay';
@@ -416,8 +417,18 @@ window.viewStaffProfile = function(id) {
           <div class="text-muted text-sm">${member.id}</div>
         </div>
         <div class="grid-2 gap-3">
-          ${[['Position',member.position],['Department',member.department],['Joining Date',member.joiningDate],['Status',member.status],['Phone',member.phone]].map(([l,v])=>`
+          ${[['Position',member.position],['Department',member.department],['Phone',member.phone],['Email',member.email]].map(([l,v])=>`
             <div style="background:var(--bg-secondary);border-radius:10px;padding:12px;">
+              <div class="text-xs text-muted">${l}</div>
+              <div class="font-medium text-sm">${v}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+};">
               <div class="text-xs text-muted">${l}</div>
               <div class="font-medium text-sm">${v}</div>
             </div>
