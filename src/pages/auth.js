@@ -169,17 +169,6 @@ const ROLE_CONFIGS = {
       ]},
     ]
   },
-  teacher: {
-    label: 'Teacher', icon: 'graduationCap', fields: [
-      {section:'grid', inputs:[
-        {type:'text', name:'subject', label:'Subject *', required:true, placeholder:'e.g. Mathematics'},
-        {type:'text', name:'qualification', label:'Qualification *', required:true, placeholder:'e.g. MSc, DU'},
-      ]},
-      {section:'grid', inputs:[
-        {type:'number', name:'experience', label:'Experience (years) *', required:true, placeholder:'e.g. 5'},
-      ]},
-    ]
-  },
   alumni: {
     label: 'Alumni', icon: 'globe', fields: [
       {section:'grid', inputs:[
@@ -189,14 +178,6 @@ const ROLE_CONFIGS = {
       {section:'grid', inputs:[
         {type:'text', name:'profession', label:'Profession *', required:true, placeholder:'e.g. Engineer'},
         {type:'text', name:'company', label:'Company', required:false, placeholder:'e.g. Google'},
-      ]},
-    ]
-  },
-  staff: {
-    label: 'Support Staff', icon: 'briefcase', fields: [
-      {section:'grid', inputs:[
-        {type:'select', name:'position', label:'Position *', required:true, opts:['Select','Office Assistant','Librarian','Security Guard','Peon','Cleaner','Lab Assistant','IT Support']},
-        {type:'select', name:'department', label:'Department *', required:true, opts:['Select','Administration','Library','Security','General','Maintenance','Science Lab','ICT']},
       ]},
     ]
   },
@@ -287,7 +268,7 @@ export function renderRegister() {
             Select your role and fill in the details. Your registration will be reviewed by the admissions office.
           </p>
           <div style="display:flex;flex-direction:column;gap:16px;">
-            ${[{n:'1',t:'Choose your role',d:'Student, Teacher, Alumni, or Staff'},{n:'2',t:'Fill in your details',d:'Role-specific information'},{n:'3',t:'Upload documents',d:'Birth certificate for verification'},{n:'4',t:'Admin approval',d:'Usually within 1-2 business days'}].map(s=>`
+            ${[{n:'1',t:'Choose your role',d:'Student or Alumni'},{n:'2',t:'Fill in your details',d:'Role-specific information'},{n:'3',t:'Upload documents',d:'Birth certificate for verification'},{n:'4',t:'Admin approval',d:'Usually within 1-2 business days'}].map(s=>`
               <div style="display:flex;align-items:flex-start;gap:12px;">
                 <div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.2);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;">${s.n}</div>
                 <div>
@@ -307,12 +288,20 @@ export function renderRegister() {
           </button>
 
           <h1 style="font-size:24px;font-weight:800;margin-bottom:4px;">Create Account</h1>
-          <p style="color:var(--text-muted);font-size:13px;margin-bottom:24px;">Choose your role and fill in your details</p>
+          <p style="color:var(--text-muted);font-size:13px;margin-bottom:12px;">Choose your role and fill in your details</p>
+          
+          <!-- Info for teachers/staff -->
+          <div style="background:var(--primary-50);border:1px solid var(--primary-100);border-radius:10px;padding:12px;margin-bottom:20px;">
+            <div style="font-size:12px;color:var(--primary);display:flex;align-items:center;gap:8px;">
+              ${icon('info', 14, 'var(--primary)')}
+              <strong>Teachers & Staff:</strong> Your account must be created by the school administrator. Please contact the admin office.
+            </div>
+          </div>
 
           <div id="regError" style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px;font-size:13px;color:#dc2626;margin-bottom:16px;"></div>
 
           <!-- Role Tabs -->
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:var(--bg-secondary);padding:5px;border-radius:10px;margin-bottom:20px;" id="regRoleTabs">
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;background:var(--bg-secondary);padding:5px;border-radius:10px;margin-bottom:20px;" id="regRoleTabs">
             ${roleTabs}
           </div>
 

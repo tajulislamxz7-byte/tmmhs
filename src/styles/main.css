@@ -242,10 +242,10 @@ ul, ol { list-style: none; }
 
 /* === CARDS === */
 .card {
-  background: var(--bg-primary); border-radius: var(--radius-xl); border: 1.5px solid var(--border);
+  background: var(--bg-primary); border-radius: var(--radius-xl); border: none;
   box-shadow: var(--shadow); overflow: hidden; transition: all var(--transition);
 }
-.card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); border-color: var(--primary-100); }
+.card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); }
 .card-body { padding: var(--space-6); }
 .card-header { padding: var(--space-5) var(--space-6); border-bottom: 1px solid var(--border); }
 .card-footer { padding: var(--space-4) var(--space-6); border-top: 1px solid var(--border); background: var(--bg-secondary); }

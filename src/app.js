@@ -225,6 +225,13 @@ function bindGlobalActions() {
           let user = users.find(u => u.email.toLowerCase() === gUser.email.toLowerCase());
 
           if (!user) {
+            // SECURITY: Block teacher, staff, and principal registration via Google
+            // Only admin can create these accounts
+            if (selectedRole === 'teacher' || selectedRole === 'staff' || selectedRole === 'principal') {
+              showToast('Teachers and staff accounts must be created by the school administrator. Please contact the admin office.', 'error');
+              return;
+            }
+            
             // For students, check if they want to link to existing unlinked account
             if (selectedRole === 'student') {
               const studentId = prompt('Do you have a Student ID from the school? If yes, enter it to link your account.\n\nLeave blank to create a new profile:');
