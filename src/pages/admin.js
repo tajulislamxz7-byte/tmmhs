@@ -49,6 +49,7 @@ const ADMIN_NAV = [
   {key:'notices',     label:'Notices',      icon:'notices'},
   {key:'events',      label:'Events',       icon:'events'},
   {key:'messages',    label:'Messages',     icon:'messages'},
+  {key:'principal',   label:'Principal',    icon:'users2'},
   {key:'roles',       label:'Users',        icon:'roles'},
   {key:'settings',    label:'Settings',     icon:'settings'},
 ];
@@ -150,6 +151,7 @@ function renderAdminTab(tab) {
     case 'notices':      return renderAdminNoticesManager();
     case 'events':       return renderAdminEventsManager();
     case 'results':      return renderAdminResults();
+    case 'principal':    return renderAdminPrincipal();
     case 'settings':     return renderAdminSettings();
     case 'roles':        return renderAdminUsers();
     default:             return renderAdminMain();
@@ -440,7 +442,67 @@ function renderAdminTeachers() {
     <div>
       <div class="flex items-center justify-between mb-6">
         <h1 style="font-size:22px;font-weight:800;">Manage Teachers</h1>
+        <button class="btn btn-primary" onclick="showAddTeacherForm()">
+          ${SVG('<path d="M12 5v14M5 12h14"/>',16,'white')} Add Teacher
+        </button>
       </div>
+      
+      <!-- Add Teacher Form (hidden by default) -->
+      <div id="addTeacherForm" style="display:none;margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header">
+            <div class="flex items-center justify-between">
+              <div class="font-semibold">Create Teacher Account</div>
+              <button class="btn btn-ghost btn-sm" onclick="hideAddTeacherForm()">Cancel</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <form id="teacherForm" onsubmit="handleAddTeacher(event)" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <div class="form-group">
+                <label class="form-label">First Name *</label>
+                <input type="text" name="firstName" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Last Name *</label>
+                <input type="text" name="lastName" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email *</label>
+                <input type="email" name="email" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone *</label>
+                <input type="tel" name="phone" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Subject *</label>
+                <input type="text" name="subject" class="form-input" placeholder="e.g. Mathematics" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Qualification *</label>
+                <input type="text" name="qualification" class="form-input" placeholder="e.g. M.Sc. DU" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Temporary Password *</label>
+                <input type="text" name="password" class="form-input" value="teacher123" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Blood Group</label>
+                <select name="bloodGroup" class="form-input form-select">
+                  <option>Select</option>
+                  <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                  <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                </select>
+              </div>
+              <div style="grid-column:1/-1;display:flex;gap:12px;justify-content:flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="hideAddTeacherForm()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Teacher Account</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      
       <div class="card">
         ${teacherUsers.length === 0
           ? `<div class="card-body text-center text-muted" style="padding:60px;">No teachers registered yet.</div>`
@@ -470,7 +532,75 @@ function renderAdminStaff() {
     <div>
       <div class="flex items-center justify-between mb-6">
         <h1 style="font-size:22px;font-weight:800;">Manage Support Staff</h1>
+        <button class="btn btn-primary" onclick="showAddStaffForm()">
+          ${SVG('<path d="M12 5v14M5 12h14"/>',16,'white')} Add Staff
+        </button>
       </div>
+      
+      <!-- Add Staff Form (hidden by default) -->
+      <div id="addStaffForm" style="display:none;margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header">
+            <div class="flex items-center justify-between">
+              <div class="font-semibold">Create Staff Account</div>
+              <button class="btn btn-ghost btn-sm" onclick="hideAddStaffForm()">Cancel</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <form id="staffForm" onsubmit="handleAddStaff(event)" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <div class="form-group">
+                <label class="form-label">First Name *</label>
+                <input type="text" name="firstName" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Last Name *</label>
+                <input type="text" name="lastName" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email *</label>
+                <input type="email" name="email" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone *</label>
+                <input type="tel" name="phone" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Position *</label>
+                <select name="position" class="form-input form-select" required>
+                  <option>Select</option>
+                  <option>Office Manager</option><option>Librarian</option><option>Security Guard</option>
+                  <option>Lab Assistant</option><option>IT Support</option><option>Peon</option><option>Cleaner</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Department *</label>
+                <select name="department" class="form-input form-select" required>
+                  <option>Select</option>
+                  <option>Administration</option><option>Library</option><option>Security</option>
+                  <option>Science Lab</option><option>ICT</option><option>Maintenance</option><option>General</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Temporary Password *</label>
+                <input type="text" name="password" class="form-input" value="staff123" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Blood Group</label>
+                <select name="bloodGroup" class="form-input form-select">
+                  <option>Select</option>
+                  <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                  <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                </select>
+              </div>
+              <div style="grid-column:1/-1;display:flex;gap:12px;justify-content:flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="hideAddStaffForm()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Staff Account</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      
       <div class="card">
         ${staffUsers.length === 0
           ? `<div class="card-body text-center text-muted" style="padding:60px;">No staff registered yet.</div>`
@@ -488,6 +618,177 @@ function renderAdminStaff() {
             ).join('')}</tbody>
           </table></div>`
         }
+      </div>
+    </div>
+  `;
+}
+function renderAdminPrincipal() {
+  const allUsers = _cache.users;
+  const currentPrincipal = allUsers.find(u => u.role === 'principal' && u.status === 'active');
+  const teachers = allUsers.filter(u => u.role === 'teacher' && u.status === 'active');
+  
+  return `
+    <div>
+      <div class="flex items-center justify-between mb-6">
+        <h1 style="font-size:22px;font-weight:800;">Manage Principal</h1>
+      </div>
+      
+      ${currentPrincipal ? `
+        <!-- Current Principal -->
+        <div class="card" style="margin-bottom:20px;border-left:4px solid var(--success);">
+          <div class="card-header">
+            <div class="flex items-center justify-between">
+              <div class="font-semibold" style="color:var(--success);">
+                ${SVG(ICONS.users2, 16, 'var(--success)')} Current Principal
+              </div>
+              <span class="badge badge-success">Active</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="flex items-center gap-4 mb-4">
+              <img src="${currentPrincipal.avatar}" class="avatar avatar-lg" onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
+              <div>
+                <div style="font-size:18px;font-weight:700;">${currentPrincipal.name}</div>
+                <div style="font-size:13px;color:var(--text-muted);">${currentPrincipal.email}</div>
+                <div style="font-size:12px;color:var(--text-muted);font-family:monospace;">${currentPrincipal.id}</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+              <div>
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">PHONE</div>
+                <div style="font-size:13px;font-weight:600;">${currentPrincipal.phone || '—'}</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">CREATED</div>
+                <div style="font-size:13px;font-weight:600;">${new Date(currentPrincipal.createdAt).toLocaleDateString()}</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-warning" onclick="demotePrincipal('${currentPrincipal.id}', '${currentPrincipal.name}')">
+                ${SVG('<path d="M7 10l5 5 5-5"/>',14,'white')} Demote to Teacher
+              </button>
+              <button class="btn btn-secondary" onclick="adminEditUser('${currentPrincipal.id}')">
+                ${SVG('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',14)} Edit Details
+              </button>
+            </div>
+          </div>
+        </div>
+      ` : `
+        <!-- No Principal -->
+        <div class="card" style="margin-bottom:20px;border-left:4px solid var(--warning);">
+          <div class="card-body" style="text-align:center;padding:40px;">
+            <div style="font-size:48px;margin-bottom:16px;">👤</div>
+            <div style="font-size:18px;font-weight:700;margin-bottom:8px;">No Principal Assigned</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:24px;">
+              Create a new principal account or promote an existing teacher to principal role.
+            </div>
+            <div style="display:flex;gap:12px;justify-content:center;">
+              <button class="btn btn-primary" onclick="showCreatePrincipalForm()">
+                ${SVG('<path d="M12 5v14M5 12h14"/>',16,'white')} Create Principal Account
+              </button>
+              ${teachers.length > 0 ? `
+                <button class="btn btn-secondary" onclick="showPromoteTeacherForm()">
+                  ${SVG('<path d="M7 10l5-5 5 5"/>',16)} Promote Teacher
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `}
+      
+      <!-- Create Principal Form (hidden) -->
+      <div id="createPrincipalForm" style="display:none;margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header">
+            <div class="flex items-center justify-between">
+              <div class="font-semibold">Create New Principal Account</div>
+              <button class="btn btn-ghost btn-sm" onclick="hideCreatePrincipalForm()">Cancel</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div style="padding:12px;background:var(--primary-50);border-radius:8px;border:1px solid var(--primary-100);margin-bottom:16px;">
+              <div style="font-size:12px;color:var(--primary);">
+                ${SVG(ICONS.users2,14,'var(--primary)')} <strong>Note:</strong> Only one principal can be active at a time. This account will have elevated permissions.
+              </div>
+            </div>
+            <form id="principalForm" onsubmit="handleCreatePrincipal(event)" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <div class="form-group">
+                <label class="form-label">First Name *</label>
+                <input type="text" name="firstName" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Last Name *</label>
+                <input type="text" name="lastName" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email *</label>
+                <input type="email" name="email" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone *</label>
+                <input type="tel" name="phone" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Temporary Password *</label>
+                <input type="text" name="password" class="form-input" value="principal123" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Blood Group</label>
+                <select name="bloodGroup" class="form-input form-select">
+                  <option>Select</option>
+                  <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                  <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                </select>
+              </div>
+              <div style="grid-column:1/-1;display:flex;gap:12px;justify-content:flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="hideCreatePrincipalForm()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Principal Account</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Promote Teacher Form (hidden) -->
+      <div id="promoteTeacherForm" style="display:none;margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header">
+            <div class="flex items-center justify-between">
+              <div class="font-semibold">Promote Teacher to Principal</div>
+              <button class="btn btn-ghost btn-sm" onclick="hidePromoteTeacherForm()">Cancel</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div style="padding:12px;background:var(--warning-50);border-radius:8px;border:1px solid var(--warning);margin-bottom:16px;">
+              <div style="font-size:12px;color:var(--text);">
+                ${SVG('<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',14,'var(--warning)')}
+                <strong>Warning:</strong> Promoting a teacher will change their role to principal. This action is logged.
+              </div>
+            </div>
+            <form id="promoteForm" onsubmit="handlePromoteTeacher(event)">
+              <div class="form-group">
+                <label class="form-label">Select Teacher to Promote *</label>
+                <select name="teacherId" class="form-input form-select" required onchange="showTeacherPreview(this.value)">
+                  <option value="">-- Select a teacher --</option>
+                  ${teachers.map(t => `<option value="${t.id}">${t.name} (${t.subject || 'No subject'})</option>`).join('')}
+                </select>
+              </div>
+              <div id="teacherPreview"></div>
+              <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:16px;">
+                <button type="button" class="btn btn-secondary" onclick="hidePromoteTeacherForm()">Cancel</button>
+                <button type="submit" class="btn btn-warning">Promote to Principal</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Activity Log -->
+      <div class="card">
+        <div class="card-header"><div class="font-semibold">Principal Account Activity Log</div></div>
+        <div class="card-body">
+          <div class="text-muted text-sm">Activity logging - Coming soon</div>
+        </div>
       </div>
     </div>
   `;
@@ -1520,6 +1821,214 @@ window.adminDeleteUser = async function(id, name) {
 
   showToast(`${name} has been deleted.`, 'success');
   await _refreshTab(adminTab);
+};
+
+// ── Add Teacher/Staff Functions ──
+window.showAddTeacherForm = function() {
+  document.getElementById('addTeacherForm').style.display = 'block';
+  document.getElementById('teacherForm').reset();
+};
+
+window.hideAddTeacherForm = function() {
+  document.getElementById('addTeacherForm').style.display = 'none';
+};
+
+window.handleAddTeacher = async function(e) {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData);
+  
+  const teacherData = {
+    firstName: data.firstName,
+    lastName: data.lastName,
+    email: data.email,
+    phone: data.phone,
+    password: data.password,
+    role: 'teacher',
+    subject: data.subject,
+    qualification: data.qualification,
+    bloodGroup: data.bloodGroup === 'Select' ? '' : data.bloodGroup,
+  };
+  
+  const result = await api.register(teacherData);
+  
+  if (!result.ok) {
+    showToast(result.error || 'Failed to create teacher account', 'error');
+    return;
+  }
+  
+  showToast(`Teacher account created! Email: ${data.email}, Password: ${data.password}`, 'success');
+  hideAddTeacherForm();
+  await _refreshTab('teachers');
+};
+
+window.showAddStaffForm = function() {
+  document.getElementById('addStaffForm').style.display = 'block';
+  document.getElementById('staffForm').reset();
+};
+
+window.hideAddStaffForm = function() {
+  document.getElementById('addStaffForm').style.display = 'none';
+};
+
+window.handleAddStaff = async function(e) {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData);
+  
+  const staffData = {
+    firstName: data.firstName,
+    lastName: data.lastName,
+    email: data.email,
+    phone: data.phone,
+    password: data.password,
+    role: 'staff',
+    position: data.position === 'Select' ? '' : data.position,
+    department: data.department === 'Select' ? '' : data.department,
+    bloodGroup: data.bloodGroup === 'Select' ? '' : data.bloodGroup,
+  };
+  
+  const result = await api.register(staffData);
+  
+  if (!result.ok) {
+    showToast(result.error || 'Failed to create staff account', 'error');
+    return;
+  }
+  
+  showToast(`Staff account created! Email: ${data.email}, Password: ${data.password}`, 'success');
+  hideAddStaffForm();
+  await _refreshTab('staff');
+};
+
+// ── Manage Principal Functions ──
+window.showCreatePrincipalForm = function() {
+  document.getElementById('createPrincipalForm').style.display = 'block';
+  document.getElementById('principalForm').reset();
+};
+
+window.hideCreatePrincipalForm = function() {
+  document.getElementById('createPrincipalForm').style.display = 'none';
+};
+
+window.handleCreatePrincipal = async function(e) {
+  e.preventDefault();
+  
+  // Check if principal already exists
+  const existingPrincipal = _cache.users.find(u => u.role === 'principal' && u.status === 'active');
+  if (existingPrincipal) {
+    showToast('A principal already exists. Please demote them first.', 'error');
+    return;
+  }
+  
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData);
+  
+  const principalData = {
+    firstName: data.firstName,
+    lastName: data.lastName,
+    email: data.email,
+    phone: data.phone,
+    password: data.password,
+    role: 'principal',
+    bloodGroup: data.bloodGroup === 'Select' ? '' : data.bloodGroup,
+  };
+  
+  const result = await api.register(principalData);
+  
+  if (!result.ok) {
+    showToast(result.error || 'Failed to create principal account', 'error');
+    return;
+  }
+  
+  showToast(`Principal account created! Email: ${data.email}, Password: ${data.password}`, 'success');
+  hideCreatePrincipalForm();
+  await _refreshTab('principal');
+};
+
+window.showPromoteTeacherForm = function() {
+  document.getElementById('promoteTeacherForm').style.display = 'block';
+  document.getElementById('teacherPreview').innerHTML = '';
+};
+
+window.hidePromoteTeacherForm = function() {
+  document.getElementById('promoteTeacherForm').style.display = 'none';
+};
+
+window.showTeacherPreview = function(teacherId) {
+  if (!teacherId) {
+    document.getElementById('teacherPreview').innerHTML = '';
+    return;
+  }
+  
+  const teacher = _cache.users.find(u => u.id === teacherId);
+  if (!teacher) return;
+  
+  document.getElementById('teacherPreview').innerHTML = `
+    <div style="padding:16px;background:var(--bg-secondary);border-radius:8px;margin-top:12px;">
+      <div class="flex items-center gap-3">
+        <img src="${teacher.avatar}" class="avatar avatar-md" onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
+        <div>
+          <div style="font-weight:700;">${teacher.name}</div>
+          <div style="font-size:12px;color:var(--text-muted);">${teacher.email}</div>
+          <div style="font-size:11px;color:var(--text-muted);">Subject: ${teacher.subject || 'N/A'} · Qualification: ${teacher.qualification || 'N/A'}</div>
+        </div>
+      </div>
+    </div>
+  `;
+};
+
+window.handlePromoteTeacher = async function(e) {
+  e.preventDefault();
+  
+  // Check if principal already exists
+  const existingPrincipal = _cache.users.find(u => u.role === 'principal' && u.status === 'active');
+  if (existingPrincipal) {
+    showToast('A principal already exists. Please demote them first.', 'error');
+    return;
+  }
+  
+  const formData = new FormData(e.target);
+  const teacherId = formData.get('teacherId');
+  
+  if (!teacherId) {
+    showToast('Please select a teacher', 'error');
+    return;
+  }
+  
+  const teacher = _cache.users.find(u => u.id === teacherId);
+  if (!teacher) {
+    showToast('Teacher not found', 'error');
+    return;
+  }
+  
+  const confirmed = await confirmDialog(
+    `Promote ${teacher.name} to Principal? This will change their role and grant them elevated permissions.`,
+    'Promote to Principal'
+  );
+  
+  if (!confirmed) return;
+  
+  // Update user role
+  await api.updateUser(teacherId, { role: 'principal' });
+  
+  showToast(`${teacher.name} has been promoted to Principal!`, 'success');
+  hidePromoteTeacherForm();
+  await _refreshTab('principal');
+};
+
+window.demotePrincipal = async function(principalId, principalName) {
+  const confirmed = await confirmDialog(
+    `Demote ${principalName} back to Teacher role? They will lose principal permissions.`,
+    'Demote Principal'
+  );
+  
+  if (!confirmed) return;
+  
+  // Update user role back to teacher
+  await api.updateUser(principalId, { role: 'teacher' });
+  
+  showToast(`${principalName} has been demoted to Teacher`, 'success');
+  await _refreshTab('principal');
 };
 
 // ── Batch Management ──
