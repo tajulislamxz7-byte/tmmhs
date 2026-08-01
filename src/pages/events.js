@@ -29,10 +29,12 @@ export function renderEvents() {
       </div>
       <div class="container section-sm">
         <!-- Category Filters -->
-        <div class="flex gap-2 mb-6 overflow-x-auto" style="padding-bottom:4px;">
-          ${['All','Academic','Sports','Tour','Farewell','Reunion','Prize Giving'].map(cat=>`
-            <button class="search-filter ${cat==='All'?'active':''}" onclick="filterEvents('${cat}',this)">${cat}</button>
-          `).join('')}
+        <div class="filters-scroll-container" style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 calc(-1 * var(--space-4));padding:0 var(--space-4) 4px var(--space-4);">
+          <div class="flex gap-2 mb-6" style="min-width:max-content;">
+            ${['All','Academic','Sports','Tour','Farewell','Reunion','Prize Giving'].map(cat=>`
+              <button class="search-filter ${cat==='All'?'active':''}" onclick="filterEvents('${cat}',this)">${cat}</button>
+            `).join('')}
+          </div>
         </div>
 
         <!-- Events Grid -->

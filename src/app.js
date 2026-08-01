@@ -570,39 +570,68 @@ function bindGlobalActions() {
   };
 
   // ── Nav ──
+  // Store overlay click handler reference
+  let overlayClickHandler = null;
+
   window.toggleMobileMenu = function() {
     const menu = document.getElementById('mobileMenu');
     const hamburger = document.getElementById('hamburgerBtn');
+    const userDropdown = document.getElementById('userDropdown');
     
     if (!menu) {
       console.error('Mobile menu element not found');
       return;
     }
     
-    const isCurrentlyHidden = menu.classList.contains('hidden') || menu.style.display === 'none';
+    const isCurrentlyHidden = menu.classList.contains('hidden');
     
     if (isCurrentlyHidden) {
-      // Show menu
+      // Hide user dropdown if open
+      if (userDropdown) {
+        userDropdown.classList.add('hidden');
+      }
+      
+      // Show menu (slide in)
       menu.classList.remove('hidden');
-      menu.style.display = 'block';
       document.body.style.overflow = 'hidden';
       
-      // Change hamburger to X icon
+      // Add active class to hamburger for animation
       if (hamburger) {
-        hamburger.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+        hamburger.classList.add('active');
       }
+      
+      // Add overlay click handler after a delay to prevent immediate triggering
+      setTimeout(() => {
+        overlayClickHandler = (e) => {
+          const menuElement = document.getElementById('mobileMenu');
+          const hamburgerElement = document.getElementById('hamburgerBtn');
+          
+          // Close menu if clicking outside (not on menu or hamburger)
+          if (menuElement && 
+              !menuElement.contains(e.target) && 
+              hamburgerElement && 
+              !hamburgerElement.contains(e.target)) {
+            window.toggleMobileMenu();
+          }
+        };
+        document.addEventListener('click', overlayClickHandler);
+      }, 300);
+      
     } else {
-      // Hide menu
+      // Hide menu (slide out)
       menu.classList.add('hidden');
-      menu.style.display = 'none';
       document.body.style.overflow = '';
       
-      // Change back to hamburger icon
-      if (hamburger) {
-        hamburger.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
+      // Remove overlay click handler
+      if (overlayClickHandler) {
+        document.removeEventListener('click', overlayClickHandler);
+        overlayClickHandler = null;
       }
       
-      console.log('✅ Menu closed');
+      // Remove active class from hamburger
+      if (hamburger) {
+        hamburger.classList.remove('active');
+      }
     }
   };
 

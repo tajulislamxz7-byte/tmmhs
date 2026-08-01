@@ -143,16 +143,21 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
         </div>
         `}
 
-        <!-- Hamburger -->
-        <button class="hamburger" onclick="toggleMobileMenu()" id="hamburgerBtn">
-          ${icon('menu', 22)}
+        <!-- Animated Hamburger -->
+        <button class="hamburger" onclick="event.stopPropagation();toggleMobileMenu()" id="hamburgerBtn">
+          <div class="hamburger-inner">
+            <span class="hamburger-line hamburger-line-1"></span>
+            <span class="hamburger-line hamburger-line-2"></span>
+            <span class="hamburger-line hamburger-line-3"></span>
+            <span class="hamburger-arrow"></span>
+          </div>
         </button>
       </div>
     </div>
   </nav>
   
   <!-- Mobile Menu (outside navbar) -->
-  <div class="mobile-menu hidden" id="mobileMenu">
+  <div class="mobile-menu hidden" id="mobileMenu" onclick="event.stopPropagation()">
     <div class="mobile-menu-inner">
       ${isLoggedIn && user ? `
       <div class="user-profile-section">
@@ -163,41 +168,41 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
         </div>
       </div>` : ''}
 
-      <div class="mobile-nav-link" onclick="navigate('home');toggleMobileMenu()">${icon('home',20)} Home</div>
-      <div class="mobile-nav-link" onclick="navigate('about');toggleMobileMenu()">${icon('info',20)} About</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('home')"><span class="mobile-nav-emoji">🏠</span> Home</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('about')"><span class="mobile-nav-emoji">ℹ️</span> About</div>
       
       <div class="mobile-menu-section-title">People</div>
-      <div class="mobile-nav-link" onclick="navigate('students');toggleMobileMenu()">${icon('users',20)} Students</div>
-      <div class="mobile-nav-link" onclick="navigate('teachers');toggleMobileMenu()">${icon('graduationCap',20)} Teachers</div>
-      <div class="mobile-nav-link" onclick="navigate('staff');toggleMobileMenu()">${icon('briefcase',20)} Support Staff</div>
-      <div class="mobile-nav-link" onclick="navigate('alumni');toggleMobileMenu()">${icon('globe',20)} Alumni</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('students')"><span class="mobile-nav-emoji">👨‍🎓</span> Students</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('teachers')"><span class="mobile-nav-emoji">👨‍🏫</span> Teachers</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('staff')"><span class="mobile-nav-emoji">👔</span> Support Staff</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('alumni')"><span class="mobile-nav-emoji">🎓</span> Alumni</div>
       
       <div class="mobile-menu-section-title">Academic</div>
-      <div class="mobile-nav-link" onclick="navigate('batches');toggleMobileMenu()">${icon('bookOpen',20)} Batches</div>
-      <div class="mobile-nav-link" onclick="navigate('results');toggleMobileMenu()">${icon('fileText',20)} Results</div>
-      <div class="mobile-nav-link" onclick="navigate('assignments');toggleMobileMenu()">${icon('clipboardList',20)} Assignments</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('batches')"><span class="mobile-nav-emoji">📚</span> Batches</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('results')"><span class="mobile-nav-emoji">📊</span> Results</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('assignments')"><span class="mobile-nav-emoji">📝</span> Assignments</div>
       
       <div class="mobile-menu-section-title">Updates</div>
-      <div class="mobile-nav-link" onclick="navigate('notices');toggleMobileMenu()">${icon('bell',20)} Notices</div>
-      <div class="mobile-nav-link" onclick="navigate('events');toggleMobileMenu()">${icon('calendar',20)} Events</div>
-      <div class="mobile-nav-link" onclick="navigate('gallery');toggleMobileMenu()">${icon('image',20)} Gallery</div>
-      <div class="mobile-nav-link" onclick="navigate('admission');toggleMobileMenu()">${icon('clipboardList',20)} Admission</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('notices')"><span class="mobile-nav-emoji">📢</span> Notices</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('events')"><span class="mobile-nav-emoji">🎉</span> Events</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('gallery')"><span class="mobile-nav-emoji">🖼️</span> Gallery</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('admission')"><span class="mobile-nav-emoji">📋</span> Admission</div>
 
       ${isLoggedIn ? `
       <div class="mobile-menu-section-title">Account</div>
-      <div class="mobile-nav-link" onclick="navigate('messages');toggleMobileMenu()">${icon('messageSquare',20)} Messages</div>
-      ${role==='student'?`<div class="mobile-nav-link" onclick="navigate('student-dashboard');toggleMobileMenu()">${icon('layout',20)} My Dashboard</div>`:''}
-      ${role==='teacher'?`<div class="mobile-nav-link" onclick="navigate('teacher-dashboard');toggleMobileMenu()">${icon('layout',20)} My Dashboard</div>`:''}
-      ${role==='alumni'?`<div class="mobile-nav-link" onclick="navigate('alumni-dashboard');toggleMobileMenu()">${icon('layout',20)} My Dashboard</div>`:''}
-      ${role==='staff'?`<div class="mobile-nav-link" onclick="navigate('staff-dashboard');toggleMobileMenu()">${icon('layout',20)} My Dashboard</div>`:''}
-      ${role==='admin'?`<div class="mobile-nav-link" onclick="navigate('admin');toggleMobileMenu()">${icon('settings',20)} Admin Panel</div>`:''}
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('messages')"><span class="mobile-nav-emoji">💬</span> Messages</div>
+      ${role==='student'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('student-dashboard')"><span class="mobile-nav-emoji">📱</span> My Dashboard</div>`:''}
+      ${role==='teacher'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('teacher-dashboard')"><span class="mobile-nav-emoji">📱</span> My Dashboard</div>`:''}
+      ${role==='alumni'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('alumni-dashboard')"><span class="mobile-nav-emoji">📱</span> My Dashboard</div>`:''}
+      ${role==='staff'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('staff-dashboard')"><span class="mobile-nav-emoji">📱</span> My Dashboard</div>`:''}
+      ${role==='admin'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('admin')"><span class="mobile-nav-emoji">⚙️</span> Admin Panel</div>`:''}
       <div class="buttons-container">
         <button class="btn btn-danger w-full" onclick="signOut()">${icon('logOut',16)} Sign Out</button>
       </div>
       ` : `
       <div class="buttons-container">
-        <button class="btn btn-secondary w-full" onclick="navigate('login');toggleMobileMenu()">${icon('logIn',16)} Sign In</button>
-        <button class="btn btn-primary w-full" onclick="navigate('register');toggleMobileMenu()">${icon('plus',16)} Register</button>
+        <button class="btn btn-secondary w-full" onclick="toggleMobileMenu();navigate('login')">${icon('logIn',16)} Sign In</button>
+        <button class="btn btn-primary w-full" onclick="toggleMobileMenu();navigate('register')">${icon('plus',16)} Register</button>
       </div>
       `}
     </div>
