@@ -168,34 +168,34 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
         </div>
       </div>` : ''}
 
-      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('home')"><span class="mobile-nav-emoji">&#x1F3E0;</span> Home</div>
-      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('about')"><span class="mobile-nav-emoji">&#x2139;&#xFE0F;</span> About</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('home')">${icon('home', 18)} Home</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('about')">${icon('info', 18)} About</div>
       
       <div class="mobile-menu-section-title">People</div>
-      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('students')"><span class="mobile-nav-emoji">&#x1F9D1;&#x200D;&#x1F393;</span> Students</div>
-      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('teachers')"><span class="mobile-nav-emoji">&#x1F9D1;&#x200D;&#x1F3EB;</span> Teachers</div>
-      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('staff')"><span class="mobile-nav-emoji">&#x1F454;</span> Support Staff</div>
-      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('alumni')"><span class="mobile-nav-emoji">&#x1F393;</span> Alumni</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('students')">${icon('users', 18)} Students</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('teachers')">${icon('graduationCap', 18)} Teachers</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('staff')">${icon('briefcase', 18)} Support Staff</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('alumni')">${icon('award', 18)} Alumni</div>
       
       <div class="mobile-menu-section-title">Academic</div>
-      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('batches')"><span class="mobile-nav-emoji">&#x1F4DA;</span> Batches</div>
-      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('results')"><span class="mobile-nav-emoji">&#x1F4CA;</span> Results</div>
-      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('assignments')"><span class="mobile-nav-emoji">&#x1F4DD;</span> Assignments</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('batches')">${icon('bookOpen', 18)} Batches</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('results')">${icon('trendingUp', 18)} Results</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('assignments')">${icon('clipboardList', 18)} Assignments</div>
       
       <div class="mobile-menu-section-title">Updates</div>
-      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('notices')"><span class="mobile-nav-emoji">&#x1F4E2;</span> Notices</div>
-      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('events')"><span class="mobile-nav-emoji">&#x1F389;</span> Events</div>
-      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('gallery')"><span class="mobile-nav-emoji">&#x1F5BC;&#xFE0F;</span> Gallery</div>
-      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('admission')"><span class="mobile-nav-emoji">&#x1F4CB;</span> Admission</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('notices')">${icon('bell', 18)} Notices</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('events')">${icon('calendar', 18)} Events</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('gallery')">${icon('image', 18)} Gallery</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('admission')">${icon('fileText', 18)} Admission</div>
 
       ${isLoggedIn ? `
       <div class="mobile-menu-section-title">Account</div>
-      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('messages')"><span class="mobile-nav-emoji">&#x1F4AC;</span> Messages</div>
-      ${role==='student'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('student-dashboard')"><span class="mobile-nav-emoji">&#x1F4F1;</span> My Dashboard</div>`:''}
-      ${role==='teacher'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('teacher-dashboard')"><span class="mobile-nav-emoji">&#x1F4F1;</span> My Dashboard</div>`:''}
-      ${role==='alumni'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('alumni-dashboard')"><span class="mobile-nav-emoji">&#x1F4F1;</span> My Dashboard</div>`:''}
-      ${role==='staff'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('staff-dashboard')"><span class="mobile-nav-emoji">&#x1F4F1;</span> My Dashboard</div>`:''}
-      ${role==='admin'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('admin')"><span class="mobile-nav-emoji">&#x2699;&#xFE0F;</span> Admin Panel</div>`:''}
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('messages')">${icon('messageSquare', 18)} Messages</div>
+      ${role==='student'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('student-dashboard')">${icon('layout', 18)} My Dashboard</div>`:''}
+      ${role==='teacher'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('teacher-dashboard')">${icon('layout', 18)} My Dashboard</div>`:''}
+      ${role==='alumni'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('alumni-dashboard')">${icon('layout', 18)} My Dashboard</div>`:''}
+      ${role==='staff'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('staff-dashboard')">${icon('layout', 18)} My Dashboard</div>`:''}
+      ${role==='admin'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('admin')">${icon('settings', 18)} Admin Panel</div>`:''}
       <div class="buttons-container">
         <button class="btn btn-danger w-full" onclick="signOut()">${icon('logOut',16)} Sign Out</button>
       </div>
