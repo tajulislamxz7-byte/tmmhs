@@ -9,7 +9,7 @@ import { api } from '../utils/api.js';
 async function fetchTeachers() {
   const apiUsers = await api.getUsers();
   const users = apiUsers || JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
-  return users.filter(u => u.role === 'teacher' && u.status === 'active').map(t => ({
+  return users.filter(u => (u.role === 'teacher' || u.role === 'principal') && u.status === 'active').map(t => ({
     id: t.id,
     name: t.name,
     email: t.email,
@@ -91,7 +91,7 @@ function renderTeacherCard(t) {
 export async function renderTeacherProfile(teacherId) {
   const teachers = await fetchTeachers();
   const teacher = teachers.find(t => t.id === teacherId);
-  if (!teacher) return `<div class="container section-sm"><div class="card"><div class="card-body text-center text-muted">Teacher not found.</div></div></div>`;
+  if (!teacher) return `<div class="container section-sm"><div class="card"><div class="card-body text-center text-muted">Profile not found.</div></div></div>`;
   return `
     <div class="page-container">
       <div class="profile-hero">

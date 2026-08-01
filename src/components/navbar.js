@@ -113,6 +113,9 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
             ` : role === 'teacher' ? `
             <div class="dropdown-item" onclick="navigate('teacher-dashboard')" style="cursor:pointer;">${icon('layout', 14)} <span>Dashboard</span></div>
             <div class="dropdown-item" onclick="navigate('teacher-profile','${user.id}')" style="cursor:pointer;">${icon('user', 14)} <span>My Profile</span></div>
+            ` : role === 'principal' ? `
+            <div class="dropdown-item" onclick="navigate('teacher-profile','${user.id}')" style="cursor:pointer;">${icon('user', 14)} <span>My Profile</span></div>
+            <div class="dropdown-item" onclick="navigate('about')" style="cursor:pointer;">${icon('info', 14)} <span>School Overview</span></div>
             ` : role === 'alumni' ? `
             <div class="dropdown-item" onclick="navigate('alumni-dashboard')" style="cursor:pointer;">${icon('layout', 14)} <span>Dashboard</span></div>
             <div class="dropdown-item" onclick="navigate('alumni')" style="cursor:pointer;">${icon('users', 14)} <span>Alumni Network</span></div>
@@ -122,6 +125,7 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
             ` : ''}
             <div class="dropdown-item" onclick="navigate('messages')" style="cursor:pointer;">${icon('messageSquare', 14)} <span>Messages</span></div>
             ${role === 'admin' ? `<div class="dropdown-item" onclick="navigate('admin')" style="cursor:pointer;">${icon('settings', 14)} <span>Admin Panel</span></div>` : ''}
+            ${role === 'principal' ? `<div class="dropdown-item" onclick="navigate('admin')" style="cursor:pointer;">${icon('eye', 14)} <span>View Admin Panel</span></div>` : ''}
             <div class="divider"></div>
             <div class="dropdown-item" onclick="signOut()" style="cursor:pointer;color:var(--danger);">${icon('logOut', 14)} <span>Sign Out</span></div>
           </div>

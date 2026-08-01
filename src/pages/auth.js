@@ -5,6 +5,125 @@
 import { classes, batches } from '../data/schoolConfig.js';
 import { icon } from '../utils/icons.js';
 
+export function renderPrincipalLogin() {
+  return `
+  <div class="auth-page">
+    <div class="auth-bg" style="background:linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);">
+      <div class="auth-shape auth-shape-1"></div>
+      <div class="auth-shape auth-shape-2"></div>
+    </div>
+    <div class="auth-container">
+
+      <!-- Left brand panel -->
+      <div class="auth-left hide-mobile">
+        <div class="auth-left-content">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px;">
+            <svg width="48" height="48" viewBox="0 0 34 34" fill="none">
+              <rect width="34" height="34" rx="10" fill="white" opacity="0.15"/>
+              <path d="M7 26L17 9L27 26H7Z" fill="white" opacity="0.9"/>
+              <circle cx="17" cy="19" r="4.5" fill="rgba(255,255,255,0.6)"/>
+            </svg>
+            <div>
+              <div style="font-size:22px;font-weight:800;color:white;">Tiarkhali M.M High School</div>
+              <div style="font-size:13px;color:rgba(255,255,255,0.6);">Principal Portal</div>
+            </div>
+          </div>
+          <h2 style="font-size:30px;font-weight:800;color:white;line-height:1.2;margin-bottom:16px;">
+            Principal<br>Management Portal
+          </h2>
+          <p style="color:rgba(255,255,255,0.75);font-size:14px;line-height:1.9;margin-bottom:32px;">
+            Secure access to institutional management,<br>oversight, and administrative tools.
+          </p>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            ${[
+              ['Oversee All Operations', 'eye'],
+              ['Manage Staff & Teachers', 'users'],
+              ['Review Student Reports', 'fileText'],
+              ['Publish School Notices', 'bell'],
+            ].map(([label, ico]) => `
+              <div style="display:flex;align-items:center;gap:10px;color:rgba(255,255,255,0.9);font-size:13px;">
+                <span style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;background:rgba(255,255,255,0.15);border-radius:8px;flex-shrink:0;">
+                  ${icon(ico, 14, 'white')}
+                </span>
+                ${label}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- Right form panel -->
+      <div class="auth-right">
+        <div class="auth-form-container">
+          <button onclick="navigate('home')" style="display:inline-flex;align-items:center;gap:6px;color:var(--text-muted);font-size:13px;background:none;border:none;cursor:pointer;margin-bottom:28px;padding:0;">
+            ${icon('arrowLeft', 14)} Back to Home
+          </button>
+
+          <!-- Principal Badge -->
+          <div style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg, #fbbf24, #f59e0b);padding:6px 14px;border-radius:20px;margin-bottom:16px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+            <span style="color:white;font-size:11px;font-weight:700;letter-spacing:0.5px;">PRINCIPAL ACCESS</span>
+          </div>
+
+          <h1 style="font-size:26px;font-weight:800;margin-bottom:6px;">Principal Sign In</h1>
+          <p style="color:var(--text-muted);font-size:13px;margin-bottom:24px;">
+            Enter your credentials to access the principal dashboard
+          </p>
+
+          <!-- Security Notice -->
+          <div style="background:var(--warning-50);border:1px solid var(--warning);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--text-primary);margin-bottom:20px;display:flex;gap:8px;">
+            ${icon('shield', 14, 'var(--warning)')}
+            <div>
+              <strong>Secure Login</strong>
+              <div style="margin-top:2px;color:var(--text-muted);">Only authorized principal accounts can access this portal. All login attempts are logged.</div>
+            </div>
+          </div>
+
+          <!-- Error msg -->
+          <div id="principalLoginError" style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 14px;font-size:13px;color:#dc2626;margin-bottom:16px;">
+            ${icon('alertTriangle', 14, '#dc2626')} <span id="principalLoginErrorText"></span>
+          </div>
+
+          <form id="principalLoginForm" onsubmit="handlePrincipalLogin(event)" style="display:flex;flex-direction:column;gap:16px;">
+            <div class="form-group">
+              <label class="form-label" style="display:flex;align-items:center;gap:6px;">
+                ${icon('mail', 13)} Email Address
+              </label>
+              <input type="email" id="principalLoginEmail" class="form-input" placeholder="principal@school.com" required autocomplete="email">
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="display:flex;align-items:center;gap:6px;">
+                ${icon('lock', 13)} Password
+              </label>
+              <div style="position:relative;">
+                <input type="password" id="principalLoginPassword" class="form-input" placeholder="Enter your password" required autocomplete="current-password" style="padding-right:44px;">
+                <button type="button" onclick="togglePassword('principalLoginPassword','eyePrincipalBtn')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;" id="eyePrincipalBtn">
+                  ${icon('eye', 16)}
+                </button>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-lg w-full" style="background:linear-gradient(135deg, #1e40af, #7c3aed);border:none;">
+              ${icon('logIn', 16, 'white')} Sign In as Principal
+            </button>
+          </form>
+
+          <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:20px;">
+            Need access? Contact the school administrator
+          </p>
+
+          <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:12px;">
+            <button onclick="navigate('login')" style="color:var(--primary);font-weight:600;background:none;border:none;cursor:pointer;">
+              Sign in as Student/Teacher →
+            </button>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
 export function renderLogin() {
   return `
   <div class="auth-page">

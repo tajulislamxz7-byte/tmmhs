@@ -9,7 +9,7 @@ import { renderFooter }         from './components/footer.js';
 import { renderSearchModal, initSearch } from './components/search.js';
 import { renderHome, renderHomeExtra }   from './pages/home.js';
 import { renderStudents, renderStudentProfile } from './pages/students.js';
-import { renderLogin, renderRegister, renderForgotPassword, renderResetPassword } from './pages/auth.js';
+import { renderLogin, renderRegister, renderForgotPassword, renderResetPassword, renderPrincipalLogin } from './pages/auth.js';
 import { renderTeachers, renderTeacherProfile, renderTeacherDashboard } from './pages/teachers.js';
 import { renderAlumni, renderAlumniDashboard }         from './pages/alumni.js';
 import { renderBatches, renderBatchDetail } from './pages/batches.js';
@@ -21,6 +21,7 @@ import { renderMessages, startMessagesPolling, stopMessagesPolling } from './pag
 import { renderAbout }          from './pages/about.js';
 import { renderAdminDashboard } from './pages/admin.js';
 import { renderStaff, renderStaffDashboard }          from './pages/staff.js';
+import { renderPrincipalDashboard } from './pages/principal.js';
 import { renderAdmission }      from './pages/admission.js';
 import { renderComplaintBox }   from './pages/complaints.js';
 import { icon } from './utils/icons.js';
@@ -31,9 +32,10 @@ import { generateStudentIDCard } from './utils/idCardGenerator.js';
 let currentPage  = 'home';
 let currentParam = null;
 
-const AUTH_PAGES       = ['login', 'register', 'forgot-password', 'reset-password'];
-const PROTECTED_PAGES  = ['student-dashboard','teacher-dashboard','messages','notifications'];
+const AUTH_PAGES       = ['login', 'register', 'forgot-password', 'reset-password', 'principal-login'];
+const PROTECTED_PAGES  = ['student-dashboard','teacher-dashboard','messages','notifications','principal-dashboard'];
 const ADMIN_PAGES      = ['admin'];
+const PRINCIPAL_PAGES  = ['principal-dashboard'];
 
 // ── Router ─────────────────────────────────────────
 window.navigate = function(page, param = null) {
@@ -55,6 +57,11 @@ window.navigate = function(page, param = null) {
 
   if (ADMIN_PAGES.includes(page) && user?.role !== 'admin') {
     showToast('Admin access required.', 'error');
+    return;
+  }
+
+  if (PRINCIPAL_PAGES.includes(page) && user?.role !== 'principal') {
+    showToast('Principal access required.', 'error');
     return;
   }
 
@@ -102,6 +109,14 @@ async function render() {
     const html = await renderAdminDashboard();
     pageRoot.innerHTML = html;
     bindGlobalActions();
+  } else if (currentPage === 'principal-dashboard') {
+    pageRoot.innerHTML = `<div class="container section-sm text-center" style="padding:60px 0;"><div class="text-muted">Loading principal dashboard...</div></div>`;
+    pageRoot.style.paddingTop = '0';
+    footerRoot.innerHTML = '';
+    bindGlobalActions();
+    const html = await renderPrincipalDashboard();
+    pageRoot.innerHTML = html;
+    bindGlobalActions();
   } else {
     pageRoot.innerHTML = `<div class="container section-sm text-center" style="padding:60px 0;"><div class="text-muted">Loading...</div></div>`;
     const html = await getPageContent(user, role);
@@ -147,6 +162,7 @@ async function getPageContent(user, role) {
     case 'complaints':        return renderComplaintBox();
     case 'notifications':     return await renderNotificationsPage();
     case 'login':             return renderLogin();
+    case 'principal-login':   return renderPrincipalLogin();
     case 'register':          return renderRegister();
     case 'forgot-password':   return renderForgotPassword();
     case 'reset-password':    return renderResetPassword();
@@ -188,10 +204,51 @@ function bindGlobalActions() {
 
     showToast(`Welcome back, ${result.user.name.split(' ')[0]}!`, 'success');
     if (result.user.role === 'admin') navigate('admin');
+    else if (result.user.role === 'principal') navigate('teacher-profile', result.user.id);
     else if (result.user.role === 'teacher') navigate('teacher-dashboard');
     else if (result.user.role === 'alumni') navigate('alumni-dashboard');
     else if (result.user.role === 'staff') navigate('staff-dashboard');
     else navigate('student-dashboard');
+  };
+
+  window.handlePrincipalLogin = async function(e) {
+    e.preventDefault();
+    const email    = document.getElementById('principalLoginEmail')?.value?.trim();
+    const password = document.getElementById('principalLoginPassword')?.value;
+    const errBox   = document.getElementById('principalLoginError');
+    const errText  = document.getElementById('principalLoginErrorText');
+    const btn      = document.querySelector('#principalLoginForm button[type="submit"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Verifying...'; }
+
+    const result = await auth.login(email, password);
+
+    if (btn) { btn.disabled = false; btn.textContent = 'Sign In as Principal'; }
+
+    if (!result.ok) {
+      if (errBox && errText) {
+        errText.textContent = result.error;
+        errBox.style.display = 'flex';
+        errBox.style.gap = '8px';
+        errBox.style.alignItems = 'center';
+      }
+      return;
+    }
+
+    // Security check: Only allow principal role
+    if (result.user.role !== 'principal') {
+      if (errBox && errText) {
+        errText.textContent = 'Access denied. This portal is only for principal accounts.';
+        errBox.style.display = 'flex';
+        errBox.style.gap = '8px';
+        errBox.style.alignItems = 'center';
+      }
+      // Logout the non-principal user
+      auth.logout();
+      return;
+    }
+
+    showToast(`Welcome back, ${result.user.name.split(' ')[0]}!`, 'success');
+    navigate('teacher-profile', result.user.id);
   };
 
   window.handleGoogleLogin = function() {
@@ -309,6 +366,7 @@ function bindGlobalActions() {
 
           showToast(`Welcome, ${user.name.split(' ')[0]}!`, 'success');
           if (user.role === 'admin') navigate('admin');
+          else if (user.role === 'principal') navigate('teacher-profile', user.id);
           else if (user.role === 'teacher') navigate('teacher-dashboard');
           else if (user.role === 'alumni') navigate('alumni-dashboard');
           else if (user.role === 'staff') navigate('staff-dashboard');

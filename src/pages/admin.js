@@ -328,7 +328,7 @@ function _alumniRow(a) {
 
 function _pendingUserRow(u) {
   const approveIcon = SVG('<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>', 13, 'white');
-  const roleBadge = u.role==='teacher'?'purple':u.role==='alumni'?'success':u.role==='staff'?'gray':'primary';
+  const roleBadge = u.role==='principal'?'warning':u.role==='teacher'?'purple':u.role==='alumni'?'success':u.role==='staff'?'gray':'primary';
   return '<tr>'
     + '<td><div style="display:flex;align-items:center;gap:10px;"><img src="'+u.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://i.imgur.com/x9wE0QT.png\'"><div><div class="font-semibold text-sm">'+u.name+'</div><div class="text-xs text-muted">'+u.id+'</div></div></div></td>'
     + '<td><span class="badge badge-'+roleBadge+'" style="text-transform:capitalize;">'+u.role+'</span></td>'
@@ -343,7 +343,7 @@ function _pendingUserRow(u) {
 }
 
 function _activeUserRow(u) {
-  const roleBadge = u.role==='admin'?'danger':u.role==='teacher'?'purple':'primary';
+  const roleBadge = u.role==='admin'?'danger':u.role==='principal'?'warning':u.role==='teacher'?'purple':'primary';
   return '<tr>'
     + '<td><div style="display:flex;align-items:center;gap:10px;"><img src="'+u.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://i.imgur.com/x9wE0QT.png\'"><div><div class="font-semibold text-sm">'+u.name+'</div><div class="text-xs text-muted">'+u.id+'</div></div></div></td>'
     + '<td style="font-size:12px;">'+u.email+'</td>'
@@ -701,7 +701,7 @@ function renderAdminPrincipal() {
         <div class="card">
           <div class="card-header">
             <div class="flex items-center justify-between">
-              <div class="font-semibold">Create New Principal Account</div>
+              <div class="font-semibold" style="color:var(--text-primary);">Create New Principal Account</div>
               <button class="btn btn-ghost btn-sm" onclick="hideCreatePrincipalForm()">Cancel</button>
             </div>
           </div>
@@ -754,13 +754,13 @@ function renderAdminPrincipal() {
         <div class="card">
           <div class="card-header">
             <div class="flex items-center justify-between">
-              <div class="font-semibold">Promote Teacher to Principal</div>
+              <div class="font-semibold" style="color:var(--text-primary);">Promote Teacher to Principal</div>
               <button class="btn btn-ghost btn-sm" onclick="hidePromoteTeacherForm()">Cancel</button>
             </div>
           </div>
           <div class="card-body">
             <div style="padding:12px;background:var(--warning-50);border-radius:8px;border:1px solid var(--warning);margin-bottom:16px;">
-              <div style="font-size:12px;color:var(--text);">
+              <div style="font-size:12px;color:var(--text-primary);">
                 ${SVG('<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',14,'var(--warning)')}
                 <strong>Warning:</strong> Promoting a teacher will change their role to principal. This action is logged.
               </div>
@@ -2008,8 +2008,8 @@ window.handlePromoteTeacher = async function(e) {
   
   if (!confirmed) return;
   
-  // Update user role
-  await api.updateUser(teacherId, { role: 'principal' });
+  // Update user role and ensure they are active
+  await api.updateUser(teacherId, { role: 'principal', status: 'active' });
   
   showToast(`${teacher.name} has been promoted to Principal!`, 'success');
   hidePromoteTeacherForm();

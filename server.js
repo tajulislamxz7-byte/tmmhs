@@ -118,7 +118,7 @@ app.post('/api/users/register', (req, res) => {
 
   // ======== CREATE NEW ACCOUNT ========
   // Only create new account if NO Student ID provided
-  const prefixMap = { student:'STU', teacher:'TCH', alumni:'ALM', staff:'STF' };
+  const prefixMap = { student:'STU', teacher:'TCH', alumni:'ALM', staff:'STF', principal:'PRI' };
   const prefix = prefixMap[role] || 'STU';
   const id = `${prefix}-${new Date().getFullYear()}-${String(users.length + 1).padStart(4, '0')}`;
   const name = `${data.firstName} ${data.lastName}`.trim();
@@ -126,6 +126,11 @@ app.post('/api/users/register', (req, res) => {
 
   // Strip "Select" placeholder values
   const clean = (v) => (!v || v === 'Select' || v === 'select') ? '' : v;
+
+  // Admin-created accounts (teacher, staff, principal) are auto-activated
+  // Student/alumni accounts need approval
+  const autoActivateRoles = ['teacher', 'staff', 'principal'];
+  const initialStatus = autoActivateRoles.includes(role) ? 'active' : 'pending';
 
   const user = {
     id, name,
@@ -136,7 +141,7 @@ app.post('/api/users/register', (req, res) => {
     password: data.password,
     role,
     avatar,
-    status: 'pending',
+    status: initialStatus,
     createdAt: new Date().toISOString(),
     class: clean(data.class),
     section: clean(data.section),
