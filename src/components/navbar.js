@@ -92,13 +92,13 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
         <!-- User menu -->
         <div id="userMenuWrapper" style="position:relative;">
           <button class="user-avatar-btn" onclick="toggleUserDropdown()">
-            <img src="${user.avatar}" alt="${user.name}" class="avatar avatar-sm" onerror="this.src='https://ui-avatars.com/api/?name=User&background=4267B2&color=fff&size=128'">
+            <img src="${user.avatar}" alt="${user.name}" class="avatar avatar-sm" onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
             <span class="hide-mobile" style="font-size:13px;font-weight:600;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${user.name}</span>
             ${icon('chevronDown', 13)}
           </button>
           <div class="user-dropdown hidden" id="userDropdown">
             <div class="user-dropdown-header">
-              <img src="${user.avatar}" alt="${user.name}" class="avatar avatar-md" onerror="this.src='https://ui-avatars.com/api/?name=User&background=4267B2&color=fff&size=128'">
+              <img src="${user.avatar}" alt="${user.name}" class="avatar avatar-md" onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
               <div>
                 <div style="font-weight:700;font-size:14px;">${user.name}</div>
                 <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${user.email}</div>
@@ -157,7 +157,7 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
     <div class="mobile-menu-inner">
       ${isLoggedIn && user ? `
       <div class="user-profile-section">
-        <img src="${user.avatar}" class="avatar avatar-md" onerror="this.src='https://ui-avatars.com/api/?name=User&background=4267B2&color=fff&size=128'">
+        <img src="${user.avatar}" class="avatar avatar-md" onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
         <div>
           <div class="user-name">${user.name}</div>
           <div class="user-email">${user.email}</div>

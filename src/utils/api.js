@@ -117,7 +117,7 @@ function lsRegister(data) {
     id, name, firstName: data.firstName, lastName: data.lastName,
     email: data.email.toLowerCase().trim(), phone: data.phone||'',
     password: data.password, role,
-    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4267B2&color=fff&size=128`,
+    avatar: `https://i.imgur.com/x9wE0QT.png`,
     status: 'pending', createdAt: new Date().toISOString(),
     class: clean(data.class), section: clean(data.section), batch: clean(data.batch),
     bloodGroup: clean(data.bloodGroup), guardian: data.guardian||'',

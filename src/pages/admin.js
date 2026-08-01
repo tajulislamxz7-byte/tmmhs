@@ -111,9 +111,9 @@ export async function renderAdminDashboard() {
           <button style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);padding:6px 14px;border-radius:8px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;" onclick="navigate('home')">
             ${SVG(ICONS.home, 14, 'rgba(255,255,255,0.8)')} Exit to Site
           </button>
-          <img src="${user?.avatar || 'https://ui-avatars.com/api/?name=Admin&background=4267B2&color=fff&size=128'}"
+          <img src="${user?.avatar || 'https://i.imgur.com/x9wE0QT.png'}"
                alt="${user?.name || 'Admin'}" class="avatar avatar-sm"
-               onerror="this.src='https://ui-avatars.com/api/?name=Admin&background=4267B2&color=fff&size=128'"
+               onerror="this.src='https://i.imgur.com/x9wE0QT.png'"
                style="border:2px solid rgba(255,255,255,0.2);">
           <span style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.9);">${user?.name || 'Admin'}</span>
         </div>
@@ -265,7 +265,7 @@ function _studentRow(s) {
   const statusText = s.status==='unlinked'?'Not Linked':s.status;
   const emailText = s.email || '<span style="color:var(--text-muted);font-style:italic;">Not linked yet</span>';
   return '<tr>'
-    + '<td><div class="flex items-center gap-3"><img src="'+s.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://ui-avatars.com/api/?name=User&background=4267B2&color=fff&size=128\'"><div><div class="font-semibold text-sm">'+s.name+'</div><div class="text-xs text-muted">'+emailText+'</div></div></div></td>'
+    + '<td><div class="flex items-center gap-3"><img src="'+s.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://i.imgur.com/x9wE0QT.png\'"><div><div class="font-semibold text-sm">'+s.name+'</div><div class="text-xs text-muted">'+emailText+'</div></div></div></td>'
     + '<td style="font-family:monospace;font-size:12px;">'+s.id+'</td>'
     + '<td>'+(s.class||'—')+' '+(s.section?'· '+s.section:'')+'</td>'
     + '<td><span class="badge badge-'+statusBadge+'">'+statusText+'</span></td>'
@@ -313,7 +313,7 @@ function renderAdminStudents() {
 function _alumniRow(a) {
   const statusBadge = a.status==='active'?'success':a.status==='pending'?'warning':'danger';
   return '<tr>'
-    + '<td><div class="flex items-center gap-3"><img src="'+a.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://ui-avatars.com/api/?name=User&background=4267B2&color=fff&size=128\'"><div><div class="font-semibold text-sm">'+a.name+'</div><div class="text-xs text-muted">'+a.email+'</div></div></div></td>'
+    + '<td><div class="flex items-center gap-3"><img src="'+a.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://i.imgur.com/x9wE0QT.png\'"><div><div class="font-semibold text-sm">'+a.name+'</div><div class="text-xs text-muted">'+a.email+'</div></div></div></td>'
     + '<td style="font-family:monospace;font-size:12px;">'+a.id+'</td>'
     + '<td>'+(a.graduationYear||'—')+'</td>'
     + '<td>'+(a.profession||'—')+'</td>'
@@ -328,7 +328,7 @@ function _pendingUserRow(u) {
   const approveIcon = SVG('<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>', 13, 'white');
   const roleBadge = u.role==='teacher'?'purple':u.role==='alumni'?'success':u.role==='staff'?'gray':'primary';
   return '<tr>'
-    + '<td><div style="display:flex;align-items:center;gap:10px;"><img src="'+u.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://ui-avatars.com/api/?name=User&background=4267B2&color=fff&size=128\'"><div><div class="font-semibold text-sm">'+u.name+'</div><div class="text-xs text-muted">'+u.id+'</div></div></div></td>'
+    + '<td><div style="display:flex;align-items:center;gap:10px;"><img src="'+u.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://i.imgur.com/x9wE0QT.png\'"><div><div class="font-semibold text-sm">'+u.name+'</div><div class="text-xs text-muted">'+u.id+'</div></div></div></td>'
     + '<td><span class="badge badge-'+roleBadge+'" style="text-transform:capitalize;">'+u.role+'</span></td>'
     + '<td style="font-size:12px;">'+u.email+'</td>'
     + '<td style="font-size:12px;">'+(u.phone||'—')+'</td>'
@@ -343,7 +343,7 @@ function _pendingUserRow(u) {
 function _activeUserRow(u) {
   const roleBadge = u.role==='admin'?'danger':u.role==='teacher'?'purple':'primary';
   return '<tr>'
-    + '<td><div style="display:flex;align-items:center;gap:10px;"><img src="'+u.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://ui-avatars.com/api/?name=User&background=4267B2&color=fff&size=128\'"><div><div class="font-semibold text-sm">'+u.name+'</div><div class="text-xs text-muted">'+u.id+'</div></div></div></td>'
+    + '<td><div style="display:flex;align-items:center;gap:10px;"><img src="'+u.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://i.imgur.com/x9wE0QT.png\'"><div><div class="font-semibold text-sm">'+u.name+'</div><div class="text-xs text-muted">'+u.id+'</div></div></div></td>'
     + '<td style="font-size:12px;">'+u.email+'</td>'
     + '<td><span class="badge badge-'+roleBadge+'" style="text-transform:capitalize;">'+u.role+'</span></td>'
     + '<td>'+(u.class||'—')+' '+(u.section?'· '+u.section:'')+'</td>'
@@ -448,7 +448,7 @@ function renderAdminTeachers() {
             <thead><tr><th>Teacher</th><th>ID</th><th>Subject</th><th>Status</th><th>Registered</th><th>Actions</th></tr></thead>
             <tbody>${teacherUsers.map(t =>
               '<tr>'
-              + '<td><div class="flex items-center gap-3"><img src="'+t.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://ui-avatars.com/api/?name=User&background=4267B2&color=fff&size=128\'"><div><div class="font-semibold text-sm">'+t.name+'</div><div class="text-xs text-muted">'+t.email+'</div></div></div></td>'
+              + '<td><div class="flex items-center gap-3"><img src="'+t.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://i.imgur.com/x9wE0QT.png\'"><div><div class="font-semibold text-sm">'+t.name+'</div><div class="text-xs text-muted">'+t.email+'</div></div></div></td>'
               + '<td style="font-family:monospace;font-size:12px;">'+t.id+'</td>'
               + '<td><span class="badge badge-primary">'+(t.subject||'—')+'</span></td>'
               + '<td><span class="badge badge-'+(t.status==='active'?'success':t.status==='pending'?'warning':'gray')+'">'+t.status+'</span></td>'
@@ -478,7 +478,7 @@ function renderAdminStaff() {
             <thead><tr><th>Name</th><th>ID</th><th>Position</th><th>Department</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody>${staffUsers.map(s =>
               '<tr>'
-              + '<td><div class="flex items-center gap-3"><img src="'+s.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://ui-avatars.com/api/?name=User&background=4267B2&color=fff&size=128\'"><div class="font-semibold text-sm">'+s.name+'</div></div></td>'
+              + '<td><div class="flex items-center gap-3"><img src="'+s.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://i.imgur.com/x9wE0QT.png\'"><div class="font-semibold text-sm">'+s.name+'</div></div></td>'
               + '<td style="font-family:monospace;font-size:12px;">'+s.id+'</td>'
               + '<td>'+(s.position||'—')+'</td>'
               + '<td>'+(s.department||'—')+'</td>'
