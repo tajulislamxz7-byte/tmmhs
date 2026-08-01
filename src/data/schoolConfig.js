@@ -71,8 +71,8 @@ export const testimonials = [];
 
 export const roles = {
   guest:       { label: "Guest",         permissions: ["view_home", "view_notices", "view_events", "view_gallery"] },
-  student:     { label: "Student",       permissions: ["view_home", "view_notices", "view_events", "view_gallery", "view_profile", "edit_profile", "view_results", "download_marksheet", "view_assignments", "send_messages"] },
-  teacher:     { label: "Teacher",       permissions: ["view_home", "view_notices", "view_events", "view_gallery", "view_teacher_profile", "edit_teacher_profile", "upload_notes", "upload_assignments", "publish_results", "publish_notices", "reply_messages"] },
+  student:     { label: "Student",       permissions: ["view_home", "view_notices", "view_events", "view_gallery", "view_profile", "edit_profile", "view_results", "download_marksheet", "send_messages"] },
+  teacher:     { label: "Teacher",       permissions: ["view_home", "view_notices", "view_events", "view_gallery", "view_teacher_profile", "edit_teacher_profile", "upload_notes", "publish_results", "publish_notices", "reply_messages"] },
   admin:       { label: "Admin",         permissions: ["all"] },
   superAdmin:  { label: "Super Admin",   permissions: ["all", "manage_settings", "manage_roles"] },
   alumni:      { label: "Alumni",        permissions: ["view_home", "view_notices", "view_events", "view_gallery", "view_alumni_profile", "edit_alumni_profile"] },

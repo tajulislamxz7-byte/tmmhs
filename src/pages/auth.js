@@ -150,14 +150,21 @@ export function renderLogin() {
 
 const ROLE_CONFIGS = {
   student: {
-    label: 'Student', icon: 'users', fields: [
+    label: 'Student', icon: 'users', 
+    showToggle: true, // Enable mode toggle for students
+    fields: [
+      {section:'verification', inputs:[
+        {type:'text', name:'studentId', label:'Student ID', required:false, placeholder:'e.g. STU-2026-0001'},
+        {type:'text', name:'roll', label:'Roll Number', required:false, placeholder:'Your roll number'},
+        {type:'date', name:'birthday', label:'Date of Birth', required:false, placeholder:'YYYY-MM-DD'},
+      ]},
       {section:'academic', inputs:[
-        {type:'select', name:'class', label:'Class', required:true, opts:['Select',...classes.map(c=>c.name)]},
-        {type:'select', name:'section', label:'Section', required:true, opts:['Select','A','B','C','D']},
-        {type:'select', name:'batch', label:'Batch', required:true, opts:['Select',...batches.map(b=>b.id+':'+b.name)]},
+        {type:'select', name:'class', label:'Class', required:false, opts:['Select',...classes.map(c=>c.name)]},
+        {type:'select', name:'section', label:'Section', required:false, opts:['Select','A','B','C','D']},
+        {type:'select', name:'batch', label:'Batch', required:false, opts:['Select',...batches.map(b=>b.id+':'+b.name)]},
       ]},
       {section:'grid', inputs:[
-        {type:'text', name:'guardian', label:'Guardian Name *', required:true, placeholder:'Father / Mother name'},
+        {type:'text', name:'guardian', label:'Guardian Name', required:false, placeholder:'Father / Mother name'},
         {type:'select', name:'bloodGroup', label:'Blood Group', required:false, opts:['Select','A+','A-','B+','B-','AB+','AB-','O+','O-']},
       ]},
     ]
@@ -198,7 +205,24 @@ const ROLE_CONFIGS = {
 function renderRoleFields(roleKey) {
   const cfg = ROLE_CONFIGS[roleKey];
   if (!cfg) return '';
-  return cfg.fields.map(f => {
+  
+  // Add toggle buttons for students
+  let html = '';
+  if (cfg.showToggle) {
+    html += `
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button type="button" class="btn btn-primary" id="linkModeBtn" onclick="toggleRegistrationMode('link')" style="flex:1;">
+          ${icon('link', 14, 'white')} Link Existing Account
+        </button>
+        <button type="button" class="btn btn-secondary" id="newModeBtn" onclick="toggleRegistrationMode('new')" style="flex:1;">
+          ${icon('plus', 14)} Create New Profile
+        </button>
+      </div>
+      <input type="hidden" id="registrationMode" value="link">
+    `;
+  }
+  
+  html += cfg.fields.map((f, idx) => {
     const inner = f.inputs.map(inp => {
       if (inp.type === 'select') {
         return `<div class="form-group"><label style="font-size:11px;">${inp.label}</label><select name="${inp.name}" class="form-input form-select" ${inp.required?'required':''} style="font-size:12px;">${inp.opts.map(o=>{
@@ -208,10 +232,25 @@ function renderRoleFields(roleKey) {
       }
       return `<div class="form-group"><label style="font-size:11px;">${inp.label}</label><input type="${inp.type}" name="${inp.name}" class="form-input" placeholder="${inp.placeholder||''}" ${inp.required?'required':''} style="font-size:12px;"></div>`;
     }).join('');
-    if (f.section === 'grid') return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">${inner}</div>`;
-    if (f.section === 'academic') return `<div style="padding:14px;background:var(--primary-50);border-radius:12px;border:1.5px solid var(--primary-100);"><div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:10px;display:flex;align-items:center;gap:6px;">${icon('bookOpen',13,'var(--primary)')} Academic Placement</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">${inner}</div></div>`;
+    
+    // Add data attribute for mode visibility
+    const isLinkSection = f.section === 'verification';
+    const isNewSection = f.section === 'academic' || f.section === 'grid';
+    const modeAttr = isLinkSection ? 'data-mode="link"' : isNewSection ? 'data-mode="new" style="display:none;"' : '';
+    
+    if (f.section === 'verification') {
+      return `<div ${modeAttr}><div style="padding:14px;background:var(--success-50);border-radius:12px;border:1.5px solid var(--success-100);margin-bottom:12px;"><div style="font-size:12px;font-weight:700;color:var(--success);margin-bottom:10px;display:flex;align-items:center;gap:6px;">${icon('checkCircle',13,'var(--success)')} Link to Existing Student Record</div><div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">Enter your Student ID and details to link your account:</div>${inner}</div></div>`;
+    }
+    if (f.section === 'grid') {
+      return `<div ${modeAttr}><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">${inner}</div></div>`;
+    }
+    if (f.section === 'academic') {
+      return `<div ${modeAttr}><div style="padding:14px;background:var(--primary-50);border-radius:12px;border:1.5px solid var(--primary-100);"><div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:10px;display:flex;align-items:center;gap:6px;">${icon('bookOpen',13,'var(--primary)')} Academic Placement</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">${inner}</div></div></div>`;
+    }
     return inner;
   }).join('');
+  
+  return html;
 }
 
 export function renderRegister() {

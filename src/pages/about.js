@@ -3,6 +3,7 @@
 // ================================================
 
 import { schoolInfo } from '../data/schoolConfig.js';
+import { api } from '../utils/api.js';
 
 const FAQS = [
   { q:'What is the admission process for Class 6?', a:'Applications open in August each year, followed by a written test and interview. Results are published within two weeks of the test date.' },
@@ -13,8 +14,8 @@ const FAQS = [
   { q:'How are exam results shared?', a:'Results are published on the student portal and as printed marksheets distributed through class teachers. PDF marksheets can be downloaded anytime.' },
 ];
 
-export function renderAbout() {
-  const S = JSON.parse(localStorage.getItem('gfa_settings') || '{}');
+export async function renderAbout() {
+  const S = await api.getSettings() || JSON.parse(localStorage.getItem('gfa_settings') || '{}');
   const name     = S.name      || schoolInfo.name;
   const tagline  = S.tagline   || schoolInfo.tagline;
   const founded  = S.founded   || schoolInfo.founded;

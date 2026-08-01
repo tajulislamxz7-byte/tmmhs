@@ -192,7 +192,6 @@ function buildTeacherProfile(user) {
 const TCH_SIDEBAR_ITEMS = [
   {i:'layout',       l:'Overview',         p:'teacher-dashboard'},
   {i:'fileText',     l:'Results',           p:'results'},
-  {i:'clipboardList',l:'Assignments',       p:'assignments'},
   {i:'messageSquare',l:'Messages',          p:'messages'},
   {i:'bell',         l:'Notices',           p:'notices'},
   {i:'user',         l:'My Profile',        p:'teacher-profile'},

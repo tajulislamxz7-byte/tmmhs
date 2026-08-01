@@ -59,9 +59,6 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
             <div class="dropdown-item" onclick="navigate('results')" style="cursor:pointer;">
               ${icon('fileText', 15)} <span>Results</span>
             </div>
-            <div class="dropdown-item" onclick="navigate('assignments')" style="cursor:pointer;">
-              ${icon('clipboardList', 15)} <span>Assignments</span>
-            </div>
           </div>
         </div>
 
@@ -124,7 +121,6 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
             <div class="dropdown-item" onclick="navigate('staff')" style="cursor:pointer;">${icon('users', 14)} <span>Staff Team</span></div>
             ` : ''}
             <div class="dropdown-item" onclick="navigate('messages')" style="cursor:pointer;">${icon('messageSquare', 14)} <span>Messages</span></div>
-            ${role !== 'alumni' && role !== 'staff' ? `<div class="dropdown-item" onclick="navigate('assignments')" style="cursor:pointer;">${icon('clipboardList', 14)} <span>Assignments</span></div>` : ''}
             ${role === 'admin' ? `<div class="dropdown-item" onclick="navigate('admin')" style="cursor:pointer;">${icon('settings', 14)} <span>Admin Panel</span></div>` : ''}
             <div class="divider"></div>
             <div class="dropdown-item" onclick="signOut()" style="cursor:pointer;color:var(--danger);">${icon('logOut', 14)} <span>Sign Out</span></div>
@@ -180,7 +176,6 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
       <div class="mobile-menu-section-title">Academic</div>
       <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('batches')">${icon('bookOpen', 18)} Batches</div>
       <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('results')">${icon('trendingUp', 18)} Results</div>
-      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('assignments')">${icon('clipboardList', 18)} Assignments</div>
       
       <div class="mobile-menu-section-title">Updates</div>
       <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('notices')">${icon('bell', 18)} Notices</div>

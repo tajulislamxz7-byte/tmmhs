@@ -9,17 +9,37 @@ import { api } from '../utils/api.js';
 async function fetchStudents() {
   const apiUsers = await api.getUsers();
   const users = apiUsers || JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
-  const registeredStudents = users.filter(u => u.role === 'student').map(u => ({
-    id: u.id, name: u.name, roll: u.roll||'—',
-    class: u.class||'N/A', section: u.section||'N/A',
-    batch: u.batch||'N/A', email: u.email||'',
-    phone: u.phone||'—', address: u.address||'—',
-    bloodGroup: u.bloodGroup||'—', birthday: u.birthday||'—',
-    guardian: u.guardian||'—', skills: u.skills||[],
-    bio: u.bio||'', achievements: u.achievements||[],
-    avatar: u.avatar||`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`,
-    gpa: u.gpa||'N/A', status: u.status,
-  }));
+  const allResults = JSON.parse(localStorage.getItem('gfa_results') || '[]');
+  
+  // Show active and unlinked students on public page
+  const registeredStudents = users.filter(u => u.role === 'student' && (u.status === 'active' || u.status === 'unlinked')).map(u => {
+    // Calculate GPA from latest result
+    const studentResults = allResults.filter(r => r.studentId === u.id).sort((a,b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+    const latestResult = studentResults[0];
+    
+    let calculatedGPA = 'N/A';
+    if (latestResult && latestResult.gpa !== undefined && latestResult.gpa !== null) {
+      if (typeof latestResult.gpa === 'number') {
+        calculatedGPA = latestResult.gpa.toFixed(2);
+      } else {
+        calculatedGPA = String(latestResult.gpa);
+      }
+    } else if (u.gpa && u.gpa !== 'N/A') {
+      calculatedGPA = u.gpa;
+    }
+    
+    return {
+      id: u.id, name: u.name, roll: u.roll||'—',
+      class: u.class||'N/A', section: u.section||'N/A',
+      batch: u.batch||'N/A', email: u.email||'',
+      phone: u.phone||'—', address: u.address||'—',
+      bloodGroup: u.bloodGroup||'—', birthday: u.birthday||'—',
+      guardian: u.guardian||'—', skills: u.skills||[],
+      bio: u.bio||'', achievements: u.achievements||[],
+      avatar: u.avatar||`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`,
+      gpa: calculatedGPA, status: u.status,
+    };
+  });
   // Merge: sampleData first, then registered (skip duplicates)
   const merged = [...sampleStudents];
   registeredStudents.forEach(s => { if (!merged.find(x => x.id === s.id)) merged.push(s); });
@@ -29,24 +49,44 @@ async function fetchStudents() {
 function getStudents() {
   // Sync fallback using cache
   const cached = JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
-  const registeredStudents = cached.filter(u => u.role === 'student').map(u => ({
-    id: u.id, name: u.name, roll: u.roll||'—',
-    class: u.class||'N/A', section: u.section||'N/A',
-    batch: u.batch||'N/A', email: u.email||'',
-    phone: u.phone||'—', address: u.address||'—',
-    bloodGroup: u.bloodGroup||'—', birthday: u.birthday||'—',
-    guardian: u.guardian||'—', skills: u.skills||[],
-    bio: u.bio||'', achievements: u.achievements||[],
-    avatar: u.avatar||`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`,
-    gpa: u.gpa||'N/A', status: u.status,
-  }));
+  const allResults = JSON.parse(localStorage.getItem('gfa_results') || '[]');
+  
+  // Show active and unlinked students on public page
+  const registeredStudents = cached.filter(u => u.role === 'student' && (u.status === 'active' || u.status === 'unlinked')).map(u => {
+    // Calculate GPA from latest result
+    const studentResults = allResults.filter(r => r.studentId === u.id).sort((a,b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+    const latestResult = studentResults[0];
+    
+    let calculatedGPA = 'N/A';
+    if (latestResult && latestResult.gpa !== undefined && latestResult.gpa !== null) {
+      if (typeof latestResult.gpa === 'number') {
+        calculatedGPA = latestResult.gpa.toFixed(2);
+      } else {
+        calculatedGPA = String(latestResult.gpa);
+      }
+    } else if (u.gpa && u.gpa !== 'N/A') {
+      calculatedGPA = u.gpa;
+    }
+    
+    return {
+      id: u.id, name: u.name, roll: u.roll||'—',
+      class: u.class||'N/A', section: u.section||'N/A',
+      batch: u.batch||'N/A', email: u.email||'',
+      phone: u.phone||'—', address: u.address||'—',
+      bloodGroup: u.bloodGroup||'—', birthday: u.birthday||'—',
+      guardian: u.guardian||'—', skills: u.skills||[],
+      bio: u.bio||'', achievements: u.achievements||[],
+      avatar: u.avatar||`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`,
+      gpa: calculatedGPA, status: u.status,
+    };
+  });
   const merged = [...sampleStudents];
   registeredStudents.forEach(s => { if (!merged.find(x => x.id === s.id)) merged.push(s); });
   return merged;
 }
 
-export function renderStudents() {
-  const students = getStudents();
+export async function renderStudents() {
+  const students = await fetchStudents();
   const totalStudents = students.length;
   const activeStudents = students.filter(s => s.status !== 'inactive').length;
   const avgGpa = totalStudents > 0
@@ -141,6 +181,9 @@ export function renderStudents() {
 }
 
 function renderStudentCard(s) {
+  // Format batch: "B2027" → "2027"
+  const batchDisplay = s.batch.startsWith('B') ? s.batch.substring(1) : s.batch;
+  
   return `
     <div class="student-card card" data-name="${s.name.toLowerCase()}" data-class="${s.class}" data-section="${s.section}" onclick="navigate('student-profile','${s.id}')">
       <div class="card-body" style="padding:24px;text-align:center;">
@@ -153,7 +196,7 @@ function renderStudentCard(s) {
         <div class="flex gap-2 justify-center flex-wrap mb-3">
           <span class="badge badge-primary">${s.class}</span>
           <span class="badge badge-gray">Sec ${s.section}</span>
-          <span class="badge badge-purple">${s.batch}</span>
+          <span class="badge badge-purple">${batchDisplay}</span>
         </div>
         <div class="student-card-stats">
           <div><div class="font-semibold text-sm">${s.gpa}</div><div class="text-xs text-muted">GPA</div></div>
@@ -174,8 +217,24 @@ export function renderStudentProfile(studentId) {
   if (!student) {
     // Check registered users (gfa_users or gfa_users_cache)
     const allUsers = JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
+    const allResults = JSON.parse(localStorage.getItem('gfa_results') || '[]');
     const u = allUsers.find(u => u.id === studentId);
     if (u) {
+      // Calculate GPA from latest result
+      const studentResults = allResults.filter(r => r.studentId === u.id).sort((a,b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+      const latestResult = studentResults[0];
+      
+      let calculatedGPA = 'N/A';
+      if (latestResult && latestResult.gpa !== undefined && latestResult.gpa !== null) {
+        if (typeof latestResult.gpa === 'number') {
+          calculatedGPA = latestResult.gpa.toFixed(2);
+        } else {
+          calculatedGPA = String(latestResult.gpa);
+        }
+      } else if (u.gpa && u.gpa !== 'N/A') {
+        calculatedGPA = u.gpa;
+      }
+      
       student = {
         id: u.id, name: u.name, roll: u.roll || '—',
         class: u.class || 'N/A', section: u.section || 'N/A',
@@ -185,12 +244,16 @@ export function renderStudentProfile(studentId) {
         guardian: u.guardian || '—', skills: u.skills || [],
         bio: u.bio || '', achievements: u.achievements || [],
         avatar: u.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`,
-        gpa: u.gpa || 'N/A',
+        gpa: calculatedGPA,
         status: u.status,
       };
     }
   }
   if (!student) return `<div class="container section-sm"><div class="card"><div class="card-body text-center text-muted" style="padding:60px;">Student not found.</div></div></div>`;
+  
+  // Format batch: "B2027" → "2027"
+  const batchDisplay = student.batch && student.batch.startsWith('B') ? student.batch.substring(1) : student.batch;
+  
   return `
     <div class="page-container">
       <div class="profile-hero">
@@ -218,7 +281,7 @@ export function renderStudentProfile(studentId) {
                 <div class="profile-detail-chips">
                   <span class="profile-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg> ${student.class}</span>
                   <span class="profile-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Section ${student.section}</span>
-                  <span class="profile-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg> ${student.batch}</span>
+                  <span class="profile-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg> ${batchDisplay}</span>
                   <span class="profile-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg> ${student.bloodGroup}</span>
                   <span class="profile-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ${student.birthday}</span>
                 </div>
@@ -249,7 +312,6 @@ export function renderStudentProfile(studentId) {
         <div class="tabs mb-8" id="profileTabs">
           <button class="tab active" onclick="switchProfileTab('overview',this)">Overview</button>
           <button class="tab" onclick="switchProfileTab('results',this)">Results</button>
-          <button class="tab" onclick="switchProfileTab('assignments',this)">Assignments</button>
           <button class="tab" onclick="switchProfileTab('achievements',this)">Achievements</button>
         </div>
 
@@ -262,6 +324,9 @@ export function renderStudentProfile(studentId) {
 }
 
 function renderProfileOverviewTab(student) {
+  // Format batch: "B2027" → "2027"
+  const batchDisplay = student.batch && student.batch.startsWith('B') ? student.batch.substring(1) : student.batch;
+  
   return `
     <div class="grid" style="grid-template-columns:340px 1fr;gap:24px;" id="overviewTab">
       <!-- Left: Contact Info -->
@@ -347,10 +412,24 @@ function renderProfileOverviewTab(student) {
       <div class="flex flex-col gap-4">
         <div class="grid-3 gap-4" style="grid-template-columns:repeat(3,1fr);">
           ${(()=>{
-            const myResults = JSON.parse(localStorage.getItem('gfa_results')||'[]').filter(r=>r.studentId===student.id);
+            const myResults = JSON.parse(localStorage.getItem('gfa_results')||'[]').filter(r=>r.studentId===student.id).sort((a,b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+            const latestResult = myResults[0] || null;
+            
+            // Calculate GPA properly from latest result
+            let currentGPA = '—';
+            if (latestResult && latestResult.gpa !== undefined && latestResult.gpa !== null) {
+              if (typeof latestResult.gpa === 'number') {
+                currentGPA = latestResult.gpa.toFixed(2);
+              } else {
+                currentGPA = String(latestResult.gpa);
+              }
+            } else if (student.gpa && student.gpa !== 'N/A') {
+              currentGPA = student.gpa;
+            }
+            
             const rank = myResults.length>0 ? '#'+myResults[0].position : '—';
             return [
-              {l:'Current GPA',v:student.gpa,icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',c:'var(--primary)'},
+              {l:'Current GPA',v:currentGPA,icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',c:'var(--primary)'},
               {l:'Class Rank',v:rank,icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg>',c:'var(--warning)'},
             ].map(s=>`
               <div class="card text-center">
@@ -429,10 +508,31 @@ export function renderProfileTabContent(tab, studentId) {
   let student = students.find(s => s.id === studentId);
   if (!student) {
     const allUsers = JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
+    const allResults = JSON.parse(localStorage.getItem('gfa_results') || '[]');
     const u = allUsers.find(u => u.id === studentId);
-    if (u) student = { id:u.id, name:u.name, roll:u.roll||'—', class:u.class||'N/A', section:u.section||'N/A', batch:u.batch||'N/A', email:u.email, phone:u.phone||'—', address:u.address||'—', bloodGroup:u.bloodGroup||'—', birthday:u.birthday||'—', guardian:u.guardian||'—', skills:u.skills||[], bio:u.bio||'', achievements:u.achievements||[], avatar:u.avatar||`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`, gpa:u.gpa||'N/A' };
+    if (u) {
+      // Calculate GPA from latest result
+      const studentResults = allResults.filter(r => r.studentId === u.id).sort((a,b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+      const latestResult = studentResults[0];
+      
+      let calculatedGPA = 'N/A';
+      if (latestResult && latestResult.gpa !== undefined && latestResult.gpa !== null) {
+        if (typeof latestResult.gpa === 'number') {
+          calculatedGPA = latestResult.gpa.toFixed(2);
+        } else {
+          calculatedGPA = String(latestResult.gpa);
+        }
+      } else if (u.gpa && u.gpa !== 'N/A') {
+        calculatedGPA = u.gpa;
+      }
+      
+      student = { id:u.id, name:u.name, roll:u.roll||'—', class:u.class||'N/A', section:u.section||'N/A', batch:u.batch||'N/A', email:u.email, phone:u.phone||'—', address:u.address||'—', bloodGroup:u.bloodGroup||'—', birthday:u.birthday||'—', guardian:u.guardian||'—', skills:u.skills||[], bio:u.bio||'', achievements:u.achievements||[], avatar:u.avatar||`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`, gpa:calculatedGPA };
+    }
   }
   if (!student) return '<p class="text-muted">No student data found.</p>';
+  
+  // Format batch: "B2027" → "2027"
+  const batchDisplay = student.batch && student.batch.startsWith('B') ? student.batch.substring(1) : student.batch;
 
   if (tab === 'overview') return renderProfileOverviewTab(student);
 
@@ -472,15 +572,6 @@ export function renderProfileTabContent(tab, studentId) {
     </div>
   `;
   }
-
-  if (tab === 'assignments') return `
-    <div class="card">
-      <div class="card-header"><div class="font-semibold">Assignments</div></div>
-      <div class="card-body">
-        <button class="btn btn-secondary" onclick="navigate('assignments')">View All Assignments →</button>
-      </div>
-    </div>
-  `;
 
   if (tab === 'achievements') return `
     <div class="card">
@@ -561,7 +652,7 @@ window.openEditProfile = function(studentId) {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div class="form-group">
             <label class="form-label">Email</label>
-            <input id="ep_email" type="email" class="form-input" value="${u.email||''}" readonly style="background:var(--bg-secondary);">
+            <input id="ep_email" type="email" class="form-input" value="${u.email||''}">
           </div>
           <div class="form-group">
             <label class="form-label">Phone</label>
@@ -663,6 +754,7 @@ window.saveEditProfile = async function(studentId) {
   const updates = {
     firstName, lastName,
     name: `${firstName} ${lastName}`.trim(),
+    email:    get('ep_email'),
     phone:    get('ep_phone'),
     class:    get('ep_class'),
     section:  get('ep_section'),

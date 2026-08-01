@@ -2,6 +2,7 @@
 // NOTICES PAGE
 // ================================================
 
+import { api } from '../utils/api.js';
 import { notices as sampleNotices } from '../data/schoolConfig.js';
 
 // Get notices from localStorage (admin-managed) falling back to empty
@@ -10,10 +11,16 @@ function getNotices() {
   return stored !== null ? stored : sampleNotices;
 }
 
+// Load notices from server
+async function loadNotices() {
+  const notices = await api.getNotices();
+  return notices && notices.length > 0 ? notices : sampleNotices;
+}
+
 const CATEGORIES = ['All', 'General', 'Exam', 'Holiday', 'Event', 'Scholarship', 'Emergency', 'Admission', 'Results'];
 
-export function renderNotices() {
-  const notices = getNotices();
+export async function renderNotices() {
+  const notices = await loadNotices();
   return `
     <div class="page-container">
       <div class="page-header">

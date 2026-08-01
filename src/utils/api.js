@@ -43,16 +43,72 @@ async function req(method, path, body) {
 
 const get   = (path)       => req('GET',   path);
 const post  = (path, body) => req('POST',  path, body);
+const put   = (path, body) => req('PUT',   path, body);
 const patch = (path, body) => req('PATCH', path, body);
 const del   = (path)       => req('DELETE', path);
 
 // ── Fallback helpers ──────────────────────────────
 function lsRegister(data) {
   const users = LS.get('gfa_users', []);
+  
+  // Check if email already exists
   if (users.some(u => u.email.toLowerCase() === data.email.toLowerCase())) {
     return { ok: false, error: 'An account with this email already exists.' };
   }
+  
   const role = data.role || 'student';
+  
+  // ======== ACCOUNT LINKING FOR STUDENTS ========
+  // If student provides Student ID, try to link to existing record
+  if (role === 'student' && data.studentId && data.studentId.trim()) {
+    const existingStudent = users.find(u => 
+      u.id === data.studentId.trim() && 
+      u.role === 'student'
+    );
+    
+    if (!existingStudent) {
+      return { ok: false, error: 'Student ID not found in our database. Please contact school administration.' };
+    }
+    
+    // Check if already linked/active
+    if (existingStudent.status === 'active' && existingStudent.email && existingStudent.password) {
+      return { ok: false, error: 'This Student ID is already linked to an account. Please use the login page.' };
+    }
+    
+    // Verify with roll number if provided by BOTH admin and user
+    if (data.roll && data.roll.trim() && existingStudent.roll && existingStudent.roll.trim()) {
+      if (existingStudent.roll.trim() !== data.roll.trim()) {
+        return { ok: false, error: 'Roll number does not match our records. Please check and try again.' };
+      }
+    }
+    
+    // Verify with birthday if provided by BOTH admin and user
+    if (data.birthday && data.birthday.trim() && existingStudent.birthday && existingStudent.birthday.trim()) {
+      if (existingStudent.birthday !== data.birthday.trim()) {
+        return { ok: false, error: 'Date of birth does not match our records. Please check and try again.' };
+      }
+    }
+    
+    // Link account: update existing student record with login credentials
+    existingStudent.email = data.email.toLowerCase().trim();
+    existingStudent.phone = data.phone || existingStudent.phone;
+    existingStudent.password = data.password;
+    existingStudent.firstName = data.firstName || existingStudent.firstName;
+    existingStudent.lastName = data.lastName || existingStudent.lastName;
+    existingStudent.name = `${data.firstName || existingStudent.firstName} ${data.lastName || existingStudent.lastName}`.trim();
+    existingStudent.status = 'active'; // Auto-activate linked accounts
+    existingStudent.linkedAt = new Date().toISOString();
+    
+    LS.set('gfa_users', users);
+    LS.set('gfa_users_cache', users);
+    
+    const session = {...existingStudent}; 
+    delete session.password;
+    return { ok: true, user: session, linked: true };
+  }
+  
+  // ======== CREATE NEW ACCOUNT ========
+  // Only create new account if NO Student ID provided
   const prefixMap = { student:'STU', teacher:'TCH', alumni:'ALM', staff:'STF' };
   const id = `${prefixMap[role]||'STU'}-${new Date().getFullYear()}-${String(users.length+1).padStart(4,'0')}`;
   const name = `${data.firstName} ${data.lastName}`.trim();
@@ -69,7 +125,8 @@ function lsRegister(data) {
     graduationYear: data.graduationYear||'', profession: data.profession||'',
     company: data.company||'', university: data.university||'',
     position: data.position||'', department: data.department||'',
-    roll:'', address:'', skills:[], achievements:[], gpa:'N/A', bio:'',
+    roll: data.roll||'', address:'', skills:[], achievements:[], gpa:'N/A', bio:'',
+    birthday: data.birthday||'',
   };
   users.push(user);
   LS.set('gfa_users', users);
@@ -136,6 +193,17 @@ export const api = {
     const users = LS.get('gfa_users', []).filter(u => u.id !== id);
     LS.set('gfa_users', users); LS.set('gfa_users_cache', users);
     return { ok: true };
+  },
+
+  async addStudent(studentData) {
+    const result = await post('/users/add-student', studentData);
+    if (result) return result;
+    // Fallback: add to localStorage
+    const users = LS.get('gfa_users', []);
+    users.push(studentData);
+    LS.set('gfa_users', users);
+    LS.set('gfa_users_cache', users);
+    return { ok: true, student: studentData };
   },
 
   // Notices
@@ -245,6 +313,39 @@ export const api = {
     LS.set('gfa_results', results);
     return { ok: true };
   },
+  async updateResult(resultId, updates) {
+    const r = await put(`/results/${resultId}`, updates);
+    if (r) {
+      const results = LS.get('gfa_results', []);
+      const idx = results.findIndex(res => res.id === resultId);
+      if (idx >= 0) {
+        results[idx] = { ...results[idx], ...updates };
+        LS.set('gfa_results', results);
+      }
+      return r;
+    }
+    const results = LS.get('gfa_results', []);
+    const idx = results.findIndex(res => res.id === resultId);
+    if (idx >= 0) {
+      results[idx] = { ...results[idx], ...updates };
+      LS.set('gfa_results', results);
+      return { ok: true };
+    }
+    return { ok: false, error: 'Result not found' };
+  },
+  async deleteResult(resultId) {
+    const r = await del(`/results/${resultId}`);
+    if (r) {
+      const results = LS.get('gfa_results', []);
+      const filtered = results.filter(res => res.id !== resultId);
+      LS.set('gfa_results', filtered);
+      return r;
+    }
+    const results = LS.get('gfa_results', []);
+    const filtered = results.filter(res => res.id !== resultId);
+    LS.set('gfa_results', filtered);
+    return { ok: true };
+  },
 
   // Messages
   async getConversations()              { return (await get('/conversations')) || LS.get('gfa_conversations', []); },
@@ -256,12 +357,69 @@ export const api = {
   // Settings
   async getSettings() {
     const r = await get('/settings');
-    if (r) { LS.set('gfa_settings', r); return r; }
+    if (r) { 
+      LS.set('gfa_settings', r); 
+      return r; 
+    }
     return LS.get('gfa_settings', {});
   },
   async saveSettings(data) {
     const r = await post('/settings', data);
+    // Always update localStorage with the new data
     LS.set('gfa_settings', data);
+    // Immediately refresh from server to ensure sync
+    if (r?.ok) {
+      const fresh = await get('/settings');
+      if (fresh) {
+        LS.set('gfa_settings', fresh);
+      }
+    }
     return r || { ok: true };
+  },
+
+  // Notifications
+  async getNotifications() {
+    const r = await get('/notifications');
+    if (r) { 
+      LS.set('gfa_notifications', r); 
+      return r; 
+    }
+    return LS.get('gfa_notifications', []);
+  },
+  async addNotification(data) {
+    const r = await post('/notifications', data);
+    if (r) return r;
+    // Fallback to localStorage
+    const notifs = LS.get('gfa_notifications', []);
+    const notification = {
+      id: 'NOTIF-' + Date.now(),
+      ...data,
+      read: false,
+      createdAt: new Date().toISOString(),
+    };
+    notifs.unshift(notification);
+    LS.set('gfa_notifications', notifs);
+    return { ok: true, notification };
+  },
+  async markNotificationRead(id) {
+    const r = await patch(`/notifications/${id}/read`);
+    if (r) return r;
+    // Fallback to localStorage
+    const notifs = LS.get('gfa_notifications', []);
+    const notif = notifs.find(n => n.id === id);
+    if (notif) {
+      notif.read = true;
+      LS.set('gfa_notifications', notifs);
+    }
+    return { ok: true };
+  },
+  async markAllNotificationsRead() {
+    const r = await patch('/notifications/mark-all-read');
+    if (r) return r;
+    // Fallback to localStorage
+    const notifs = LS.get('gfa_notifications', []);
+    notifs.forEach(n => n.read = true);
+    LS.set('gfa_notifications', notifs);
+    return { ok: true };
   },
 };

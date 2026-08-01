@@ -170,11 +170,14 @@ export async function generateStudentIDCard(student) {
   ctx.textAlign = 'center';
   ctx.fillText('STUDENT INFORMATION', infoSection.x + infoSection.width / 2, infoSection.y + 28);
 
+  // Format batch: "B2027" → "2027"
+  const batchDisplay = student.batch && student.batch.startsWith('B') ? student.batch.substring(1) : (student.batch || '—');
+
   // Student details with better layout
   const details = [
     ['Roll Number', student.roll || '—'],
     ['Class & Section', `${student.class || 'N/A'} - ${student.section || 'N/A'}`],
-    ['Batch Year', student.batch || '—'],
+    ['Batch Year', batchDisplay],
     ['Blood Group', student.bloodGroup || '—'],
     ['Guardian', student.guardian || '—']
   ];

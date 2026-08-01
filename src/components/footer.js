@@ -2,10 +2,19 @@
 // FOOTER COMPONENT
 // ================================================
 
+import { api } from '../utils/api.js';
+
 const S = (d, size=18, color='currentColor') =>
   `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 
-export function renderFooter() {
+export async function renderFooter() {
+  // Load settings from API
+  const settings = await api.getSettings() || {};
+  const schoolName = settings.name || 'Tiarkhali M.M High School';
+  const founded = settings.founded || '1985';
+  const tagline = settings.tagline || 'Nurturing Excellence, Inspiring Futures';
+  const address = settings.address || 'Tiarkhali, Bangladesh';
+  
   return `
     <footer class="footer">
       <div class="footer-top">
@@ -21,12 +30,12 @@ export function renderFooter() {
                   <circle cx="16" cy="17" r="4" fill="#60a5fa"/>
                 </svg>
                 <div>
-                  <div style="font-size:18px;font-weight:800;color:white;">Tiarkhali M.M High School</div>
-                  <div style="font-size:11px;color:rgba(255,255,255,0.5);">Est. 1985</div>
+                  <div style="font-size:18px;font-weight:800;color:white;">${schoolName}</div>
+                  <div style="font-size:11px;color:rgba(255,255,255,0.5);">Est. ${founded}</div>
                 </div>
               </div>
               <p style="color:rgba(255,255,255,0.65);font-size:13px;line-height:1.8;max-width:280px;">
-                Nurturing excellence and inspiring futures since 1985. A premier institution committed to holistic education.
+                ${tagline} since ${founded}. A premier institution committed to holistic education.
               </p>
               <div style="display:flex;gap:10px;margin-top:16px;">
                 <a href="#" style="width:36px;height:36px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.7);transition:all 0.2s;" onmouseover="this.style.background='#1877f2'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
@@ -63,7 +72,6 @@ export function renderFooter() {
               <ul class="footer-links">
                 <li><a onclick="navigate('batches')" style="cursor:pointer;display:flex;align-items:center;gap:8px;">${S('<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',14,'rgba(255,255,255,0.5)')} Batches</a></li>
                 <li><a onclick="navigate('results')" style="cursor:pointer;display:flex;align-items:center;gap:8px;">${S('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>',14,'rgba(255,255,255,0.5)')} Results</a></li>
-                <li><a onclick="navigate('assignments')" style="cursor:pointer;display:flex;align-items:center;gap:8px;">${S('<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>',14,'rgba(255,255,255,0.5)')} Assignments</a></li>
                 <li><a onclick="navigate('notices')" style="cursor:pointer;display:flex;align-items:center;gap:8px;">${S('<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',14,'rgba(255,255,255,0.5)')} Notice Board</a></li>
                 <li><a onclick="navigate('events')" style="cursor:pointer;display:flex;align-items:center;gap:8px;">${S('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',14,'rgba(255,255,255,0.5)')} Events</a></li>
               </ul>
@@ -75,15 +83,15 @@ export function renderFooter() {
               <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;">
                 <li style="display:flex;align-items:flex-start;gap:10px;color:rgba(255,255,255,0.7);font-size:13px;">
                   ${S('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',16,'#60a5fa')}
-                  <span>123 Education Avenue,<br>Dhaka 1205, Bangladesh</span>
+                  <span>${address}</span>
                 </li>
                 <li style="display:flex;align-items:center;gap:10px;color:rgba(255,255,255,0.7);font-size:13px;">
                   ${S('<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.23h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91A16 16 0 0 0 14 15.91l.29-.29a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21 18v.92z"/>',16,'#60a5fa')}
-                  <span>+880 1711-234567</span>
+                  <span>${settings.phone || '+880 1711-234567'}</span>
                 </li>
                 <li style="display:flex;align-items:center;gap:10px;color:rgba(255,255,255,0.7);font-size:13px;">
                   ${S('<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>',16,'#60a5fa')}
-                  <span>info@greenfieldacademy.edu.bd</span>
+                  <span>${settings.email || 'info@tiarkhali-mmhs.edu.bd'}</span>
                 </li>
                 <li style="display:flex;align-items:center;gap:10px;color:rgba(255,255,255,0.7);font-size:13px;">
                   ${S('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',16,'#60a5fa')}
@@ -99,7 +107,7 @@ export function renderFooter() {
       <div class="footer-bottom">
         <div class="container" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
           <p style="color:rgba(255,255,255,0.4);font-size:13px;">
-            © ${new Date().getFullYear()} Tiarkhali M.M High School and College. All rights reserved.
+            © ${new Date().getFullYear()} ${schoolName}. All rights reserved.
           </p>
           <div style="display:flex;gap:20px;font-size:13px;">
             <a href="#" style="color:rgba(255,255,255,0.4);display:flex;align-items:center;gap:5px;">${S('<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',13,'rgba(255,255,255,0.4)')} Privacy</a>

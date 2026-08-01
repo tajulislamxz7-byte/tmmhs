@@ -13,6 +13,9 @@ export default defineConfig({
     port: 80,
     host: true,
     allowedHosts: 'all',
+    fs: {
+      strict: false,
+    },
     headers: {
       'ngrok-skip-browser-warning': 'true',
     },

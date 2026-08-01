@@ -61,11 +61,63 @@ app.post('/api/users/register', (req, res) => {
   const users = readJSON('users.json');
   const data = req.body;
 
+  // Check if email already exists
   if (users.some(u => u.email.toLowerCase() === data.email.toLowerCase())) {
     return res.status(400).json({ ok: false, error: 'An account with this email already exists.' });
   }
 
   const role = data.role || 'student';
+
+  // ======== ACCOUNT LINKING FOR STUDENTS ========
+  // If student provides Student ID, try to link to existing record
+  if (role === 'student' && data.studentId && data.studentId.trim()) {
+    const existingStudent = users.find(u => 
+      u.id === data.studentId.trim() && 
+      u.role === 'student'
+    );
+    
+    if (!existingStudent) {
+      return res.status(404).json({ ok: false, error: 'Student ID not found in our database. Please contact school administration.' });
+    }
+    
+    // Check if already linked/active
+    if (existingStudent.status === 'active' && existingStudent.email && existingStudent.password) {
+      return res.status(400).json({ ok: false, error: 'This Student ID is already linked to an account. Please use the login page.' });
+    }
+    
+    // Verify with roll number if provided by BOTH admin and user
+    if (data.roll && data.roll.trim() && existingStudent.roll && existingStudent.roll.trim()) {
+      if (existingStudent.roll.trim() !== data.roll.trim()) {
+        return res.status(400).json({ ok: false, error: 'Roll number does not match our records. Please check and try again.' });
+      }
+    }
+    
+    // Verify with birthday if provided by BOTH admin and user
+    if (data.birthday && data.birthday.trim() && existingStudent.birthday && existingStudent.birthday.trim()) {
+      if (existingStudent.birthday !== data.birthday.trim()) {
+        return res.status(400).json({ ok: false, error: 'Date of birth does not match our records. Please check and try again.' });
+      }
+    }
+    
+    // Link account: update existing student record with login credentials
+    existingStudent.email = data.email.toLowerCase().trim();
+    existingStudent.phone = data.phone || existingStudent.phone;
+    existingStudent.password = data.password;
+    existingStudent.firstName = data.firstName || existingStudent.firstName;
+    existingStudent.lastName = data.lastName || existingStudent.lastName;
+    existingStudent.name = `${data.firstName || existingStudent.firstName} ${data.lastName || existingStudent.lastName}`.trim();
+    existingStudent.status = 'active'; // Auto-activate linked accounts
+    existingStudent.linkedAt = new Date().toISOString();
+    
+    writeJSON('users.json', users);
+    
+    const session = {...existingStudent}; 
+    delete session.password;
+    return res.json({ ok: true, user: session, linked: true });
+  }
+
+  // ======== CREATE NEW ACCOUNT ========
+  // Only create new account if NO Student ID provided
   const prefixMap = { student:'STU', teacher:'TCH', alumni:'ALM', staff:'STF' };
   const prefix = prefixMap[role] || 'STU';
   const id = `${prefix}-${new Date().getFullYear()}-${String(users.length + 1).padStart(4, '0')}`;
@@ -99,7 +151,8 @@ app.post('/api/users/register', (req, res) => {
     university: data.university || '',
     position: data.position || '',
     department: data.department || '',
-    roll: '', address: '', skills: [], achievements: [], gpa: 'N/A', bio: '',
+    roll: data.roll || '', address: '', skills: [], achievements: [], gpa: 'N/A', bio: '',
+    birthday: data.birthday || '',
   };
 
   users.push(user);
@@ -107,6 +160,28 @@ app.post('/api/users/register', (req, res) => {
 
   const session = {...user}; delete session.password;
   res.json({ ok: true, user: session });
+});
+
+// Add student by admin (pre-add without account)
+app.post('/api/users/add-student', (req, res) => {
+  const users = readJSON('users.json');
+  const studentData = req.body;
+
+  // Validate that it's a student record
+  if (studentData.role !== 'student') {
+    return res.status(400).json({ ok: false, error: 'Only student records can be added via this endpoint.' });
+  }
+
+  // Check if student ID already exists
+  if (users.some(u => u.id === studentData.id)) {
+    return res.status(400).json({ ok: false, error: 'A student with this ID already exists.' });
+  }
+
+  // Add student to database
+  users.push(studentData);
+  writeJSON('users.json', users);
+
+  res.json({ ok: true, student: studentData });
 });
 
 app.post('/api/users/login', (req, res) => {
@@ -237,6 +312,29 @@ app.post('/api/results', (req, res) => {
   res.json({ ok: true });
 });
 
+app.put('/api/results/:id', (req, res) => {
+  const results = readJSON('results.json');
+  const idx = results.findIndex(r => r.id === req.params.id);
+  if (idx >= 0) {
+    results[idx] = { ...results[idx], ...req.body };
+    writeJSON('results.json', results);
+    res.json({ ok: true, result: results[idx] });
+  } else {
+    res.status(404).json({ ok: false, error: 'Result not found' });
+  }
+});
+
+app.delete('/api/results/:id', (req, res) => {
+  const results = readJSON('results.json');
+  const filtered = results.filter(r => r.id !== req.params.id);
+  if (filtered.length < results.length) {
+    writeJSON('results.json', filtered);
+    res.json({ ok: true });
+  } else {
+    res.status(404).json({ ok: false, error: 'Result not found' });
+  }
+});
+
 // ── MESSAGES ──────────────────────────────────────
 app.get('/api/conversations', (_req, res) => res.json(readJSON('conversations.json')));
 
@@ -301,6 +399,41 @@ app.get('/api/settings', (_req, res) => res.json(readJSON('settings.json')));
 
 app.post('/api/settings', (req, res) => {
   writeJSON('settings.json', req.body);
+  res.json({ ok: true });
+});
+
+// ── NOTIFICATIONS ─────────────────────────────────
+app.get('/api/notifications', (_req, res) => res.json(readJSON('notifications.json')));
+
+app.post('/api/notifications', (req, res) => {
+  const notifications = readJSON('notifications.json');
+  const notification = {
+    id: 'NOTIF-' + Date.now(),
+    ...req.body,
+    read: false,
+    createdAt: new Date().toISOString(),
+  };
+  notifications.unshift(notification);
+  writeJSON('notifications.json', notifications);
+  res.json({ ok: true, notification });
+});
+
+app.patch('/api/notifications/:id/read', (req, res) => {
+  const notifications = readJSON('notifications.json');
+  const notif = notifications.find(n => n.id === req.params.id);
+  if (notif) {
+    notif.read = true;
+    writeJSON('notifications.json', notifications);
+    res.json({ ok: true });
+  } else {
+    res.status(404).json({ ok: false, error: 'Notification not found' });
+  }
+});
+
+app.patch('/api/notifications/mark-all-read', (req, res) => {
+  const notifications = readJSON('notifications.json');
+  notifications.forEach(n => n.read = true);
+  writeJSON('notifications.json', notifications);
   res.json({ ok: true });
 });
 

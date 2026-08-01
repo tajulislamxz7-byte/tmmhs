@@ -28,6 +28,16 @@ const ICONS = {
   users2:    `<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>`,
 };
 
+// ── Notification Helper ──
+async function createNotification(type, title, message, link = null) {
+  await api.addNotification({
+    type,  // 'notice', 'result', 'event'
+    title,
+    message,
+    link,
+  });
+}
+
 const ADMIN_NAV = [
   {key:'dashboard',   label:'Dashboard',    icon:'dashboard'},
   {key:'students',    label:'Students',     icon:'students'},
@@ -38,7 +48,6 @@ const ADMIN_NAV = [
   {key:'results',     label:'Results',      icon:'results'},
   {key:'notices',     label:'Notices',      icon:'notices'},
   {key:'events',      label:'Events',       icon:'events'},
-  {key:'assignments', label:'Assignments',  icon:'admissions'},
   {key:'messages',    label:'Messages',     icon:'messages'},
   {key:'roles',       label:'Users',        icon:'roles'},
   {key:'settings',    label:'Settings',     icon:'settings'},
@@ -58,7 +67,7 @@ const _cache = {
 };
 
 async function _loadCache() {
-  const [users, notices, events, batches, exams, results, settings] = await Promise.all([
+  const [users, notices, events, batches, exams, results, settings, notifications] = await Promise.all([
     api.getUsers(),
     api.getNotices(),
     api.getEvents(),
@@ -66,14 +75,16 @@ async function _loadCache() {
     api.getExams(),
     api.getResults(),
     api.getSettings(),
+    api.getNotifications(),
   ]);
-  _cache.users    = users    || [];
-  _cache.notices  = notices  || [];
-  _cache.events   = events   || [];
-  _cache.batches  = batches  || [];
-  _cache.exams    = exams    || [];
-  _cache.results  = results  || [];
-  _cache.settings = settings || {};
+  _cache.users          = users          || [];
+  _cache.notices        = notices        || [];
+  _cache.events         = events         || [];
+  _cache.batches        = batches        || [];
+  _cache.exams          = exams          || [];
+  _cache.results        = results        || [];
+  _cache.settings       = settings       || {};
+  _cache.notifications  = notifications  || [];
 }
 
 export async function renderAdminDashboard() {
@@ -138,7 +149,6 @@ function renderAdminTab(tab) {
     case 'batches':      return renderAdminBatches();
     case 'notices':      return renderAdminNoticesManager();
     case 'events':       return renderAdminEventsManager();
-    case 'assignments':  return renderAdminAssignmentsManager();
     case 'results':      return renderAdminResults();
     case 'settings':     return renderAdminSettings();
     case 'roles':        return renderAdminUsers();
@@ -155,11 +165,13 @@ async function _refreshTab(tab) {
 function renderAdminMain() {
   const allUsers = _cache.users;
   const studentCount = allUsers.filter(u => u.role === 'student' && u.status === 'active').length;
+  const unlinkedCount = allUsers.filter(u => u.role === 'student' && u.status === 'unlinked').length;
   const teacherCount = allUsers.filter(u => u.role === 'teacher' && u.status === 'active').length;
-  const pendingCount = allUsers.filter(u => u.status !== 'active' && u.role !== 'admin').length;
+  const pendingCount = allUsers.filter(u => u.status !== 'active' && u.status !== 'unlinked' && u.role !== 'admin').length;
   const S = _cache.settings;
   const noticesCount = _cache.notices.length;
   const eventsCount  = _cache.events.length;
+  const notificationCount = _cache.notifications.length;
   const today = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
 
@@ -178,7 +190,7 @@ function renderAdminMain() {
       <!-- KPI Grid — live data -->
       <div class="kpi-grid mb-6">
         ${[
-          {svg:`<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`, l:'Active Students',  v:studentCount,         c:'#2563eb', t:pendingCount>0?`${pendingCount} pending approval`:'All approved', up:true},
+          {svg:`<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`, l:'Active Students',  v:studentCount,         c:'#2563eb', t:unlinkedCount>0?`${unlinkedCount} not linked yet`:(pendingCount>0?`${pendingCount} pending approval`:'All approved'), up:true},
           {svg:`<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>`,                                                                                l:'Active Teachers',  v:teacherCount,         c:'#7c3aed', t:'Verified accounts',  up:true},
           {svg:`<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>`,                                                              l:'Published Notices',v:noticesCount,          c:'#d97706', t:'On notice board',      up:true},
           {svg:`<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>`,l:'Events',          v:eventsCount,          c:'#059669', t:'Scheduled',           up:true},
@@ -219,8 +231,7 @@ function renderAdminMain() {
             ${[
               {l:'Published Notices',  v: noticesCount},
               {l:'Scheduled Events',   v: eventsCount},
-              {l:'Assignments',        v: JSON.parse(localStorage.getItem('gfa_assignments')||'[]').length},
-              {l:'Notifications Sent', v: JSON.parse(localStorage.getItem('gfa_notifications')||'[]').length},
+              {l:'Notifications Sent', v: notificationCount},
             ].map(s=>`
               <div class="flex items-center justify-between mb-3 pb-3 border-b" style="border-color:var(--border);">
                 <span class="text-sm text-secondary">${s.l}</span>
@@ -250,14 +261,16 @@ function renderAdminMain() {
 
 function _studentRow(s) {
   const approveBtn = s.status==='pending' ? '<button class="btn btn-success btn-sm" onclick="approveUser(\''+s.id+'\')">Approve</button>' : '';
-  const statusBadge = s.status==='active'?'success':s.status==='pending'?'warning':'danger';
+  const statusBadge = s.status==='active'?'success':s.status==='pending'?'warning':s.status==='unlinked'?'gray':'danger';
+  const statusText = s.status==='unlinked'?'Not Linked':s.status;
+  const emailText = s.email || '<span style="color:var(--text-muted);font-style:italic;">Not linked yet</span>';
   return '<tr>'
-    + '<td><div class="flex items-center gap-3"><img src="'+s.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://api.dicebear.com/7.x/avataaars/svg?seed=default\'"><div><div class="font-semibold text-sm">'+s.name+'</div><div class="text-xs text-muted">'+s.email+'</div></div></div></td>'
+    + '<td><div class="flex items-center gap-3"><img src="'+s.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://api.dicebear.com/7.x/avataaars/svg?seed=default\'"><div><div class="font-semibold text-sm">'+s.name+'</div><div class="text-xs text-muted">'+emailText+'</div></div></div></td>'
     + '<td style="font-family:monospace;font-size:12px;">'+s.id+'</td>'
     + '<td>'+(s.class||'—')+' '+(s.section?'· '+s.section:'')+'</td>'
-    + '<td><span class="badge badge-'+statusBadge+'">'+s.status+'</span></td>'
+    + '<td><span class="badge badge-'+statusBadge+'">'+statusText+'</span></td>'
     + '<td style="font-size:12px;">'+new Date(s.createdAt).toLocaleDateString()+'</td>'
-    + '<td><div style="display:flex;gap:4px;">'+approveBtn+_userActions(s.id,s.name)+'</div></td>'
+    + '<td><div style="display:flex;gap:4px;">'+approveBtn+_userActions(s.id,s.name,s.status)+'</div></td>'
     + '</tr>';
 }
 
@@ -269,14 +282,24 @@ function renderAdminStudents() {
       <div class="flex items-center justify-between mb-6">
         <h1 style="font-size:22px;font-weight:800;">Manage Students</h1>
         <div class="flex gap-3">
-          <button class="btn btn-secondary" onclick="showToast('CSV export coming soon','info')">
-            ${SVG('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',14)} Export
+          <button class="btn btn-primary" onclick="openAddStudentModal()">
+            ${SVG('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',14,'white')} Add Student
+          </button>
+          <button class="btn btn-secondary" onclick="showToast('CSV import/export coming soon','info')">
+            ${SVG('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',14)} Import/Export
           </button>
         </div>
       </div>
       <div class="card">
         ${studentUsers.length === 0
-          ? `<div class="card-body text-center text-muted" style="padding:60px;">No students registered yet.</div>`
+          ? `<div class="card-body text-center text-muted" style="padding:60px;">
+              <div style="font-size:48px;margin-bottom:12px;">👨‍🎓</div>
+              <div class="font-semibold" style="font-size:18px;">No students yet</div>
+              <div class="text-sm mt-2 mb-4">Start by adding student records to your database</div>
+              <button class="btn btn-primary" onclick="openAddStudentModal()">
+                ${SVG('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',14,'white')} Add First Student
+              </button>
+            </div>`
           : `<div class="table-container"><table>
             <thead><tr><th>Student</th><th>ID</th><th>Class</th><th>Status</th><th>Registered</th><th>Actions</th></tr></thead>
             <tbody>${studentUsers.map(s => _studentRow(s)).join('')}</tbody>
@@ -295,7 +318,7 @@ function _alumniRow(a) {
     + '<td>'+(a.graduationYear||'—')+'</td>'
     + '<td>'+(a.profession||'—')+'</td>'
     + '<td><span class="badge badge-'+statusBadge+'">'+a.status+'</span></td>'
-    + '<td><div style="display:flex;gap:4px;">'+_approveBtn(a.id,a.status)+_userActions(a.id,a.name)+'</div></td>'
+    + '<td><div style="display:flex;gap:4px;">'+_approveBtn(a.id,a.status)+_userActions(a.id,a.name,a.status)+'</div></td>'
     + '</tr>';
 }
 
@@ -337,6 +360,14 @@ function _resultRow(r) {
     + '<td>'+r.percentage+'%</td>'
     + '<td><span class="badge badge-success">'+r.grade+'</span></td>'
     + '<td class="font-bold" style="color:var(--primary);">'+r.gpa+'</td>'
+    + '<td>'
+    + '<button class="btn btn-ghost btn-icon btn-sm" onclick="editResult(\''+r.id+'\')" title="Edit Result">'
+    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'
+    + '</button>'
+    + '<button class="btn btn-ghost btn-icon btn-sm" onclick="deleteResult(\''+r.id+'\')" title="Delete Result">'
+    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>'
+    + '</button>'
+    + '</td>'
     + '</tr>';
 }
 
@@ -358,17 +389,6 @@ function _eventRow(e, i) {
     + '<td><span class="badge badge-primary">'+e.category+'</span></td>'
     + '<td>'+e.location+'</td>'
     + '<td><button class="btn btn-danger btn-sm" onclick="deleteEvent('+i+')">Delete</button></td>'
-    + '</tr>';
-}
-
-function _assignmentRow(a, i) {
-  return '<tr>'
-    + '<td><div class="font-medium">'+a.title+'</div></td>'
-    + '<td>'+a.subject+'</td>'
-    + '<td>'+a.teacher+'</td>'
-    + '<td>'+(a.dueDate||'—')+'</td>'
-    + '<td>'+(a.class||'All')+'</td>'
-    + '<td><button class="btn btn-danger btn-sm" onclick="deleteAssignment('+i+')">Delete</button></td>'
     + '</tr>';
 }
 
@@ -401,8 +421,12 @@ function _batchCard(b, i) {
     + '</div></div></div>';
 }
 
-function _userActions(id, name) {
-  return '<button class="btn btn-ghost btn-icon btn-sm" onclick="adminEditUser(\''+id+'\')" title="Edit">'+SVG('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',14)+'</button>'
+function _userActions(id, name, status) {
+  // Show edit button for all statuses, but different edit functions
+  const editBtn = status === 'unlinked'
+    ? '<button class="btn btn-ghost btn-icon btn-sm" onclick="adminEditUnlinkedStudent(\''+id+'\')" title="Edit Basic Info">'+SVG('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',14)+'</button>'
+    : '<button class="btn btn-ghost btn-icon btn-sm" onclick="adminEditUser(\''+id+'\')" title="Edit">'+SVG('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',14)+'</button>';
+  return editBtn
     + '<button class="btn btn-ghost btn-icon btn-sm" onclick="adminDeleteUser(\''+id+'\',\''+name+'\')" title="Delete" style="color:var(--danger);">'+SVG('<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',14,'var(--danger)')+'</button>';
 }
 function _approveBtn(id, status) {
@@ -429,7 +453,7 @@ function renderAdminTeachers() {
               + '<td><span class="badge badge-primary">'+(t.subject||'—')+'</span></td>'
               + '<td><span class="badge badge-'+(t.status==='active'?'success':t.status==='pending'?'warning':'gray')+'">'+t.status+'</span></td>'
               + '<td style="font-size:12px;">'+new Date(t.createdAt).toLocaleDateString()+'</td>'
-              + '<td><div style="display:flex;gap:4px;">'+_approveBtn(t.id,t.status)+_userActions(t.id,t.name)+'</div></td>'
+              + '<td><div style="display:flex;gap:4px;">'+_approveBtn(t.id,t.status)+_userActions(t.id,t.name,t.status)+'</div></td>'
               + '</tr>'
             ).join('')}</tbody>
           </table></div>`
@@ -459,7 +483,7 @@ function renderAdminStaff() {
               + '<td>'+(s.position||'—')+'</td>'
               + '<td>'+(s.department||'—')+'</td>'
               + '<td><span class="badge badge-'+(s.status==='active'?'success':'warning')+'">'+s.status+'</span></td>'
-              + '<td><div style="display:flex;gap:4px;">'+_approveBtn(s.id,s.status)+_userActions(s.id,s.name)+'</div></td>'
+              + '<td><div style="display:flex;gap:4px;">'+_approveBtn(s.id,s.status)+_userActions(s.id,s.name,s.status)+'</div></td>'
               + '</tr>'
             ).join('')}</tbody>
           </table></div>`
@@ -535,7 +559,8 @@ function renderAdminBatches() {
 
 function renderAdminResults() {
   const allUsers = _cache.users;
-  const studentUsers = allUsers.filter(u => u.role === 'student' && u.status === 'active');
+  // Include both active and unlinked students in results management
+  const studentUsers = allUsers.filter(u => u.role === 'student' && (u.status === 'active' || u.status === 'unlinked'));
   const exams = _cache.exams;
   const results = _cache.results;
 
@@ -606,7 +631,7 @@ function renderAdminResults() {
         <div class="card mt-6">
           <div class="card-header"><div class="font-semibold">Published Results Summary</div></div>
           <div class="table-container"><table>
-            <thead><tr><th>Student</th><th>Exam</th><th>Total</th><th>%</th><th>Grade</th><th>GPA</th></tr></thead>
+            <thead><tr><th>Student</th><th>Exam</th><th>Total</th><th>%</th><th>Grade</th><th>GPA</th><th>Actions</th></tr></thead>
             <tbody>${results.slice(-20).reverse().map(r => _resultRow(r)).join('')}</tbody>
           </table></div>
         </div>` : ''}
@@ -636,14 +661,24 @@ window.saveExam = async function() {
 };
 
 window.deleteExam = async function(i) {
-  if (!confirm('Delete this exam and all its results?')) return;
+  const confirmed = await confirmDialog('Delete this exam and all its results? This action cannot be undone.', 'Delete Exam');
+  if (!confirmed) return;
+  
   await api.deleteExam(i);
   showToast('Exam deleted','info');
   await _refreshTab('results');
 };
 
 window.publishExam = async function(i) {
+  const exams = _cache.exams;
+  const exam = exams[i];
   await api.updateExam(i, { status: 'Published' });
+  
+  // Create notification
+  if (exam) {
+    await createNotification('result', 'New Results Published', `${exam.name} results are now available`, 'results');
+  }
+  
   showToast('Results published! Students can now view them.','success');
   await _refreshTab('results');
 };
@@ -654,12 +689,135 @@ window.unpublishExam = async function(i) {
   await _refreshTab('results');
 };
 
+window.editResult = async function(resultId) {
+  const results = _cache.results;
+  const result = results.find(r => r.id === resultId);
+  if (!result) { showToast('Result not found', 'error'); return; }
+  
+  const exams = _cache.exams;
+  const exam = exams.find(e => e.id === result.examId);
+  if (!exam) { showToast('Exam not found', 'error'); return; }
+  
+  const subjects = exam.subjects || [];
+  
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.onclick = e => { if (e.target === modal) modal.remove(); };
+  modal.innerHTML = `
+    <div class="modal" style="max-width:600px;">
+      <div class="modal-header">
+        <div class="font-semibold">Edit Result — ${result.studentName}</div>
+        <button class="btn btn-ghost btn-icon" onclick="this.closest('.modal-overlay').remove()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="max-height:70vh;overflow-y:auto;">
+        <div class="form-group mb-4">
+          <label class="form-label">Exam</label>
+          <input class="form-input" value="${result.exam}" readonly style="background:var(--bg-secondary);">
+        </div>
+        <div class="form-group mb-4">
+          <label class="form-label">Student</label>
+          <input class="form-input" value="${result.studentName}" readonly style="background:var(--bg-secondary);">
+        </div>
+        <div class="mb-4">
+          <label class="form-label mb-3">Subject Marks</label>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            ${subjects.map(sub => `
+              <div style="display:grid;grid-template-columns:1fr 120px;gap:12px;align-items:center;">
+                <label class="text-sm font-medium">${sub}</label>
+                <input type="number" min="0" max="100" class="form-input edit-subject-mark" data-subject="${sub}" value="${result.subjects[sub] || ''}" placeholder="0-100" style="text-align:center;">
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="flex gap-3 justify-end" style="border-top:1px solid var(--border);padding-top:16px;margin-top:16px;">
+          <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+          <button class="btn btn-primary" onclick="saveEditResult('${resultId}')">Save Changes</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+};
+
+window.saveEditResult = async function(resultId) {
+  const results = _cache.results;
+  const result = results.find(r => r.id === resultId);
+  if (!result) { showToast('Result not found', 'error'); return; }
+  
+  const exams = _cache.exams;
+  const exam = exams.find(e => e.id === result.examId);
+  if (!exam) { showToast('Exam not found', 'error'); return; }
+  
+  const subjects = {};
+  const inputs = document.querySelectorAll('.edit-subject-mark');
+  let total = 0;
+  inputs.forEach(inp => {
+    const subName = inp.dataset.subject;
+    const mark = parseInt(inp.value) || 0;
+    subjects[subName] = mark;
+    total += mark;
+  });
+  
+  const outOf = (exam.subjects || []).length * 100;
+  const percentage = outOf > 0 ? ((total / outOf) * 100).toFixed(1) : 0;
+  const pct = parseFloat(percentage);
+  
+  let grade = 'F', gpa = 0;
+  if (pct >= 80) { grade = 'A+'; gpa = 5.0; }
+  else if (pct >= 70) { grade = 'A'; gpa = 4.0; }
+  else if (pct >= 60) { grade = 'A-'; gpa = 3.5; }
+  else if (pct >= 50) { grade = 'B'; gpa = 3.0; }
+  else if (pct >= 40) { grade = 'C'; gpa = 2.0; }
+  else if (pct >= 33) { grade = 'D'; gpa = 1.0; }
+  
+  const updatedResult = {
+    ...result,
+    subjects,
+    total,
+    outOf,
+    percentage: parseFloat(percentage),
+    gpa,
+    grade,
+    pass: pct >= 33
+  };
+  
+  const response = await api.updateResult(resultId, updatedResult);
+  
+  if (response && response.ok !== false) {
+    document.querySelector('.modal-overlay')?.remove();
+    showToast('Result updated successfully!', 'success');
+    await _refreshTab('results');
+  } else {
+    showToast(response?.error || 'Failed to update result', 'error');
+  }
+};
+
+window.deleteResult = async function(resultId) {
+  const results = _cache.results;
+  const result = results.find(r => r.id === resultId);
+  if (!result) { showToast('Result not found', 'error'); return; }
+  
+  const confirmed = await confirmDialog(`Delete result for ${result.studentName} in ${result.exam}? This action cannot be undone.`, 'Delete Result');
+  if (!confirmed) return;
+  
+  const response = await api.deleteResult(resultId);
+  
+  if (response && response.ok !== false) {
+    showToast('Result deleted successfully', 'info');
+    await _refreshTab('results');
+  } else {
+    showToast(response?.error || 'Failed to delete result', 'error');
+  }
+};
+
 window.openMarksEntry = function(examIndex) {
   const exams = _cache.exams;
   const exam = exams[examIndex];
   if (!exam) return;
   const allUsers = _cache.users;
-  const studentUsers = allUsers.filter(u => u.role === 'student' && u.status === 'active');
+  // Include both active and unlinked students for marks entry
+  const studentUsers = allUsers.filter(u => u.role === 'student' && (u.status === 'active' || u.status === 'unlinked'));
   const savedResults = _cache.results;
 
   const panel = document.getElementById('marksEntryPanel');
@@ -946,52 +1104,6 @@ function renderAdminEventsManager() {
   `;
 }
 
-function renderAdminAssignmentsManager() {
-  const assignments = (JSON.parse(localStorage.getItem('gfa_assignments')||'[]'));
-  return `
-    <div>
-      <div class="flex items-center justify-between mb-6">
-        <h1 style="font-size:22px;font-weight:800;">Manage Assignments</h1>
-        <button class="btn btn-primary" onclick="showAddAssignmentForm()">+ Add Assignment</button>
-      </div>
-
-      <div class="card mb-6" id="addAssignmentForm" style="display:none;">
-        <div class="card-header"><div class="font-semibold">New Assignment</div></div>
-        <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
-          <div class="form-group"><label class="form-label">Title *</label>
-            <input class="form-input" id="as_title" placeholder="Assignment title"></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-            <div class="form-group"><label class="form-label">Subject *</label>
-              <input class="form-input" id="as_subject" placeholder="e.g. Mathematics"></div>
-            <div class="form-group"><label class="form-label">Teacher</label>
-              <input class="form-input" id="as_teacher" placeholder="Teacher name"></div>
-            <div class="form-group"><label class="form-label">Due Date</label>
-              <input class="form-input" id="as_due" type="date"></div>
-          </div>
-          <div class="form-group"><label class="form-label">Class (optional)</label>
-            <select class="form-input form-select" id="as_class">
-              <option value="">All Classes</option>
-              <option>Class 6</option><option>Class 7</option><option>Class 8</option>
-              <option>Class 9</option><option>Class 10</option>
-            </select></div>
-          <div class="flex gap-3">
-            <button class="btn btn-primary" onclick="saveAssignment()">Save Assignment</button>
-            <button class="btn btn-secondary" onclick="document.getElementById('addAssignmentForm').style.display='none'">Cancel</button>
-          </div>
-        </div>
-      </div>
-
-      ${assignments.length === 0
-        ? `<div class="card"><div class="card-body text-center text-muted" style="padding:40px;">No assignments added yet.</div></div>`
-        : `<div class="card"><div class="table-container"><table>
-            <thead><tr><th>Title</th><th>Subject</th><th>Teacher</th><th>Due Date</th><th>Class</th><th>Actions</th></tr></thead>
-            <tbody>${assignments.map((a,i) => _assignmentRow(a,i)).join('')}</tbody>
-          </table></div></div>`
-      }
-    </div>
-  `;
-}
-
 function renderAdminUsers() {
   const allUsers = _cache.users;
   // Pending = not yet active (catches 'pending', and any legacy broken statuses)
@@ -1110,11 +1222,18 @@ window.saveNotice = async function() {
     priority: document.getElementById('n_priority')?.value || 'medium',
     content,
   });
+  
+  // Create notification
+  await createNotification('notice', 'New Notice Published', title, 'notices');
+  
   showToast('Notice published!', 'success');
   await _refreshTab('notices');
 };
 
 window.deleteNotice = async function(idx) {
+  const confirmed = await confirmDialog('Are you sure you want to delete this notice? This action cannot be undone.', 'Delete Notice');
+  if (!confirmed) return;
+  
   await api.deleteNotice(idx);
   showToast('Notice deleted.', 'success');
   await _refreshTab('notices');
@@ -1137,47 +1256,22 @@ window.saveEvent = async function() {
     location: document.getElementById('ev_location')?.value || '',
     description: document.getElementById('ev_desc')?.value || '',
   });
+  
+  // Create notification
+  const eventDate = document.getElementById('ev_date')?.value;
+  await createNotification('event', 'New Event Scheduled', `${title} - ${eventDate}`, 'events');
+  
   showToast('Event added!', 'success');
   await _refreshTab('events');
 };
 
 window.deleteEvent = async function(idx) {
+  const confirmed = await confirmDialog('Are you sure you want to delete this event? This action cannot be undone.', 'Delete Event');
+  if (!confirmed) return;
+  
   await api.deleteEvent(idx);
   showToast('Event deleted.', 'success');
   await _refreshTab('events');
-};
-
-// ── Admin Assignments (still localStorage — no server endpoint yet) ──
-window.showAddAssignmentForm = function() {
-  const form = document.getElementById('addAssignmentForm');
-  if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
-};
-
-window.saveAssignment = function() {
-  const title = document.getElementById('as_title')?.value?.trim();
-  if (!title) { showToast('Assignment title is required.', 'error'); return; }
-  const assignments = JSON.parse(localStorage.getItem('gfa_assignments')||'[]');
-  assignments.unshift({
-    id: 'AS' + Date.now(), title,
-    subject: document.getElementById('as_subject')?.value || '',
-    teacher: document.getElementById('as_teacher')?.value || '',
-    dueDate: document.getElementById('as_due')?.value || '',
-    class:   document.getElementById('as_class')?.value || '',
-    done: false, createdAt: new Date().toISOString(),
-  });
-  localStorage.setItem('gfa_assignments', JSON.stringify(assignments));
-  showToast('Assignment added!', 'success');
-  const content = document.getElementById('adminContent');
-  if (content) content.innerHTML = renderAdminTab('assignments');
-};
-
-window.deleteAssignment = function(idx) {
-  const assignments = JSON.parse(localStorage.getItem('gfa_assignments')||'[]');
-  assignments.splice(idx, 1);
-  localStorage.setItem('gfa_assignments', JSON.stringify(assignments));
-  showToast('Assignment deleted.', 'success');
-  const content = document.getElementById('adminContent');
-  if (content) content.innerHTML = renderAdminTab('assignments');
 };
 
 // ── Admin User Edit/Delete ──
@@ -1248,6 +1342,136 @@ window.adminEditUser = function(id) {
   document.body.appendChild(modal);
 };
 
+window.adminEditUnlinkedStudent = function(id) {
+  const u = _cache.users.find(x => x.id === id);
+  if (!u || u.role !== 'student') return;
+
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.onclick = e => { if (e.target === modal) modal.remove(); };
+  modal.innerHTML = `
+    <div class="modal">
+      <div class="modal-header">
+        <div class="font-semibold">Edit Unlinked Student — ${u.name}</div>
+        <button class="btn btn-ghost btn-icon" onclick="this.closest('.modal-overlay').remove()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;">
+        <div style="padding:12px;background:var(--warning-50);border-radius:8px;border:1px solid var(--warning);margin-bottom:8px;">
+          <div style="font-size:13px;color:var(--text);display:flex;align-items:start;gap:8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div><strong>Note:</strong> This student hasn't linked their account yet. Only edit basic pre-registration info.</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 mb-2">
+          <img src="${u.avatar}" class="avatar avatar-lg" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=default'">
+          <div><div class="font-bold">${u.name}</div><div class="text-xs text-muted">${u.id} • Not Linked</div></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input id="eus_name" class="form-input" value="${u.name||''}" placeholder="Full name">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label class="form-label">Roll Number</label>
+            <input id="eus_roll" class="form-input" value="${u.roll||''}" placeholder="Roll number">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date of Birth</label>
+            <input id="eus_birthday" type="date" class="form-input" value="${u.birthday||''}">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label class="form-label">Class</label>
+            <select id="eus_class" class="form-input form-select">
+              <option value="">Select</option>
+              <option value="Class 6" ${u.class==='Class 6'?'selected':''}>Class 6</option>
+              <option value="Class 7" ${u.class==='Class 7'?'selected':''}>Class 7</option>
+              <option value="Class 8" ${u.class==='Class 8'?'selected':''}>Class 8</option>
+              <option value="Class 9" ${u.class==='Class 9'?'selected':''}>Class 9</option>
+              <option value="Class 10" ${u.class==='Class 10'?'selected':''}>Class 10</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Section</label>
+            <select id="eus_section" class="form-input form-select">
+              <option value="">Select</option>
+              <option value="A" ${u.section==='A'?'selected':''}>A</option>
+              <option value="B" ${u.section==='B'?'selected':''}>B</option>
+              <option value="C" ${u.section==='C'?'selected':''}>C</option>
+              <option value="D" ${u.section==='D'?'selected':''}>D</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Batch</label>
+            <select id="eus_batch" class="form-input form-select">
+              <option value="">Select</option>
+              <option value="B2024" ${u.batch==='B2024'?'selected':''}>2024</option>
+              <option value="B2025" ${u.batch==='B2025'?'selected':''}>2025</option>
+              <option value="B2026" ${u.batch==='B2026'?'selected':''}>2026</option>
+              <option value="B2027" ${u.batch==='B2027'?'selected':''}>2027</option>
+              <option value="B2028" ${u.batch==='B2028'?'selected':''}>2028</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label class="form-label">Guardian Name</label>
+            <input id="eus_guardian" class="form-input" value="${u.guardian||''}" placeholder="Guardian name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Blood Group</label>
+            <select id="eus_blood" class="form-input form-select">
+              <option value="">Select</option>
+              ${['A+','A-','B+','B-','AB+','AB-','O+','O-'].map(bg=>`<option ${(u.bloodGroup||'')===bg?'selected':''}>${bg}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input id="eus_phone" class="form-input" value="${u.phone||''}" placeholder="Phone number">
+        </div>
+        <div class="flex gap-3 justify-end" style="border-top:1px solid var(--border);padding-top:12px;margin-top:8px;">
+          <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+          <button class="btn btn-primary" onclick="adminSaveUnlinkedStudent('${id}')">Save Changes</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+};
+
+window.adminSaveUnlinkedStudent = async function(id) {
+  const get = (elId) => document.getElementById(elId)?.value?.trim();
+  const updates = {
+    name: get('eus_name'),
+    roll: get('eus_roll'),
+    birthday: get('eus_birthday'),
+    class: get('eus_class'),
+    section: get('eus_section'),
+    batch: get('eus_batch'),
+    guardian: get('eus_guardian'),
+    bloodGroup: get('eus_blood'),
+    phone: get('eus_phone'),
+  };
+  
+  // Parse name into firstName and lastName
+  if (updates.name) {
+    const nameParts = updates.name.split(' ');
+    updates.firstName = nameParts[0];
+    updates.lastName = nameParts.slice(1).join(' ');
+  }
+  
+  // Remove empty values
+  Object.keys(updates).forEach(k => !updates[k] && delete updates[k]);
+  
+  await api.updateUser(id, updates);
+  document.querySelector('.modal-overlay')?.remove();
+  showToast('Unlinked student info updated successfully!', 'success');
+  await _refreshTab(adminTab);
+};
+
 window.adminSaveUser = async function(id) {
   const get = (elId) => document.getElementById(elId)?.value?.trim();
   const updates = {
@@ -1285,7 +1509,9 @@ window.adminSaveUser = async function(id) {
 };
 
 window.adminDeleteUser = async function(id, name) {
-  if (!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
+  const confirmed = await confirmDialog(`Delete user "${name}"? This action cannot be undone and will permanently remove all associated data.`, 'Delete User');
+  if (!confirmed) return;
+  
   await api.deleteUser(id);
 
   // Log out if deleting current session
@@ -1315,7 +1541,10 @@ window.saveBatch = async function() {
 window.deleteBatch = async function(idx) {
   const batches = _cache.batches;
   const b = batches[idx];
-  if (!confirm(`Delete batch "${b?.name}"?`)) return;
+  
+  const confirmed = await confirmDialog(`Delete batch "${b?.name}"? This action cannot be undone.`, 'Delete Batch');
+  if (!confirmed) return;
+  
   await api.deleteBatch(idx);
   showToast('Batch deleted.', 'success');
   await _refreshTab('batches');

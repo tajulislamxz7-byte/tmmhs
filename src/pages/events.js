@@ -2,6 +2,7 @@
 // EVENTS PAGE
 // ================================================
 
+import { api } from '../utils/api.js';
 import { events as sampleEvents } from '../data/schoolConfig.js';
 
 function getEvents() {
@@ -9,8 +10,14 @@ function getEvents() {
   return stored !== null ? stored : sampleEvents;
 }
 
-export function renderEvents() {
-  const events = getEvents();
+// Load events from server
+async function loadEvents() {
+  const events = await api.getEvents();
+  return events && events.length > 0 ? events : sampleEvents;
+}
+
+export async function renderEvents() {
+  const events = await loadEvents();
   const upcoming = [...events].sort((a,b) => new Date(a.date) - new Date(b.date));
 
   return `

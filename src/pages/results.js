@@ -3,6 +3,7 @@
 // ================================================
 
 import { students as sampleStudents, teachers } from '../data/schoolConfig.js';
+import { api } from '../utils/api.js';
 
 function getStudentById(id) {
   // Check API cache first, then sampleData
@@ -10,6 +11,16 @@ function getStudentById(id) {
   const u = cached.find(x => x.id === id);
   if (u) return u;
   return sampleStudents.find(s => s.id === id);
+}
+
+async function fetchExams() {
+  const exams = await api.getExams();
+  return exams && exams.length > 0 ? exams : [];
+}
+
+async function fetchResults() {
+  const results = await api.getResults();
+  return results && results.length > 0 ? results : [];
 }
 
 function getExams() {
@@ -56,7 +67,11 @@ function gradeFromPct(pct) {
   return { g:'F', gp:0.0 };
 }
 
-export function renderStudentDashboard(loggedInUser) {
+export async function renderStudentDashboard(loggedInUser) {
+  // Fetch fresh data from API
+  await api.getResults(); // Load results into localStorage
+  await api.getNotices(); // Load notices into localStorage
+  
   const cached = JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
   const student = (loggedInUser && loggedInUser.id)
     ? (cached.find(s => s.id === loggedInUser.id) || sampleStudents.find(s => s.id === loggedInUser.id) || buildUserProfile(loggedInUser))
@@ -71,6 +86,9 @@ export function renderStudentDashboard(loggedInUser) {
 
   const myResults = getResults().filter(r => r.studentId === student.id);
   const latest = myResults[0] || null;
+  
+  // Calculate current GPA from latest result
+  const currentGPA = latest ? (latest.gpa || '—') : (student.gpa !== 'N/A' ? student.gpa : '—');
 
   return `
     <div class="page-container">
@@ -98,7 +116,6 @@ export function renderStudentDashboard(loggedInUser) {
             ${[
               {i:'layout',       l:'Overview',    p:'student-dashboard', ico:true},
               {i:'fileText',     l:'My Results',  p:'results',           ico:true},
-              {i:'clipboardList',l:'Assignments', p:'assignments',       ico:true},
               {i:'messageSquare',l:'Messages',    p:'messages',          ico:true},
               {i:'bell',         l:'Notices',     p:'notices',           ico:true},
               {i:'calendar',     l:'Events',      p:'events',            ico:true},
@@ -130,12 +147,11 @@ export function renderStudentDashboard(loggedInUser) {
             <div class="kpi-grid">
               ${(()=>{
                 const myResults = getResults().filter(r => r.studentId === student.id);
-                const assignmentsDue = JSON.parse(localStorage.getItem('gfa_assignments')||'[]').filter(a=>!a.done && (!a.class||!student.class||a.class===student.class)).length;
                 const classRank = myResults.length > 0 ? '#'+myResults[0].position : '—';
                 return [
-                  {svg:`<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>`,l:'Current GPA',       v:student.gpa !== 'N/A' ? student.gpa : '—',      c:'var(--primary)',  t:'Academic standing',   up:true},
+                  {svg:`<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>`,l:'Current GPA',       v:currentGPA,                                             c:'var(--primary)',  t:'Academic standing',   up:true},
                   {svg:`<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>`,                                         l:'Class Rank',        v:classRank,                                          c:'var(--warning)', t:'Based on results',    up:true},
-                  {svg:`<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>`,l:'Assignments Due',  v:assignmentsDue,                                     c:'var(--danger)',  t:assignmentsDue>0?'Submit soon':'All done',     up:false},
+                  {svg:`<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>`,                                       l:'Total Exams',       v:myResults.length,                                   c:'var(--success)',  t:'Published',           up:true},
                 ].map(s=>`
                   <div class="kpi-card">
                     <div class="kpi-icon" style="background:${s.c}15;display:flex;align-items:center;justify-content:center;">
@@ -161,8 +177,7 @@ export function renderStudentDashboard(loggedInUser) {
               </div>
             `}
 
-            <div class="grid" style="grid-template-columns:1fr 1fr;gap:20px;">
-              ${renderAssignmentsWidget()}
+            <div class="grid" style="grid-template-columns:1fr;gap:20px;">
               ${renderRecentNoticesWidget()}
             </div>
           </div>
@@ -173,18 +188,19 @@ export function renderStudentDashboard(loggedInUser) {
 }
 
 function renderMarksheetWidget(r) {
-  const entries = Object.entries(r.subjects);
-  const total = entries.reduce((s,[,m])=>s+m,0);
-  const outOf = entries.length * 100;
-  const pct = (total/outOf*100).toFixed(1);
-  const g = gradeFromPct(parseFloat(pct));
+  const entries = Object.entries(r.subjects || {});
+  const total = r.total || r.obtainedMarks || entries.reduce((s,[,m])=>s+m,0);
+  const outOf = r.outOf || r.totalMarks || entries.length * 100;
+  const pct = r.percentage || (total/outOf*100);
+  const grade = r.grade || 'N/A';
+  const gpa = r.gpa || '0.0';
 
   return `
     <div class="widget">
       <div class="widget-header">
         <div class="font-semibold">${r.exam} — Result</div>
         <div class="flex gap-2">
-          <span class="badge badge-success">Grade ${g.g}</span>
+          <span class="badge badge-success">Grade ${grade}</span>
           <button class="btn btn-secondary btn-sm" onclick="showToast('Downloading PDF marksheet...','success')">⬇ Download</button>
         </div>
       </div>
@@ -192,7 +208,7 @@ function renderMarksheetWidget(r) {
         <div class="grid" style="grid-template-columns:1fr 1fr;gap:20px;">
           <div>
             ${entries.map(([sub,marks])=>{
-              const p = marks/100*100;
+              const p = (marks/100)*100;
               const sg = gradeFromPct(p);
               return `
                 <div class="result-bar-item" style="margin-bottom:12px;">
@@ -205,53 +221,25 @@ function renderMarksheetWidget(r) {
           </div>
           <div class="flex flex-col gap-3" style="align-items:flex-start;justify-content:center;">
             <div style="text-align:center;background:var(--primary);color:white;border-radius:16px;padding:20px;width:100%;">
-              <div style="font-size:48px;font-weight:900;line-height:1;">${g.g}</div>
+              <div style="font-size:48px;font-weight:900;line-height:1;">${grade}</div>
               <div style="opacity:0.8;font-size:13px;margin-top:4px;">Grade</div>
             </div>
             <div class="grid-3" style="grid-template-columns:repeat(3,1fr);gap:8px;width:100%;">
               <div class="text-center" style="background:var(--bg-secondary);border-radius:10px;padding:10px;">
-                <div class="font-bold" style="font-size:18px;">${r.gpa}</div>
+                <div class="font-bold" style="font-size:18px;">${gpa}</div>
                 <div class="text-xs text-muted">GPA</div>
               </div>
               <div class="text-center" style="background:var(--bg-secondary);border-radius:10px;padding:10px;">
-                <div class="font-bold" style="font-size:18px;">${pct}%</div>
+                <div class="font-bold" style="font-size:18px;">${pct.toFixed(1)}%</div>
                 <div class="text-xs text-muted">Avg</div>
               </div>
               <div class="text-center" style="background:var(--bg-secondary);border-radius:10px;padding:10px;">
-                <div class="font-bold" style="font-size:18px;">#${r.position}</div>
+                <div class="font-bold" style="font-size:18px;">#${r.position || '—'}</div>
                 <div class="text-xs text-muted">Rank</div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  `;
-}
-
-function renderAssignmentsWidget() {
-  const user = JSON.parse(localStorage.getItem('gfa_session') || 'null');
-  const all = JSON.parse(localStorage.getItem('gfa_assignments') || '[]');
-  const assignments = all.filter(a => !a.class || !user?.class || a.class === user.class).slice(0, 5);
-  return `
-    <div class="widget">
-      <div class="widget-header"><div class="font-semibold">Assignments</div><span class="badge badge-danger">${assignments.filter(a=>!a.done).length} due</span></div>
-      <div class="widget-body">
-        ${assignments.length === 0
-          ? `<div class="text-center text-muted" style="padding:20px 0;font-size:13px;">No assignments yet</div>`
-          : assignments.map(a=>`
-          <div class="flex items-center gap-3 mb-3">
-            <div style="width:20px;height:20px;flex-shrink:0;">${a.done
-              ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
-              : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>`
-            }</div>
-            <div class="flex-1 min-w-0">
-              <div class="font-medium text-sm truncate">${a.title}</div>
-              <div class="text-xs text-muted">${a.subject} · ${a.dueDate||'No due date'}</div>
-            </div>
-            ${!a.done?`<span class="badge badge-warning">Pending</span>`:`<span class="badge badge-success">Done</span>`}
-          </div>
-        `).join('')}
       </div>
     </div>
   `;
@@ -280,11 +268,11 @@ function renderRecentNoticesWidget() {
   `;
 }
 
-export function renderResults(role, loggedInUser) {
+export async function renderResults(role, loggedInUser) {
   if (role === 'student') return renderStudentDashboard(loggedInUser);
 
-  const exams   = getExams();
-  const results = getResults();
+  const exams   = await fetchExams();
+  const results = await fetchResults();
   const publishedResults = results; // all saved results
 
   return `

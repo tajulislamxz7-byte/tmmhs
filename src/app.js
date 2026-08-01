@@ -32,7 +32,7 @@ let currentPage  = 'home';
 let currentParam = null;
 
 const AUTH_PAGES       = ['login', 'register', 'forgot-password', 'reset-password'];
-const PROTECTED_PAGES  = ['student-dashboard','teacher-dashboard','messages','assignments','notifications'];
+const PROTECTED_PAGES  = ['student-dashboard','teacher-dashboard','messages','notifications'];
 const ADMIN_PAGES      = ['admin'];
 
 // ── Router ─────────────────────────────────────────
@@ -107,7 +107,7 @@ async function render() {
     const html = await getPageContent(user, role);
     pageRoot.innerHTML = html;
     pageRoot.style.paddingTop = AUTH_PAGES.includes(currentPage) ? '0' : 'var(--nav-height)';
-    footerRoot.innerHTML = (['messages'].includes(currentPage)) ? '' : renderFooter();
+    footerRoot.innerHTML = (['messages'].includes(currentPage)) ? '' : await renderFooter();
     bindGlobalActions();
   }
 
@@ -119,10 +119,14 @@ async function render() {
 
 async function getPageContent(user, role) {
   switch (currentPage) {
-    case 'home':              return renderHome() + renderHomeExtra();
+    case 'home': {
+      const homeContent = await renderHome();
+      const homeExtra = await renderHomeExtra();
+      return homeContent + homeExtra;
+    }
     case 'students':          return await renderStudents();
     case 'student-profile':   return renderStudentProfile(currentParam);
-    case 'student-dashboard': return renderStudentDashboard(user);
+    case 'student-dashboard': return await renderStudentDashboard(user);
     case 'teachers':          return await renderTeachers();
     case 'teacher-profile':   return await renderTeacherProfile(currentParam);
     case 'teacher-dashboard': return renderTeacherDashboard(user);
@@ -131,27 +135,29 @@ async function getPageContent(user, role) {
     case 'staff':             return await renderStaff();
     case 'staff-dashboard':   return await renderStaffDashboard(user);
     case 'batches':           return await renderBatches();
-    case 'batch-detail':      return renderBatchDetail(currentParam);
-    case 'results':           return renderResults(role, user);
-    case 'notices':           return renderNotices();
-    case 'events':            return renderEvents();
+    case 'batch-detail':      return await renderBatchDetail(currentParam);
+    case 'results':           return await renderResults(role, user);
+    case 'notices':           return await renderNotices();
+    case 'events':            return await renderEvents();
     case 'gallery':           return renderGallery();
     case 'messages':          return renderMessages(user);
-    case 'about':             return renderAbout();
-    case 'admin':             return renderAdminDashboard();
-    case 'staff':             return await renderStaff();
-    case 'staff-dashboard':   return await renderStaffDashboard(user);
+    case 'about':             return await renderAbout();
+    case 'admin':             return await renderAdminDashboard();
     case 'admission':         return renderAdmission();
     case 'complaints':        return renderComplaintBox();
-    case 'assignments':       return renderAssignmentsPage();
-    case 'notifications':     return renderNotificationsPage();
+    case 'notifications':     return await renderNotificationsPage();
     case 'login':             return renderLogin();
     case 'register':          return renderRegister();
     case 'forgot-password':   return renderForgotPassword();
     case 'reset-password':    return renderResetPassword();
-    default:                  return renderHome() + renderHomeExtra();
+    default: {
+      const homeContent = await renderHome();
+      const homeExtra = await renderHomeExtra();
+      return homeContent + homeExtra;
+    }
   }
 }
+
 
 // ── Global Actions ─────────────────────────────────
 function bindGlobalActions() {
@@ -219,6 +225,46 @@ function bindGlobalActions() {
           let user = users.find(u => u.email.toLowerCase() === gUser.email.toLowerCase());
 
           if (!user) {
+            // For students, check if they want to link to existing unlinked account
+            if (selectedRole === 'student') {
+              const studentId = prompt('Do you have a Student ID from the school? If yes, enter it to link your account.\n\nLeave blank to create a new profile:');
+              
+              if (studentId && studentId.trim()) {
+                // Try to find and link to existing unlinked student
+                const existingStudent = users.find(u => 
+                  u.id === studentId.trim() && 
+                  u.role === 'student' && 
+                  u.status === 'unlinked'
+                );
+                
+                if (existingStudent) {
+                  // Link Google account to existing student
+                  existingStudent.email = gUser.email.toLowerCase();
+                  existingStudent.firstName = gUser.given_name || gUser.name.split(' ')[0];
+                  existingStudent.lastName = gUser.family_name || gUser.name.split(' ').slice(1).join(' ');
+                  existingStudent.name = gUser.name;
+                  existingStudent.avatar = gUser.picture;
+                  existingStudent.status = 'active'; // Auto-activate linked accounts
+                  existingStudent.googleAuth = true;
+                  existingStudent.linkedAt = new Date().toISOString();
+                  
+                  localStorage.setItem('gfa_users', JSON.stringify(users));
+                  localStorage.setItem('gfa_users_cache', JSON.stringify(users));
+                  
+                  // Save session
+                  const session = { ...existingStudent };
+                  delete session.password;
+                  localStorage.setItem('gfa_session', JSON.stringify(session));
+                  
+                  showToast(`Welcome, ${existingStudent.name.split(' ')[0]}! Your account has been linked.`, 'success');
+                  navigate('student-dashboard');
+                  return;
+                } else {
+                  showToast('Student ID not found or already linked. Creating new profile instead.', 'warning');
+                }
+              }
+            }
+            
             // Auto-register new Google user with selected role
             const rolePrefixes = { student: 'STU', teacher: 'TCH', alumni: 'ALU', staff: 'STF', admin: 'ADM' };
             const prefix = rolePrefixes[selectedRole] || 'STU';
@@ -242,9 +288,11 @@ function bindGlobalActions() {
               graduationYear: '', profession: '', company: '', university: '',
               createdAt: new Date().toISOString(),
               googleAuth: true,
+              roll: '', address: '', skills: [], achievements: [], gpa: 'N/A', bio: '',
             };
             users.push(user);
             localStorage.setItem('gfa_users', JSON.stringify(users));
+            localStorage.setItem('gfa_users_cache', JSON.stringify(users));
           }
 
           // Save session
@@ -285,6 +333,36 @@ function bindGlobalActions() {
     document.getElementById('regRoleInput').value = role;
     const container = document.getElementById('regRoleFields');
     if (window.__regRoleRender) container.innerHTML = window.__regRoleRender(role);
+  };
+
+  window.toggleRegistrationMode = function(mode) {
+    // Update hidden input
+    const modeInput = document.getElementById('registrationMode');
+    if (modeInput) modeInput.value = mode;
+    
+    // Update button styles
+    const linkBtn = document.getElementById('linkModeBtn');
+    const newBtn = document.getElementById('newModeBtn');
+    
+    if (mode === 'link') {
+      linkBtn?.classList.remove('btn-secondary');
+      linkBtn?.classList.add('btn-primary');
+      newBtn?.classList.remove('btn-primary');
+      newBtn?.classList.add('btn-secondary');
+      
+      // Show link fields, hide new fields
+      document.querySelectorAll('[data-mode="link"]').forEach(el => el.style.display = '');
+      document.querySelectorAll('[data-mode="new"]').forEach(el => el.style.display = 'none');
+    } else {
+      linkBtn?.classList.remove('btn-primary');
+      linkBtn?.classList.add('btn-secondary');
+      newBtn?.classList.remove('btn-secondary');
+      newBtn?.classList.add('btn-primary');
+      
+      // Show new fields, hide link fields
+      document.querySelectorAll('[data-mode="link"]').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('[data-mode="new"]').forEach(el => el.style.display = '');
+    }
   };
 
   window.__regRoleRender = function(role) {
@@ -425,8 +503,17 @@ function bindGlobalActions() {
       return;
     }
 
-    showToast('Account created for ' + result.user.name + '! Admin will review and approve your account shortly.', 'success');
-    setTimeout(() => navigate('login'), 1800);
+    // Success message - different for linked vs new accounts
+    if (result.linked) {
+      showToast('Account successfully linked to ' + result.user.name + '! Your existing profile and results are now accessible.', 'success');
+      // Auto-login for linked accounts since they're already verified
+      localStorage.setItem('gfa_session', JSON.stringify(result.user));
+      if (result.user.role === 'student') navigate('student-dashboard');
+      else navigate('home');
+    } else {
+      showToast('Account created for ' + result.user.name + '! Admin will review and approve your account shortly.', 'success');
+      setTimeout(() => navigate('login'), 1800);
+    }
   };
 
   window.handleForgotPassword = async function(e) {
@@ -521,6 +608,189 @@ function bindGlobalActions() {
     btn.classList.add('active');
   };
 
+  // ── Admin: Add Student Modal ──
+  window.openAddStudentModal = function() {
+    if (!requireAdmin()) return;
+    
+    const modalHtml = `
+      <div class="modal-overlay" id="addStudentOverlay" onclick="closeAddStudentModal()" style="display:flex;">
+        <div class="modal-card" onclick="event.stopPropagation()" style="max-width:600px;width:90%;max-height:90vh;overflow-y:auto;">
+          <div class="modal-header">
+            <h2 style="font-size:20px;font-weight:800;">Add Student to Database</h2>
+            <button onclick="closeAddStudentModal()" class="btn-close" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--text-secondary);">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;color:#1e40af;">
+              ${icon('info', 14, '#2563eb')} Students added here will exist in the database without login credentials. They can register later using their Student ID, Roll Number, and Date of Birth.
+            </div>
+            <form id="addStudentForm" onsubmit="adminAddStudent(event)">
+              <div class="form-group">
+                <label>Full Name <span style="color:var(--danger);">*</span></label>
+                <input type="text" name="name" class="form-input" placeholder="e.g. John Doe" required>
+              </div>
+              
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                  <label>Roll Number <span style="color:var(--danger);">*</span></label>
+                  <input type="text" name="roll" class="form-input" placeholder="e.g. 101" required>
+                </div>
+                <div class="form-group">
+                  <label>Date of Birth <span style="color:var(--danger);">*</span></label>
+                  <input type="date" name="birthday" class="form-input" required>
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                <div class="form-group">
+                  <label>Class <span style="color:var(--danger);">*</span></label>
+                  <select name="class" class="form-input form-select" required>
+                    <option value="">Select</option>
+                    <option value="Class 6">Class 6</option>
+                    <option value="Class 7">Class 7</option>
+                    <option value="Class 8">Class 8</option>
+                    <option value="Class 9">Class 9</option>
+                    <option value="Class 10">Class 10</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Section <span style="color:var(--danger);">*</span></label>
+                  <select name="section" class="form-input form-select" required>
+                    <option value="">Select</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Batch <span style="color:var(--danger);">*</span></label>
+                  <select name="batch" class="form-input form-select" required>
+                    <option value="">Select</option>
+                    <option value="B2024">Batch 2024</option>
+                    <option value="B2025">Batch 2025</option>
+                    <option value="B2026">Batch 2026</option>
+                    <option value="B2027">Batch 2027</option>
+                    <option value="B2028">Batch 2028</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                  <label>Guardian Name</label>
+                  <input type="text" name="guardian" class="form-input" placeholder="Father / Mother name">
+                </div>
+                <div class="form-group">
+                  <label>Blood Group</label>
+                  <select name="bloodGroup" class="form-input form-select">
+                    <option value="">Select</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Phone (Optional)</label>
+                <input type="tel" name="phone" class="form-input" placeholder="Guardian contact number">
+              </div>
+
+              <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
+                <button type="button" class="btn btn-secondary" onclick="closeAddStudentModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                  ${icon('userPlus', 14, 'white')} Add Student
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+  };
+
+  window.closeAddStudentModal = function() {
+    const overlay = document.getElementById('addStudentOverlay');
+    if (overlay) overlay.remove();
+  };
+
+  window.adminAddStudent = async function(e) {
+    e.preventDefault();
+    if (!requireAdmin()) return;
+
+    const form = document.getElementById('addStudentForm');
+    const data = Object.fromEntries(new FormData(form));
+    const btn = form.querySelector('button[type="submit"]');
+    
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = 'Adding...';
+    }
+
+    try {
+      // Get existing users to generate Student ID
+      const users = await api.getUsers();
+      const studentCount = users.filter(u => u.role === 'student').length;
+      const studentId = `STU-${new Date().getFullYear()}-${String(studentCount + 1).padStart(4, '0')}`;
+
+      // Create student record without email/password
+      const studentData = {
+        id: studentId,
+        name: data.name.trim(),
+        firstName: data.name.trim().split(' ')[0],
+        lastName: data.name.trim().split(' ').slice(1).join(' '),
+        roll: data.roll.trim(),
+        birthday: data.birthday,
+        class: data.class,
+        section: data.section,
+        batch: data.batch,
+        guardian: data.guardian?.trim() || '',
+        bloodGroup: data.bloodGroup || '',
+        phone: data.phone?.trim() || '',
+        email: '', // No email yet
+        password: '', // No password yet
+        role: 'student',
+        status: 'unlinked', // Special status for pre-added students
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(data.name)}`,
+        createdAt: new Date().toISOString(),
+        address: '',
+        skills: [],
+        achievements: [],
+        gpa: 'N/A',
+        bio: '',
+      };
+
+      // Save to database using api
+      const result = await api.addStudent(studentData);
+      
+      if (result.ok) {
+        showToast(`Student ${data.name} added successfully! Student ID: ${studentId}`, 'success');
+        closeAddStudentModal();
+        // Refresh the admin students tab
+        if (typeof switchAdminTab === 'function') {
+          await switchAdminTab('students', null);
+        }
+      } else {
+        showToast(result.error || 'Failed to add student', 'error');
+      }
+    } catch (err) {
+      console.error('Error adding student:', err);
+      showToast('Failed to add student. Please try again.', 'error');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = icon('userPlus', 14, 'white') + ' Add Student';
+      }
+    }
+  };
+
   window.togglePassword = function(inputId, btnId) {
     const inp = document.getElementById(inputId);
     const btn = document.getElementById(btnId);
@@ -546,17 +816,17 @@ function bindGlobalActions() {
     return true;
   };
 
-  window.markNotificationRead = function(idx) {
+  window.markNotificationRead = async function(idx) {
     const notifs = JSON.parse(localStorage.getItem('gfa_notifications') || '[]');
-    if (notifs[idx]) { notifs[idx].read = true; localStorage.setItem('gfa_notifications', JSON.stringify(notifs)); }
-    const el = document.querySelectorAll('.card[onclick*="markNotificationRead"]')[idx];
-    if (el) { el.style.borderLeft = ''; el.querySelector('div[style*="background:var(--primary);border-radius:50%"]')?.remove(); }
+    if (notifs[idx]) {
+      await api.markNotificationRead(notifs[idx].id);
+      // Refresh the page to show updated data
+      navigate('notifications');
+    }
   };
 
-  window.markAllNotificationsRead = function() {
-    const notifs = JSON.parse(localStorage.getItem('gfa_notifications') || '[]');
-    notifs.forEach(n => n.read = true);
-    localStorage.setItem('gfa_notifications', JSON.stringify(notifs));
+  window.markAllNotificationsRead = async function() {
+    await api.markAllNotificationsRead();
     showToast('All marked as read', 'success');
     navigate('notifications');
   };
@@ -769,79 +1039,69 @@ window.showToast = function(msg, type = 'info') {
   setTimeout(() => toast?.remove(), 4500);
 };
 
-// ── Inline pages ────────────────────────────────────
-function renderAssignmentsPage() {
-  // Load assignments from localStorage (admin can add, students see their own)
-  const user = auth.getCurrentUser();
-  const allAssignments = JSON.parse(localStorage.getItem('gfa_assignments') || '[]');
-  const items = allAssignments.filter(a =>
-    !a.class || !user?.class || a.class === user.class
-  );
-
-  if (items.length === 0) {
-    return `
-      <div class="page-container">
-        <div class="page-header">
-          <div class="container">
-            <h1 class="page-title" style="display:flex;align-items:center;gap:10px;">${icon('clipboardList',28,'white')} Assignments</h1>
-            <p class="page-subtitle">Your assignments from teachers</p>
+// ── Custom Confirm Dialog ──────────────────────────
+window.confirmDialog = function(message, title = 'Confirm Action') {
+  return new Promise((resolve) => {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:9999;animation:fadeIn 0.2s;';
+    
+    modal.innerHTML = `
+      <div class="modal" style="max-width:440px;animation:slideUp 0.3s;margin:20px;">
+        <div class="modal-header" style="border-bottom:1px solid var(--border);padding:20px 24px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:40px;height:40px;border-radius:12px;background:var(--warning-50);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              ${icon('alertTriangle', 20, 'var(--warning)')}
+            </div>
+            <div class="font-semibold" style="font-size:16px;">${title}</div>
           </div>
         </div>
-        <div class="container section-sm">
-          <div class="card"><div class="card-body text-center text-muted" style="padding:60px;">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="margin:0 auto 16px;display:block;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
-            No assignments yet. Check back later.
-          </div></div>
+        <div class="modal-body" style="padding:24px;">
+          <p style="color:var(--text-secondary);line-height:1.6;margin:0;">${message}</p>
         </div>
-      </div>`;
-  }
-
-  const pending = items.filter(i => !i.done);
-  return `
-    <div class="page-container">
-      <div class="page-header">
-        <div class="container">
-          <h1 class="page-title" style="display:flex;align-items:center;gap:10px;">${icon('clipboardList',28,'white')} Assignments</h1>
-          <p class="page-subtitle">${pending.length} pending · ${items.filter(i=>i.done).length} submitted</p>
+        <div class="modal-footer" style="border-top:1px solid var(--border);padding:16px 24px;display:flex;gap:12px;justify-content:flex-end;">
+          <button class="btn btn-secondary" id="confirmCancel" style="min-width:100px;">Cancel</button>
+          <button class="btn btn-danger" id="confirmOk" style="min-width:100px;">Delete</button>
         </div>
       </div>
-      <div class="container section-sm">
-        <div style="display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap;">
-          ${[{l:'Total',v:items.length,c:'var(--primary)'},{l:'Pending',v:pending.length,c:'var(--warning)'},{l:'Submitted',v:items.filter(i=>i.done).length,c:'var(--success)'}].map(s=>`
-            <div class="card" style="padding:16px 24px;min-width:100px;text-align:center;">
-              <div style="font-size:28px;font-weight:900;color:${s.c};">${s.v}</div>
-              <div style="font-size:12px;color:var(--text-muted);">${s.l}</div>
-            </div>
-          `).join('')}
-        </div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          ${items.map(a => `
-            <div class="card">
-              <div class="card-body" style="padding:18px 22px;">
-                <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-                  <div style="width:44px;height:44px;border-radius:12px;background:${a.done?'#d1fae5':'#fef3c7'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    ${icon(a.done?'checkCircle':'clipboardList', 20, a.done?'#059669':'#d97706')}
-                  </div>
-                  <div style="flex:1;min-width:160px;">
-                    <div style="font-weight:600;font-size:14px;">${a.title}</div>
-                    <div style="font-size:12px;color:var(--text-muted);margin-top:3px;">${a.subject} &nbsp;·&nbsp; ${a.teacher}</div>
-                  </div>
-                  <div style="text-align:right;flex-shrink:0;">
-                    <div style="font-size:13px;font-weight:600;color:${a.done?'var(--success)':'var(--warning)'};">${a.dueDate || 'No due date'}</div>
-                    <span class="badge badge-${a.done?'success':'warning'}" style="margin-top:4px;">${a.done?'Submitted':'Pending'}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    </div>`;
-}
+    `;
+    
+    document.body.appendChild(modal);
+    
+    const okBtn = modal.querySelector('#confirmOk');
+    const cancelBtn = modal.querySelector('#confirmCancel');
+    
+    const cleanup = () => {
+      modal.style.animation = 'fadeOut 0.2s';
+      setTimeout(() => modal.remove(), 200);
+    };
+    
+    okBtn.onclick = () => {
+      cleanup();
+      resolve(true);
+    };
+    
+    cancelBtn.onclick = () => {
+      cleanup();
+      resolve(false);
+    };
+    
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        cleanup();
+        resolve(false);
+      }
+    };
+    
+    // Focus OK button for keyboard accessibility
+    setTimeout(() => okBtn.focus(), 100);
+  });
+};
 
-function renderNotificationsPage() {
-  // Load notifications from localStorage
-  const notifs = JSON.parse(localStorage.getItem('gfa_notifications') || '[]');
+// ── Inline pages ────────────────────────────────────
+async function renderNotificationsPage() {
+  // Load notifications from API
+  const notifs = await api.getNotifications();
 
   if (notifs.length === 0) {
     return `

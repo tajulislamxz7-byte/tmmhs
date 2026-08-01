@@ -3,10 +3,11 @@
 // ================================================
 
 import { schoolInfo, stats, notices, events, testimonials, gallery, batches } from '../data/schoolConfig.js';
+import { api } from '../utils/api.js';
 
-export function renderHome() {
-  // Read admin-saved settings from localStorage
-  const S = JSON.parse(localStorage.getItem('gfa_settings') || '{}');
+export async function renderHome() {
+  // Load settings from API
+  const S = await api.getSettings() || JSON.parse(localStorage.getItem('gfa_settings') || '{}');
   const schoolName    = S.name     || schoolInfo.name;
   const schoolTagline = S.tagline  || schoolInfo.tagline;
   const schoolFounded = S.founded  || schoolInfo.founded;
@@ -133,10 +134,10 @@ export function renderHome() {
   `;
 }
 
-export function renderHomeExtra() {
-  const S = JSON.parse(localStorage.getItem('gfa_settings') || '{}');
-  const principalName = S.principal || schoolInfo.principalName;
-  const principalMsg  = S.message  || schoolInfo.principalMessage;
+export async function renderHomeExtra() {
+  const S = await api.getSettings() || JSON.parse(localStorage.getItem('gfa_settings') || '{}');
+  const principalName = S.principalName || schoolInfo.principalName;
+  const principalMsg  = S.principalMessage  || schoolInfo.principalMessage;
   const schoolName    = S.name     || schoolInfo.name;
   const achievements  = S.achievements && S.achievements.length > 0 ? S.achievements : [];
 
