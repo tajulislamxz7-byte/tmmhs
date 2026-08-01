@@ -758,7 +758,7 @@ function bindGlobalActions() {
         password: '', // No password yet
         role: 'student',
         status: 'unlinked', // Special status for pre-added students
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(data.name)}`,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=4267B2&color=fff&size=128`,
         createdAt: new Date().toISOString(),
         address: '',
         skills: [],

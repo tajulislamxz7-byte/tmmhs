@@ -117,7 +117,7 @@ function lsRegister(data) {
     id, name, firstName: data.firstName, lastName: data.lastName,
     email: data.email.toLowerCase().trim(), phone: data.phone||'',
     password: data.password, role,
-    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4267B2&color=fff&size=128`,
     status: 'pending', createdAt: new Date().toISOString(),
     class: clean(data.class), section: clean(data.section), batch: clean(data.batch),
     bloodGroup: clean(data.bloodGroup), guardian: data.guardian||'',

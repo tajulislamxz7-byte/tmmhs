@@ -62,7 +62,7 @@ export async function renderAbout() {
         <div class="principal-section mb-12">
           <div class="principal-image">
             <div class="principal-avatar">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(principal)}" alt="${principal}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+              <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(principal)}&background=4267B2&color=fff&size=128" alt="${principal}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
             </div>
             <div class="principal-badge">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--primary)"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>

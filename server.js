@@ -122,7 +122,7 @@ app.post('/api/users/register', (req, res) => {
   const prefix = prefixMap[role] || 'STU';
   const id = `${prefix}-${new Date().getFullYear()}-${String(users.length + 1).padStart(4, '0')}`;
   const name = `${data.firstName} ${data.lastName}`.trim();
-  const avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`;
+  const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4267B2&color=fff&size=128`;
 
   // Strip "Select" placeholder values
   const clean = (v) => (!v || v === 'Select' || v === 'select') ? '' : v;
