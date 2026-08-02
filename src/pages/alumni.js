@@ -11,7 +11,8 @@ const COUNTRY_FLAGS = { USA:'🇺🇸', UK:'🇬🇧', Bangladesh:'🇧🇩', Ca
 async function fetchAlumni() {
   const apiUsers = await api.getUsers();
   const users = apiUsers || JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
-  return users.filter(u => u.role === 'alumni' && u.status === 'active').map(a => ({
+  // Case-insensitive role filtering for Google Sign-In compatibility
+  return users.filter(u => u.role && u.role.toLowerCase().trim() === 'alumni' && u.status === 'active').map(a => ({
     id: a.id,
     name: a.name,
     email: a.email,

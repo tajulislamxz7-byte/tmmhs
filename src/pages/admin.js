@@ -167,9 +167,10 @@ async function _refreshTab(tab) {
 
 function renderAdminMain() {
   const allUsers = _cache.users;
-  const studentCount = allUsers.filter(u => u.role === 'student' && u.status === 'active').length;
-  const unlinkedCount = allUsers.filter(u => u.role === 'student' && u.status === 'unlinked').length;
-  const teacherCount = allUsers.filter(u => u.role === 'teacher' && u.status === 'active').length;
+  // Case-insensitive role filtering for Google Sign-In compatibility
+  const studentCount = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'student' && u.status === 'active').length;
+  const unlinkedCount = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'student' && u.status === 'unlinked').length;
+  const teacherCount = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'teacher' && u.status === 'active').length;
   const pendingCount = allUsers.filter(u => u.status !== 'active' && u.status !== 'unlinked' && u.role !== 'admin').length;
   const S = _cache.settings;
   const noticesCount = _cache.notices.length;
@@ -279,7 +280,8 @@ function _studentRow(s) {
 
 function renderAdminStudents() {
   const allUsers = _cache.users;
-  const studentUsers = allUsers.filter(u => u.role === 'student');
+  // Case-insensitive role filtering for Google Sign-In compatibility
+  const studentUsers = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'student');
   return `
     <div>
       <div class="flex items-center justify-between mb-6">
@@ -438,7 +440,8 @@ function _approveBtn(id, status) {
 
 function renderAdminTeachers() {
   const allUsers = _cache.users;
-  const teacherUsers = allUsers.filter(u => u.role === 'teacher');
+  // Case-insensitive role filtering for Google Sign-In compatibility
+  const teacherUsers = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'teacher');
   return `
     <div>
       <div class="flex items-center justify-between mb-6">
@@ -546,7 +549,8 @@ function renderAdminTeachers() {
 
 function renderAdminStaff() {
   const allUsers = _cache.users;
-  const staffUsers = allUsers.filter(u => u.role === 'staff');
+  // Case-insensitive role filtering for Google Sign-In compatibility
+  const staffUsers = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'staff');
   return `
     <div>
       <div class="flex items-center justify-between mb-6">
@@ -661,8 +665,9 @@ function renderAdminStaff() {
 }
 function renderAdminPrincipal() {
   const allUsers = _cache.users;
-  const currentPrincipal = allUsers.find(u => u.role === 'principal' && u.status === 'active');
-  const teachers = allUsers.filter(u => u.role === 'teacher' && u.status === 'active');
+  // Case-insensitive role filtering for Google Sign-In compatibility
+  const currentPrincipal = allUsers.find(u => u.role && u.role.toLowerCase().trim() === 'principal' && u.status === 'active');
+  const teachers = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'teacher' && u.status === 'active');
   
   return `
     <div>
@@ -850,7 +855,8 @@ function renderAdminPrincipal() {
 }
 function renderAdminAlumni() {
   const allUsers = _cache.users;
-  const alumniUsers = allUsers.filter(u => u.role === 'alumni');
+  // Case-insensitive role filtering for Google Sign-In compatibility
+  const alumniUsers = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'alumni');
   return `
     <div>
       <div class="flex items-center justify-between mb-6">
@@ -916,7 +922,8 @@ function renderAdminBatches() {
 function renderAdminResults() {
   const allUsers = _cache.users;
   // Include both active and unlinked students in results management
-  const studentUsers = allUsers.filter(u => u.role === 'student' && (u.status === 'active' || u.status === 'unlinked'));
+  // Case-insensitive role filtering for Google Sign-In compatibility
+  const studentUsers = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'student' && (u.status === 'active' || u.status === 'unlinked'));
   const exams = _cache.exams;
   const results = _cache.results;
 
@@ -1173,7 +1180,8 @@ window.openMarksEntry = function(examIndex) {
   if (!exam) return;
   const allUsers = _cache.users;
   // Include both active and unlinked students for marks entry
-  const studentUsers = allUsers.filter(u => u.role === 'student' && (u.status === 'active' || u.status === 'unlinked'));
+  // Case-insensitive role filtering for Google Sign-In compatibility
+  const studentUsers = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'student' && (u.status === 'active' || u.status === 'unlinked'));
   const savedResults = _cache.results;
 
   const panel = document.getElementById('marksEntryPanel');

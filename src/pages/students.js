@@ -13,7 +13,8 @@ async function fetchStudents() {
   const allResults = JSON.parse(localStorage.getItem('gfa_results') || '[]');
   
   // Show active and unlinked students on public page
-  const registeredStudents = users.filter(u => u.role === 'student' && (u.status === 'active' || u.status === 'unlinked')).map(u => {
+  // Case-insensitive role filtering for Google Sign-In compatibility
+  const registeredStudents = users.filter(u => u.role && u.role.toLowerCase().trim() === 'student' && (u.status === 'active' || u.status === 'unlinked')).map(u => {
     // Calculate GPA from latest result
     const studentResults = allResults.filter(r => r.studentId === u.id).sort((a,b) => new Date(b.publishedAt) - new Date(a.publishedAt));
     const latestResult = studentResults[0];
@@ -53,7 +54,8 @@ function getStudents() {
   const allResults = JSON.parse(localStorage.getItem('gfa_results') || '[]');
   
   // Show active and unlinked students on public page
-  const registeredStudents = cached.filter(u => u.role === 'student' && (u.status === 'active' || u.status === 'unlinked')).map(u => {
+  // Case-insensitive role filtering for Google Sign-In compatibility
+  const registeredStudents = cached.filter(u => u.role && u.role.toLowerCase().trim() === 'student' && (u.status === 'active' || u.status === 'unlinked')).map(u => {
     // Calculate GPA from latest result
     const studentResults = allResults.filter(r => r.studentId === u.id).sort((a,b) => new Date(b.publishedAt) - new Date(a.publishedAt));
     const latestResult = studentResults[0];

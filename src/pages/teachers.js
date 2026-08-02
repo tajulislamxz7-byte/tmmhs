@@ -9,7 +9,8 @@ import { api } from '../utils/api.js';
 async function fetchTeachers() {
   const apiUsers = await api.getUsers();
   const users = apiUsers || JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
-  return users.filter(u => (u.role === 'teacher' || u.role === 'principal') && u.status === 'active').map(t => ({
+  // Case-insensitive role filtering for Google Sign-In compatibility
+  return users.filter(u => u.role && (u.role.toLowerCase().trim() === 'teacher' || u.role.toLowerCase().trim() === 'principal') && u.status === 'active').map(t => ({
     id: t.id,
     name: t.name,
     email: t.email,
