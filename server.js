@@ -213,10 +213,17 @@ app.patch('/api/users/:id/approve', (req, res) => {
 app.patch('/api/users/:id', (req, res) => {
   const users = readJSON('users.json');
   const idx = users.findIndex(u => u.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ ok: false });
+  if (idx === -1) {
+    console.log(`❌ User not found: ${req.params.id}`);
+    return res.status(404).json({ 
+      ok: false, 
+      error: 'User not found in database. Please sign out and sign in again to sync your account.' 
+    });
+  }
   Object.assign(users[idx], req.body);
   writeJSON('users.json', users);
   const updated = {...users[idx]}; delete updated.password;
+  console.log(`✅ User updated: ${req.params.id}`);
   res.json({ ok: true, user: updated });
 });
 

@@ -787,7 +787,10 @@ window.saveEditProfile = async function(studentId) {
 
   // Import and use API
   const { api } = await import('../utils/api.js');
+  
+  console.log('🔄 Updating user profile:', studentId, updates);
   const result = await api.updateUser(studentId, updates);
+  console.log('📥 Update result:', result);
   
   if (result && result.ok !== false) {
     // Update session if editing own profile
@@ -803,7 +806,8 @@ window.saveEditProfile = async function(studentId) {
     showToast('Profile updated successfully!', 'success');
     window.location.reload();
   } else {
-    showToast(result?.error || 'Failed to update profile', 'error');
+    console.error('❌ Profile update failed:', result);
+    showToast(result?.error || 'Failed to update profile. Your account may not be synced with the server. Try signing out and signing in again.', 'error');
   }
 };
 

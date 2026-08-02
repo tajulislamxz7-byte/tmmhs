@@ -180,7 +180,18 @@ export const api = {
 
   async updateUser(id, data) {
     const result = await patch(`/users/${id}`, data);
-    if (result) return result;
+    if (result) {
+      // If backend returns 404 or error, provide helpful message
+      if (result.ok === false) {
+        console.error('❌ User not found in backend database:', id);
+        return { 
+          ok: false, 
+          error: 'Your profile is not synced with the server. Please sign out and sign in again to fix this.' 
+        };
+      }
+      return result;
+    }
+    // Fallback to localStorage
     const users = LS.get('gfa_users', []);
     const idx = users.findIndex(u => u.id === id);
     if (idx >= 0) { Object.assign(users[idx], data); LS.set('gfa_users', users); LS.set('gfa_users_cache', users); }
