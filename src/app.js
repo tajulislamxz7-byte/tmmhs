@@ -355,6 +355,40 @@ function bindGlobalActions() {
               googleAuth: true,
               roll: '', address: '', skills: [], achievements: [], gpa: 'N/A', bio: '',
             };
+            
+            // Save to backend API (for Netlify deployment)
+            try {
+              const apiResponse = await fetch(`${API_BASE}/users/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  firstName: user.firstName,
+                  lastName: user.lastName,
+                  email: user.email,
+                  password: '', // No password for Google auth
+                  role: user.role,
+                  avatar: user.avatar,
+                  phone: user.phone,
+                  class: user.class,
+                  section: user.section,
+                  batch: user.batch,
+                  bloodGroup: user.bloodGroup,
+                  guardian: user.guardian,
+                  googleAuth: true
+                })
+              });
+              
+              if (apiResponse.ok) {
+                const apiResult = await apiResponse.json();
+                if (apiResult.ok && apiResult.user) {
+                  // Use the user created by the API (with proper ID)
+                  user = apiResult.user;
+                }
+              }
+            } catch (apiError) {
+              console.warn('Backend API not available, using localStorage only:', apiError);
+            }
+            
             users.push(user);
             localStorage.setItem('gfa_users', JSON.stringify(users));
             localStorage.setItem('gfa_users_cache', JSON.stringify(users));
