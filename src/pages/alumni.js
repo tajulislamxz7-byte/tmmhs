@@ -226,6 +226,24 @@ export async function renderAlumni() {
               <p class="page-subtitle">Our graduates — leaders, innovators, and changemakers around the world</p>
             </div>
           </div>
+          
+          <!-- Search & Filter in header -->
+          <div style="margin-top:32px;">
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,0.2);border-radius:16px;padding:16px 20px;">
+              <div class="search-inline" style="background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3);flex:1;min-width:280px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input type="text" placeholder="Search alumni by name, profession, company..." id="alumniSearch" oninput="filterAlumni()" class="search-input-inline" style="color:white;">
+              </div>
+              <select class="form-input form-select" id="alumniYearFilter" onchange="filterAlumni()" style="width:auto;background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3);color:white;">
+                <option value="" style="color:#1e293b;">All Years</option>
+                ${[...new Set(alumni.map(a=>a.graduationYear))].sort((a,b)=>b-a).map(y=>`<option value="${y}" style="color:#1e293b;">${y}</option>`).join('')}
+              </select>
+              <select class="form-input form-select" id="alumniCountryFilter" onchange="filterAlumni()" style="width:auto;background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3);color:white;">
+                <option value="" style="color:#1e293b;">All Countries</option>
+                ${[...new Set(alumni.map(a=>a.country))].map(c=>`<option value="${c}" style="color:#1e293b;">${c}</option>`).join('')}
+              </select>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -255,25 +273,6 @@ export async function renderAlumni() {
       </div>
 
       <div class="container section-sm">
-        <!-- Search & Filter -->
-        <div class="filters-bar card mb-6">
-          <div class="card-body" style="padding:16px 20px;">
-            <div class="flex items-center gap-4 flex-wrap">
-              <div class="search-inline">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                <input type="text" placeholder="Search alumni by name, profession, company..." id="alumniSearch" oninput="filterAlumni()" class="search-input-inline">
-              </div>
-              <select class="form-input form-select" id="alumniYearFilter" onchange="filterAlumni()" style="width:auto;">
-                <option value="">All Years</option>
-                ${[...new Set(alumni.map(a=>a.graduationYear))].sort((a,b)=>b-a).map(y=>`<option value="${y}">${y}</option>`).join('')}
-              </select>
-              <select class="form-input form-select" id="alumniCountryFilter" onchange="filterAlumni()" style="width:auto;">
-                <option value="">All Countries</option>
-                ${[...new Set(alumni.map(a=>a.country))].map(c=>`<option value="${c}">${c}</option>`).join('')}
-              </select>
-            </div>
-          </div>
-        </div>
 
         <!-- Alumni Grid -->
         <div class="alumni-grid" id="alumniGrid">

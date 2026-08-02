@@ -8,7 +8,8 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
 
   return `
   <nav class="navbar" id="navbar">
-    <div class="container navbar-inner">
+    <div class="navbar-container">
+      <div class="navbar-inner">
 
       <!-- Logo -->
       <a class="navbar-logo" onclick="navigate('home')" style="cursor:pointer;text-decoration:none;">
@@ -156,11 +157,8 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
     </div>
   </nav>
   
-  <!-- Mobile Menu Overlay -->
-  <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="toggleMobileMenu()"></div>
-  
   <!-- Mobile Menu (outside navbar) -->
-  <div class="mobile-menu hidden" id="mobileMenu" onclick="event.stopPropagation()">
+  <div class="mobile-menu hidden" id="mobileMenu">
     <div class="mobile-menu-inner">
       ${isLoggedIn && user ? `
       <div class="user-profile-section">

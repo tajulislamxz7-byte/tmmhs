@@ -42,24 +42,25 @@ export async function renderTeachers() {
               <p class="page-subtitle">Meet the dedicated educators shaping young minds every day</p>
             </div>
           </div>
-        </div>
-      </div>
-      <div class="container section-sm">
-        <div class="filters-bar card mb-6">
-          <div class="card-body" style="padding:16px 20px;">
-            <div class="flex items-center gap-4 flex-wrap">
-              <div class="search-inline">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                <input type="text" placeholder="Search by name or subject..." id="teacherSearch" oninput="filterTeachers()" class="search-input-inline">
+          
+          <!-- Search & Filter in header -->
+          <div style="margin-top:32px;">
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,0.2);border-radius:16px;padding:16px 20px;">
+              <div class="search-inline" style="background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3);flex:1;min-width:260px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input type="text" placeholder="Search by name or subject..." id="teacherSearch" oninput="filterTeachers()" class="search-input-inline" style="color:white;">
               </div>
-              <select class="form-input form-select" id="statusFilter" onchange="filterTeachers()" style="width:auto;">
-                <option value="">All Status</option>
-                <option value="Working">Working</option>
-                <option value="Retired">Retired</option>
+              <select class="form-input form-select" id="statusFilter" onchange="filterTeachers()" style="width:auto;background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3);color:white;">
+                <option value="" style="color:#1e293b;">All Status</option>
+                <option value="Working" style="color:#1e293b;">Working</option>
+                <option value="Retired" style="color:#1e293b;">Retired</option>
               </select>
             </div>
           </div>
         </div>
+      </div>
+      
+      <div class="container section-sm">
         <div class="teachers-grid" id="teachersGrid">
           ${teachers.map(t => renderTeacherCard(t)).join('')}
         </div>

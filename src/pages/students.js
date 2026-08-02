@@ -115,37 +115,36 @@ export async function renderStudents() {
               </button>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div class="container section-sm">
-        <!-- Filters & Search -->
-        <div class="filters-bar card mb-6">
-          <div class="card-body" style="padding:16px 20px;">
-            <div class="flex items-center gap-4 flex-wrap">
-              <div class="search-inline">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                <input type="text" placeholder="Search students..." id="studentSearch" oninput="filterStudents()" class="search-input-inline">
+          
+          <!-- Filters & Search in header -->
+          <div style="margin-top:32px;">
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,0.2);border-radius:16px;padding:16px 20px;">
+              <div class="search-inline" style="background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input type="text" placeholder="Search students..." id="studentSearch" oninput="filterStudents()" class="search-input-inline" style="color:white;">
               </div>
-              <select class="form-input form-select" id="classFilter" onchange="filterStudents()" style="width:auto;">
-                <option value="">All Classes</option>
-                ${classes.map(c=>`<option value="${c.name}">${c.name}</option>`).join('')}
+              <select class="form-input form-select" id="classFilter" onchange="filterStudents()" style="width:auto;background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3);color:white;">
+                <option value="" style="color:#1e293b;">All Classes</option>
+                ${classes.map(c=>`<option value="${c.name}" style="color:#1e293b;">${c.name}</option>`).join('')}
               </select>
-              <select class="form-input form-select" id="sectionFilter" onchange="filterStudents()" style="width:auto;">
-                <option value="">All Sections</option>
-                <option>A</option><option>B</option><option>C</option><option>D</option>
+              <select class="form-input form-select" id="sectionFilter" onchange="filterStudents()" style="width:auto;background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3);color:white;">
+                <option value="" style="color:#1e293b;">All Sections</option>
+                <option style="color:#1e293b;">A</option><option style="color:#1e293b;">B</option><option style="color:#1e293b;">C</option><option style="color:#1e293b;">D</option>
               </select>
               <div class="flex gap-2 ml-auto">
-                <button class="btn btn-secondary btn-icon" onclick="setView('grid')" id="gridViewBtn" title="Grid View">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <button class="btn btn-secondary btn-icon" onclick="setView('grid')" id="gridViewBtn" title="Grid View" style="background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                 </button>
-                <button class="btn btn-ghost btn-icon" onclick="setView('list')" id="listViewBtn" title="List View">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                <button class="btn btn-ghost btn-icon" onclick="setView('list')" id="listViewBtn" title="List View" style="border-color:rgba(255,255,255,0.3);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
                 </button>
               </div>
             </div>
           </div>
         </div>
+      </div>
+
+      <div class="container section-sm">
 
         <!-- Stats Row -->
         <div class="grid-3 gap-4 mb-6">

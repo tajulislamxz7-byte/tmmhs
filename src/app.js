@@ -941,17 +941,15 @@ function bindGlobalActions() {
 
   // ── Nav ──
   // Store overlay click handler reference
-  let overlayClickHandler = null;
+  let mobileMenuClickHandler = null;
 
   window.toggleMobileMenu = function() {
     console.log('toggleMobileMenu called');
     const menu = document.getElementById('mobileMenu');
-    const overlay = document.getElementById('mobileMenuOverlay');
     const hamburger = document.getElementById('hamburgerBtn');
     const userDropdown = document.getElementById('userDropdown');
     
     console.log('Menu element:', menu);
-    console.log('Overlay element:', overlay);
     console.log('Hamburger element:', hamburger);
     
     if (!menu) {
@@ -970,10 +968,6 @@ function bindGlobalActions() {
       
       // Show menu (slide in)
       menu.classList.remove('hidden');
-      if (overlay) {
-        overlay.classList.add('active');
-      }
-      document.body.style.overflow = 'hidden';
       console.log('Menu opened');
       
       // Add active class to hamburger for animation
@@ -981,18 +975,37 @@ function bindGlobalActions() {
         hamburger.classList.add('active');
       }
       
+      // Add click-outside handler after a small delay to prevent immediate closing
+      setTimeout(() => {
+        mobileMenuClickHandler = (e) => {
+          const menuElement = document.getElementById('mobileMenu');
+          const hamburgerElement = document.getElementById('hamburgerBtn');
+          
+          // Close menu if clicking outside (not on menu or hamburger)
+          if (menuElement && 
+              !menuElement.contains(e.target) && 
+              hamburgerElement && 
+              !hamburgerElement.contains(e.target)) {
+            window.toggleMobileMenu();
+          }
+        };
+        document.addEventListener('click', mobileMenuClickHandler);
+      }, 100);
+      
     } else {
       // Hide menu (slide out)
       menu.classList.add('hidden');
-      if (overlay) {
-        overlay.classList.remove('active');
-      }
-      document.body.style.overflow = '';
       console.log('Menu closed');
       
       // Remove active class from hamburger
       if (hamburger) {
         hamburger.classList.remove('active');
+      }
+      
+      // Remove click-outside handler
+      if (mobileMenuClickHandler) {
+        document.removeEventListener('click', mobileMenuClickHandler);
+        mobileMenuClickHandler = null;
       }
     }
   };

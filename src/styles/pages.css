@@ -6,12 +6,14 @@
 .page-container { 
   min-height: 100vh; 
   overflow-x: hidden;  /* Prevent horizontal scroll */
+  padding-top: var(--nav-height); /* Space for fixed navbar */
 }
 .page-header { 
   background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); 
   padding: var(--space-12) 0 var(--space-8); 
   color: white; 
   overflow-x: hidden;  /* Prevent horizontal scroll */
+  margin-top: calc(-1 * var(--nav-height)); /* Pull up to sit right below navbar */
 }
 .page-header-content { 
   display: flex; 
