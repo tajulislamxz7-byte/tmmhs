@@ -57,12 +57,12 @@ export async function renderFooter() {
             <div>
               <h4 class="footer-heading">Quick Links</h4>
               <ul class="footer-links">
-                <li><a onclick="navigate('home')" style="cursor:pointer;display:flex;align-items:center;gap:8px;">${S('<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',14,'rgba(255,255,255,0.5)')} Home</a></li>
-                <li><a onclick="navigate('about')" style="cursor:pointer;display:flex;align-items:center;gap:8px;">${S('<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',14,'rgba(255,255,255,0.5)')} About Us</a></li>
-                <li><a onclick="navigate('students')" style="cursor:pointer;display:flex;align-items:center;gap:8px;">${S('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>',14,'rgba(255,255,255,0.5)')} Students</a></li>
-                <li><a onclick="navigate('teachers')" style="cursor:pointer;display:flex;align-items:center;gap:8px;">${S('<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',14,'rgba(255,255,255,0.5)')} Teachers</a></li>
-                <li><a onclick="navigate('alumni')" style="cursor:pointer;display:flex;align-items:center;gap:8px;">${S('<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',14,'rgba(255,255,255,0.5)')} Alumni</a></li>
-                <li><a onclick="navigate('gallery')" style="cursor:pointer;display:flex;align-items:center;gap:8px;">${S('<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',14,'rgba(255,255,255,0.5)')} Gallery</a></li>
+                <li><a onclick="navigate('home')" style="cursor:pointer;display:flex;align-items:center;gap:10px;">${S('<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',16,'rgba(255,255,255,0.5)')} Home</a></li>
+                <li><a onclick="navigate('about')" style="cursor:pointer;display:flex;align-items:center;gap:10px;">${S('<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',16,'rgba(255,255,255,0.5)')} About Us</a></li>
+                <li><a onclick="navigate('students')" style="cursor:pointer;display:flex;align-items:center;gap:10px;">${S('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>',16,'rgba(255,255,255,0.5)')} Students</a></li>
+                <li><a onclick="navigate('teachers')" style="cursor:pointer;display:flex;align-items:center;gap:10px;">${S('<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',16,'rgba(255,255,255,0.5)')} Teachers</a></li>
+                <li><a onclick="navigate('alumni')" style="cursor:pointer;display:flex;align-items:center;gap:10px;">${S('<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',16,'rgba(255,255,255,0.5)')} Alumni</a></li>
+                <li><a onclick="navigate('gallery')" style="cursor:pointer;display:flex;align-items:center;gap:10px;">${S('<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',16,'rgba(255,255,255,0.5)')} Gallery</a></li>
               </ul>
             </div>
 
@@ -70,10 +70,10 @@ export async function renderFooter() {
             <div>
               <h4 class="footer-heading">Academic</h4>
               <ul class="footer-links">
-                <li><a onclick="navigate('batches')" style="cursor:pointer;display:flex;align-items:center;gap:8px;">${S('<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',14,'rgba(255,255,255,0.5)')} Batches</a></li>
-                <li><a onclick="navigate('results')" style="cursor:pointer;display:flex;align-items:center;gap:8px;">${S('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>',14,'rgba(255,255,255,0.5)')} Results</a></li>
-                <li><a onclick="navigate('notices')" style="cursor:pointer;display:flex;align-items:center;gap:8px;">${S('<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',14,'rgba(255,255,255,0.5)')} Notice Board</a></li>
-                <li><a onclick="navigate('events')" style="cursor:pointer;display:flex;align-items:center;gap:8px;">${S('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',14,'rgba(255,255,255,0.5)')} Events</a></li>
+                <li><a onclick="navigate('batches')" style="cursor:pointer;display:flex;align-items:center;gap:10px;">${S('<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',16,'rgba(255,255,255,0.5)')} Batches</a></li>
+                <li><a onclick="navigate('results')" style="cursor:pointer;display:flex;align-items:center;gap:10px;">${S('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>',16,'rgba(255,255,255,0.5)')} Results</a></li>
+                <li><a onclick="navigate('notices')" style="cursor:pointer;display:flex;align-items:center;gap:10px;">${S('<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',16,'rgba(255,255,255,0.5)')} Notice Board</a></li>
+                <li><a onclick="navigate('events')" style="cursor:pointer;display:flex;align-items:center;gap:10px;">${S('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',16,'rgba(255,255,255,0.5)')} Events</a></li>
               </ul>
             </div>
 

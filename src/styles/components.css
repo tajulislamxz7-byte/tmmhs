@@ -332,6 +332,60 @@
   margin-top: 16px;
 }
 
+/* Foldable Phones Navbar Fixes */
+@media (min-width: 653px) and (max-width: 860px) {
+  /* Reduce navbar spacing for foldable devices */
+  .navbar-inner {
+    gap: 6px;
+    padding: 0 14px;
+  }
+  
+  /* Compact logo */
+  .navbar-logo {
+    font-size: 15px;
+    gap: 8px;
+  }
+  
+  .navbar-logo svg {
+    width: 30px;
+    height: 30px;
+  }
+  
+  /* Hide logo tagline on foldable devices */
+  .logo-tagline {
+    display: none;
+  }
+  
+  /* Reduce navbar action button spacing */
+  .navbar-actions {
+    gap: 4px;
+  }
+  
+  /* Make buttons more compact */
+  .navbar-actions .btn-icon {
+    min-width: 38px;
+    min-height: 38px;
+    padding: 9px;
+  }
+  
+  /* Hide user name text on foldable devices - show only avatar */
+  .user-avatar-btn span {
+    display: none !important;
+  }
+  
+  .user-avatar-btn {
+    padding: 4px;
+    gap: 0;
+  }
+  
+  /* Compact hamburger */
+  .hamburger {
+    width: 42px;
+    height: 42px;
+    padding: 10px;
+  }
+}
+
 /* Mobile Responsive Rules */
 /* Mobile viewport specific rules */
 @media (max-width: 768px) { 
