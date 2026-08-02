@@ -944,9 +944,13 @@ function bindGlobalActions() {
   let overlayClickHandler = null;
 
   window.toggleMobileMenu = function() {
+    console.log('toggleMobileMenu called');
     const menu = document.getElementById('mobileMenu');
     const hamburger = document.getElementById('hamburgerBtn');
     const userDropdown = document.getElementById('userDropdown');
+    
+    console.log('Menu element:', menu);
+    console.log('Hamburger element:', hamburger);
     
     if (!menu) {
       console.error('Mobile menu element not found');
@@ -954,6 +958,7 @@ function bindGlobalActions() {
     }
     
     const isCurrentlyHidden = menu.classList.contains('hidden');
+    console.log('Menu is currently hidden:', isCurrentlyHidden);
     
     if (isCurrentlyHidden) {
       // Hide user dropdown if open
@@ -964,6 +969,7 @@ function bindGlobalActions() {
       // Show menu (slide in)
       menu.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
+      console.log('Menu opened');
       
       // Add active class to hamburger for animation
       if (hamburger) {
@@ -991,6 +997,7 @@ function bindGlobalActions() {
       // Hide menu (slide out)
       menu.classList.add('hidden');
       document.body.style.overflow = '';
+      console.log('Menu closed');
       
       // Remove overlay click handler
       if (overlayClickHandler) {
