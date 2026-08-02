@@ -388,6 +388,71 @@ function bindGlobalActions() {
             users.push(user);
             localStorage.setItem('gfa_users', JSON.stringify(users));
             localStorage.setItem('gfa_users_cache', JSON.stringify(users));
+          } else {
+            // Existing user found - make sure they're in the users array with latest data
+            console.log('✅ Existing Google user found:', user.id);
+            
+            // Update their data in the users array (in case anything changed)
+            const userIndex = users.findIndex(u => u.email.toLowerCase() === user.email.toLowerCase());
+            if (userIndex >= 0) {
+              // Update existing entry with latest Google data
+              users[userIndex] = {
+                ...users[userIndex],
+                name: user.name,
+                firstName: user.firstName || user.name.split(' ')[0],
+                lastName: user.lastName || user.name.split(' ').slice(1).join(' '),
+                avatar: user.avatar || users[userIndex].avatar,
+              };
+              user = users[userIndex]; // Use the updated user object
+            }
+            
+            // Try to sync with backend if they don't exist there yet
+            try {
+              const backendUsers = await api.getUsers();
+              const existsInBackend = backendUsers && backendUsers.some(u => u.email.toLowerCase() === user.email.toLowerCase());
+              
+              if (!existsInBackend) {
+                console.log('⚠️ User not in backend, registering now...');
+                const apiResult = await api.register({
+                  id: user.id, // Preserve their existing localStorage ID
+                  firstName: user.firstName,
+                  lastName: user.lastName,
+                  email: user.email,
+                  password: '', // No password for Google auth
+                  role: user.role,
+                  avatar: user.avatar,
+                  phone: user.phone || '',
+                  class: user.class || '',
+                  section: user.section || '',
+                  batch: user.batch || '',
+                  bloodGroup: user.bloodGroup || '',
+                  guardian: user.guardian || '',
+                  roll: user.roll || '',
+                  address: user.address || '',
+                  bio: user.bio || '',
+                  birthday: user.birthday || '',
+                  skills: user.skills || [],
+                  achievements: user.achievements || [],
+                  googleAuth: true
+                });
+                
+                if (apiResult && apiResult.ok && apiResult.user) {
+                  console.log('✅ Existing user synced to backend:', apiResult.user.id);
+                  user = apiResult.user; // Use backend-created user
+                  if (userIndex >= 0) users[userIndex] = user;
+                } else {
+                  console.error('❌ Failed to sync user to backend:', apiResult);
+                }
+              } else {
+                console.log('✅ User already exists in backend');
+              }
+            } catch (syncError) {
+              console.warn('⚠️ Could not sync to backend:', syncError);
+            }
+            
+            // Save back to localStorage
+            localStorage.setItem('gfa_users', JSON.stringify(users));
+            localStorage.setItem('gfa_users_cache', JSON.stringify(users));
           }
 
           // Save session

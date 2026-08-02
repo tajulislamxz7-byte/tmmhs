@@ -124,16 +124,22 @@ app.post('/api/users/register', (req, res) => {
   // Only create new account if NO Student ID provided
   const prefixMap = { student:'STU', teacher:'TCH', alumni:'ALM', staff:'STF', principal:'PRI' };
   const prefix = prefixMap[role] || 'STU';
-  const id = `${prefix}-${new Date().getFullYear()}-${String(users.length + 1).padStart(4, '0')}`;
+  
+  // For Google Auth users with existing ID from localStorage, preserve their ID
+  // Otherwise generate new ID
+  const id = (data.googleAuth && data.id) 
+    ? data.id 
+    : `${prefix}-${new Date().getFullYear()}-${String(users.length + 1).padStart(4, '0')}`;
+  
   const name = `${data.firstName} ${data.lastName}`.trim();
 
   // Strip "Select" placeholder values
   const clean = (v) => (!v || v === 'Select' || v === 'select') ? '' : v;
 
-  // Admin-created accounts (teacher, staff, principal) are auto-activated
-  // Student/alumni accounts need approval
+  // Admin-created accounts (teacher, staff, principal) and Google Auth are auto-activated
+  // Student/alumni accounts need approval (unless Google Auth)
   const autoActivateRoles = ['teacher', 'staff', 'principal'];
-  const initialStatus = autoActivateRoles.includes(role) ? 'active' : 'pending';
+  const initialStatus = (autoActivateRoles.includes(role) || data.googleAuth) ? 'active' : 'pending';
 
   const user = {
     id, name,
