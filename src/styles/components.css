@@ -192,7 +192,7 @@
   width: 280px;  /* Fixed width for mobile menu */
   max-width: 85vw;  /* Don't take more than 85% of screen */
   height: calc(100vh - var(--nav-height));  /* Full height minus navbar */
-  background: #0f172a;  /* Dark blue background */
+  background: #0f172a;  /* Always dark background for better contrast */
   z-index: 9999;  /* High z-index */
   overflow-y: auto;
   overflow-x: hidden;
@@ -214,6 +214,11 @@
 [data-theme="dark"] .mobile-menu {
   background: #0f172a;
   border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="light"] .mobile-menu {
+  background: #1e293b;  /* Dark background in light theme too */
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .mobile-menu-inner { 
