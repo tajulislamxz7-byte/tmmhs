@@ -82,6 +82,60 @@ async function render() {
   const user       = auth.getCurrentUser();
   const loggedIn   = !!user;
   const role       = user?.role || 'guest';
+  
+  // AUTO-FIX: Sync Google users to backend if they're not there yet
+  if (loggedIn && user && user.googleAuth) {
+    try {
+      // Check if user exists in backend
+      const backendUsers = await api.getUsers();
+      const existsInBackend = backendUsers && backendUsers.some(u => 
+        u.email.toLowerCase() === user.email.toLowerCase()
+      );
+      
+      if (!existsInBackend) {
+        console.log('⚠️ Google user not in backend, auto-syncing now...');
+        const syncResult = await api.register({
+          id: user.id,
+          firstName: user.firstName || user.name.split(' ')[0],
+          lastName: user.lastName || user.name.split(' ').slice(1).join(' '),
+          email: user.email,
+          password: '',
+          role: user.role,
+          avatar: user.avatar,
+          phone: user.phone || '',
+          class: user.class || '',
+          section: user.section || '',
+          batch: user.batch || '',
+          bloodGroup: user.bloodGroup || '',
+          guardian: user.guardian || '',
+          roll: user.roll || '',
+          address: user.address || '',
+          bio: user.bio || '',
+          birthday: user.birthday || '',
+          skills: user.skills || [],
+          achievements: user.achievements || [],
+          googleAuth: true
+        });
+        
+        if (syncResult && syncResult.ok) {
+          console.log('✅ Google user auto-synced to backend!');
+          // Update localStorage with synced user
+          const users = JSON.parse(localStorage.getItem('gfa_users') || '[]');
+          const userIndex = users.findIndex(u => u.email.toLowerCase() === user.email.toLowerCase());
+          if (userIndex >= 0) {
+            users[userIndex] = syncResult.user;
+          } else {
+            users.push(syncResult.user);
+          }
+          localStorage.setItem('gfa_users', JSON.stringify(users));
+          localStorage.setItem('gfa_users_cache', JSON.stringify(users));
+          localStorage.setItem('gfa_session', JSON.stringify(syncResult.user));
+        }
+      }
+    } catch (error) {
+      console.warn('Could not auto-sync Google user:', error);
+    }
+  }
 
   const navRoot    = document.getElementById('navbar-root');
   const pageRoot   = document.getElementById('page-root');
