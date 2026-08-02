@@ -5,6 +5,20 @@ import { icon } from '../utils/icons.js';
 
 export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'guest', user = null) {
   const active = (page) => activePage === page ? 'active' : '';
+  
+  // Normalize role to lowercase to handle case sensitivity issues
+  const normalizedRole = role ? role.toLowerCase().trim() : 'guest';
+  
+  // Debug logging
+  if (isLoggedIn && user) {
+    console.log('🔍 Navbar render:', {
+      role: role,
+      normalizedRole: normalizedRole,
+      userId: user?.id,
+      userName: user?.name,
+      userEmail: user?.email
+    });
+  }
 
   return `
   <nav class="navbar" id="navbar">
@@ -107,26 +121,26 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
               </div>
             </div>
             <div class="divider"></div>
-            ${role === 'student' ? `
+            ${normalizedRole === 'student' ? `
             <div class="dropdown-item" onclick="navigate('student-dashboard')" style="cursor:pointer;">${icon('layout', 14)} <span>Dashboard</span></div>
             <div class="dropdown-item" onclick="navigate('student-profile','${user.id}')" style="cursor:pointer;">${icon('user', 14)} <span>My Profile</span></div>
             <div class="dropdown-item" onclick="navigate('results')" style="cursor:pointer;">${icon('fileText', 14)} <span>My Results</span></div>
-            ` : role === 'teacher' ? `
+            ` : normalizedRole === 'teacher' ? `
             <div class="dropdown-item" onclick="navigate('teacher-dashboard')" style="cursor:pointer;">${icon('layout', 14)} <span>Dashboard</span></div>
             <div class="dropdown-item" onclick="navigate('teacher-profile','${user.id}')" style="cursor:pointer;">${icon('user', 14)} <span>My Profile</span></div>
-            ` : role === 'principal' ? `
+            ` : normalizedRole === 'principal' ? `
             <div class="dropdown-item" onclick="navigate('teacher-profile','${user.id}')" style="cursor:pointer;">${icon('user', 14)} <span>My Profile</span></div>
             <div class="dropdown-item" onclick="navigate('about')" style="cursor:pointer;">${icon('info', 14)} <span>School Overview</span></div>
-            ` : role === 'alumni' ? `
+            ` : normalizedRole === 'alumni' ? `
             <div class="dropdown-item" onclick="navigate('alumni-dashboard')" style="cursor:pointer;">${icon('layout', 14)} <span>Dashboard</span></div>
             <div class="dropdown-item" onclick="navigate('alumni')" style="cursor:pointer;">${icon('users', 14)} <span>Alumni Network</span></div>
-            ` : role === 'staff' ? `
+            ` : normalizedRole === 'staff' ? `
             <div class="dropdown-item" onclick="navigate('staff-dashboard')" style="cursor:pointer;">${icon('layout', 14)} <span>Dashboard</span></div>
             <div class="dropdown-item" onclick="navigate('staff')" style="cursor:pointer;">${icon('users', 14)} <span>Staff Team</span></div>
             ` : ''}
             <div class="dropdown-item" onclick="navigate('messages')" style="cursor:pointer;">${icon('messageSquare', 14)} <span>Messages</span></div>
-            ${role === 'admin' ? `<div class="dropdown-item" onclick="navigate('admin')" style="cursor:pointer;">${icon('settings', 14)} <span>Admin Panel</span></div>` : ''}
-            ${role === 'principal' ? `<div class="dropdown-item" onclick="navigate('admin')" style="cursor:pointer;">${icon('eye', 14)} <span>View Admin Panel</span></div>` : ''}
+            ${normalizedRole === 'admin' ? `<div class="dropdown-item" onclick="navigate('admin')" style="cursor:pointer;">${icon('settings', 14)} <span>Admin Panel</span></div>` : ''}
+            ${normalizedRole === 'principal' ? `<div class="dropdown-item" onclick="navigate('admin')" style="cursor:pointer;">${icon('eye', 14)} <span>View Admin Panel</span></div>` : ''}
             <div class="divider"></div>
             <div class="dropdown-item" onclick="signOut()" style="cursor:pointer;color:var(--danger);">${icon('logOut', 14)} <span>Sign Out</span></div>
           </div>
