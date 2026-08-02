@@ -156,6 +156,9 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
     </div>
   </nav>
   
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="toggleMobileMenu()"></div>
+  
   <!-- Mobile Menu (outside navbar) -->
   <div class="mobile-menu hidden" id="mobileMenu" onclick="event.stopPropagation()">
     <div class="mobile-menu-inner">

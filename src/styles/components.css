@@ -167,48 +167,50 @@
 /* Mobile Menu - Beautiful and Functional */
 .mobile-menu { 
   position: fixed; 
-  top: 72px;  /* Start below navbar */
-  left: -70%;  /* Hidden off-screen by default */
+  top: var(--nav-height);  /* Start below navbar */
+  left: 0;
   width: 70%;  /* Sidebar takes 70% of screen width (narrower) */
   max-width: 320px;  /* Maximum width on larger phones */
-  height: calc(100vh - 72px);  /* Full height minus navbar */
-  background: #0f172a;  /* Dark blue background like example */
-  z-index: 10000;  /* Much higher than user dropdown (200) */
+  height: calc(100vh - var(--nav-height));  /* Full height minus navbar */
+  background: #0f172a;  /* Dark blue background */
+  z-index: 9999;  /* High z-index */
   overflow-y: auto;
   box-shadow: 4px 0 20px rgba(0,0,0,0.3);
-  transition: left 0.3s ease;
+  transform: translateX(-100%);  /* Hidden off-screen by default */
+  transition: transform 0.3s ease;
+}
+
+.mobile-menu.hidden {
+  transform: translateX(-100%);  /* Slide out off-screen */
+  visibility: hidden;
 }
 
 .mobile-menu:not(.hidden) {
-  left: 0;  /* Slide in when visible */
+  transform: translateX(0);  /* Slide in when visible */
+  visibility: visible;
 }
 
 /* Overlay behind menu to show page content dimmed */
-.mobile-menu::before {
-  content: '';
+.mobile-menu-overlay {
   position: fixed;
-  top: 72px;  /* Start below navbar */
-  left: 70%;  /* Start where menu ends */
-  width: 30%;  /* Cover remaining 30% of screen */
-  height: calc(100vh - 72px);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: -1;
+  z-index: 9998;
   opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.mobile-menu:not(.hidden)::before {
+.mobile-menu-overlay.active {
   opacity: 1;
-  pointer-events: auto;
+  visibility: visible;
 }
 
 [data-theme="dark"] .mobile-menu {
   background: #0f172a;
-}
-
-.mobile-menu.hidden { 
-  left: -70%;  /* Slide out off-screen */
 }
 
 .mobile-menu-inner { 

@@ -946,10 +946,12 @@ function bindGlobalActions() {
   window.toggleMobileMenu = function() {
     console.log('toggleMobileMenu called');
     const menu = document.getElementById('mobileMenu');
+    const overlay = document.getElementById('mobileMenuOverlay');
     const hamburger = document.getElementById('hamburgerBtn');
     const userDropdown = document.getElementById('userDropdown');
     
     console.log('Menu element:', menu);
+    console.log('Overlay element:', overlay);
     console.log('Hamburger element:', hamburger);
     
     if (!menu) {
@@ -968,6 +970,9 @@ function bindGlobalActions() {
       
       // Show menu (slide in)
       menu.classList.remove('hidden');
+      if (overlay) {
+        overlay.classList.add('active');
+      }
       document.body.style.overflow = 'hidden';
       console.log('Menu opened');
       
@@ -976,34 +981,14 @@ function bindGlobalActions() {
         hamburger.classList.add('active');
       }
       
-      // Add overlay click handler after a delay to prevent immediate triggering
-      setTimeout(() => {
-        overlayClickHandler = (e) => {
-          const menuElement = document.getElementById('mobileMenu');
-          const hamburgerElement = document.getElementById('hamburgerBtn');
-          
-          // Close menu if clicking outside (not on menu or hamburger)
-          if (menuElement && 
-              !menuElement.contains(e.target) && 
-              hamburgerElement && 
-              !hamburgerElement.contains(e.target)) {
-            window.toggleMobileMenu();
-          }
-        };
-        document.addEventListener('click', overlayClickHandler);
-      }, 300);
-      
     } else {
       // Hide menu (slide out)
       menu.classList.add('hidden');
+      if (overlay) {
+        overlay.classList.remove('active');
+      }
       document.body.style.overflow = '';
       console.log('Menu closed');
-      
-      // Remove overlay click handler
-      if (overlayClickHandler) {
-        document.removeEventListener('click', overlayClickHandler);
-        overlayClickHandler = null;
-      }
       
       // Remove active class from hamburger
       if (hamburger) {
