@@ -140,6 +140,11 @@ export async function renderHomeExtra() {
   const principalMsg  = S.principalMessage  || schoolInfo.principalMessage;
   const schoolName    = S.name     || schoolInfo.name;
   const achievements  = S.achievements && S.achievements.length > 0 ? S.achievements : [];
+  
+  // Fetch principal user data to get avatar
+  const users = await api.getUsers();
+  const principal = users.find(u => u.role === 'principal' && u.status === 'active');
+  const principalAvatar = principal?.avatar || 'https://i.imgur.com/x9wE0QT.png';
 
   return `
     <!-- NOTICES & EVENTS -->
@@ -280,7 +285,7 @@ export async function renderHomeExtra() {
         <div class="principal-section">
           <div class="principal-image">
             <div class="principal-avatar">
-              <img src="https://i.imgur.com/x9wE0QT.png" alt="Principal" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+              <img src="${principalAvatar}" alt="Principal" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
             </div>
             <div class="principal-badge">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--primary)"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>

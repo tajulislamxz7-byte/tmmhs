@@ -450,6 +450,22 @@ export function renderRegister() {
               <div id="phoneError" style="display:none;color:#dc2626;font-size:12px;margin-top:4px;"></div>
             </div>
 
+            <!-- Profile Picture Upload -->
+            <div class="form-group">
+              <label class="form-label">${icon('user',12)} Profile Picture (Optional)</label>
+              <div style="display:flex;align-items:center;gap:16px;">
+                <img id="profilePicPreview" src="https://i.imgur.com/x9wE0QT.png" alt="Preview" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--border);background:var(--bg-secondary);" onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
+                <div style="flex:1;">
+                  <div style="border:2px dashed var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;background:var(--bg-secondary);" onclick="document.getElementById('profilePicInput').click()">
+                    <div style="font-size:32px;margin-bottom:4px;">📸</div>
+                    <div style="font-size:13px;font-weight:600;color:var(--text-primary);">Upload your photo</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">JPG, PNG (max 15MB)</div>
+                  </div>
+                  <input type="file" id="profilePicInput" accept="image/*" style="display:none;" onchange="profilePicChange(this)">
+                </div>
+              </div>
+            </div>
+
             <!-- Role-specific fields container -->
             <div id="regRoleFields">${renderRoleFields('student')}</div>
 

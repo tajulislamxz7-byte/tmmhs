@@ -67,6 +67,9 @@ app.post('/api/users/register', (req, res) => {
   }
 
   const role = data.role || 'student';
+  
+  // Profile picture handling
+  const avatar = data.avatar || 'https://i.imgur.com/x9wE0QT.png';
 
   // ======== ACCOUNT LINKING FOR STUDENTS ========
   // If student provides Student ID, try to link to existing record
@@ -106,6 +109,7 @@ app.post('/api/users/register', (req, res) => {
     existingStudent.firstName = data.firstName || existingStudent.firstName;
     existingStudent.lastName = data.lastName || existingStudent.lastName;
     existingStudent.name = `${data.firstName || existingStudent.firstName} ${data.lastName || existingStudent.lastName}`.trim();
+    existingStudent.avatar = avatar; // Update with uploaded picture or default
     existingStudent.status = 'active'; // Auto-activate linked accounts
     existingStudent.linkedAt = new Date().toISOString();
     
@@ -122,7 +126,6 @@ app.post('/api/users/register', (req, res) => {
   const prefix = prefixMap[role] || 'STU';
   const id = `${prefix}-${new Date().getFullYear()}-${String(users.length + 1).padStart(4, '0')}`;
   const name = `${data.firstName} ${data.lastName}`.trim();
-  const avatar = `https://i.imgur.com/x9wE0QT.png`;
 
   // Strip "Select" placeholder values
   const clean = (v) => (!v || v === 'Select' || v === 'select') ? '' : v;

@@ -5,6 +5,7 @@
 import { students, teachers, supportStaff, alumni, batches, notices, events, results } from '../data/schoolConfig.js';
 import * as auth from '../utils/auth.js';
 import { api } from '../utils/api.js';
+import { handleProfilePictureUpload, getDefaultAvatar } from '../utils/imageHandler.js';
 
 const SVG = (paths, size=18, color='currentColor') =>
   `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
@@ -458,6 +459,24 @@ function renderAdminTeachers() {
           </div>
           <div class="card-body">
             <form id="teacherForm" onsubmit="handleAddTeacher(event)" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <!-- Profile Picture Upload -->
+              <div style="grid-column:1/-1;">
+                <label class="form-label">Profile Picture (Optional)</label>
+                <div style="display:flex;align-items:center;gap:16px;">
+                  <img id="teacherPicPreview" src="https://i.imgur.com/x9wE0QT.png" alt="Preview" 
+                       style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--border);background:var(--bg-secondary);" 
+                       onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
+                  <div style="flex:1;">
+                    <div style="border:2px dashed var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;background:var(--bg-secondary);" 
+                         onclick="document.getElementById('teacherPicInput').click()">
+                      <div style="font-size:28px;margin-bottom:4px;">📸</div>
+                      <div style="font-size:13px;font-weight:600;color:var(--text-primary);">Upload photo</div>
+                      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">JPG, PNG (max 15MB)</div>
+                    </div>
+                    <input type="file" id="teacherPicInput" accept="image/*" style="display:none;" onchange="adminProfilePicChange(this, 'teacherPicPreview', 'teacher')">
+                  </div>
+                </div>
+              </div>
               <div class="form-group">
                 <label class="form-label">First Name *</label>
                 <input type="text" name="firstName" class="form-input" required>
@@ -548,6 +567,24 @@ function renderAdminStaff() {
           </div>
           <div class="card-body">
             <form id="staffForm" onsubmit="handleAddStaff(event)" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <!-- Profile Picture Upload -->
+              <div style="grid-column:1/-1;">
+                <label class="form-label">Profile Picture (Optional)</label>
+                <div style="display:flex;align-items:center;gap:16px;">
+                  <img id="staffPicPreview" src="https://i.imgur.com/x9wE0QT.png" alt="Preview" 
+                       style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--border);background:var(--bg-secondary);" 
+                       onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
+                  <div style="flex:1;">
+                    <div style="border:2px dashed var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;background:var(--bg-secondary);" 
+                         onclick="document.getElementById('staffPicInput').click()">
+                      <div style="font-size:28px;margin-bottom:4px;">📸</div>
+                      <div style="font-size:13px;font-weight:600;color:var(--text-primary);">Upload photo</div>
+                      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">JPG, PNG (max 15MB)</div>
+                    </div>
+                    <input type="file" id="staffPicInput" accept="image/*" style="display:none;" onchange="adminProfilePicChange(this, 'staffPicPreview', 'staff')">
+                  </div>
+                </div>
+              </div>
               <div class="form-group">
                 <label class="form-label">First Name *</label>
                 <input type="text" name="firstName" class="form-input" required>
@@ -712,6 +749,24 @@ function renderAdminPrincipal() {
               </div>
             </div>
             <form id="principalForm" onsubmit="handleCreatePrincipal(event)" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <!-- Profile Picture Upload -->
+              <div style="grid-column:1/-1;">
+                <label class="form-label">Profile Picture (Optional)</label>
+                <div style="display:flex;align-items:center;gap:16px;">
+                  <img id="principalPicPreview" src="https://i.imgur.com/x9wE0QT.png" alt="Preview" 
+                       style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--border);background:var(--bg-secondary);" 
+                       onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
+                  <div style="flex:1;">
+                    <div style="border:2px dashed var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;background:var(--bg-secondary);" 
+                         onclick="document.getElementById('principalPicInput').click()">
+                      <div style="font-size:28px;margin-bottom:4px;">📸</div>
+                      <div style="font-size:13px;font-weight:600;color:var(--text-primary);">Upload photo</div>
+                      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">JPG, PNG (max 15MB)</div>
+                    </div>
+                    <input type="file" id="principalPicInput" accept="image/*" style="display:none;" onchange="adminProfilePicChange(this, 'principalPicPreview', 'principal')">
+                  </div>
+                </div>
+              </div>
               <div class="form-group">
                 <label class="form-label">First Name *</label>
                 <input type="text" name="firstName" class="form-input" required>
@@ -1592,8 +1647,15 @@ window.adminEditUser = function(id) {
         </button>
       </div>
       <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;">
+        <!-- Profile Picture Section -->
+        <div style="text-align:center;padding:20px;background:var(--bg-secondary);border-radius:12px;">
+          <img id="editUserAvatar" src="${u.avatar}" class="avatar" style="width:100px;height:100px;margin:0 auto 12px;" onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
+          <div><button class="btn btn-secondary btn-sm" onclick="changeUserAvatar('${id}')">
+            ${SVG('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',14)} Change Photo
+          </button></div>
+        </div>
+        
         <div class="flex items-center gap-3 mb-2">
-          <img src="${u.avatar}" class="avatar avatar-lg" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=default'">
           <div><div class="font-bold">${u.name}</div><div class="text-xs text-muted">${u.id}</div></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -1621,7 +1683,7 @@ window.adminEditUser = function(id) {
             <div class="form-group"><label class="form-label">Blood Group</label>
               <input id="eu_blood" class="form-input" value="${u.bloodGroup||''}"></div>
           </div>` : ''}
-        ${u.role === 'teacher' ? `
+        ${u.role === 'teacher' || u.role === 'principal' ? `
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div class="form-group"><label class="form-label">Subject</label>
               <input id="eu_subject" class="form-input" value="${u.subject||''}"></div>
@@ -1634,6 +1696,7 @@ window.adminEditUser = function(id) {
             <option value="pending" ${u.status==='pending'?'selected':''}>Pending</option>
             <option value="inactive" ${u.status==='inactive'?'selected':''}>Inactive</option>
           </select></div>
+        <input type="file" id="editUserAvatarInput" accept="image/*" style="display:none;">
         <div class="flex gap-3 justify-end">
           <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
           <button class="btn btn-primary" onclick="adminSaveUser('${id}')">Save Changes</button>
@@ -1789,6 +1852,13 @@ window.adminSaveUser = async function(id) {
     subject:   get('eu_subject'),
     qualification: get('eu_qualification'),
   };
+  
+  // Include updated avatar if changed
+  if (window._editUserNewAvatar) {
+    updates.avatar = window._editUserNewAvatar;
+    window._editUserNewAvatar = null;
+  }
+  
   // Rebuild name
   const u = _cache.users.find(x => x.id === id);
   if (u) {
@@ -1848,6 +1918,7 @@ window.handleAddTeacher = async function(e) {
     subject: data.subject,
     qualification: data.qualification,
     bloodGroup: data.bloodGroup === 'Select' ? '' : data.bloodGroup,
+    avatar: window._adminUploadedPics?.teacher || null,
   };
   
   const result = await api.register(teacherData);
@@ -1856,6 +1927,9 @@ window.handleAddTeacher = async function(e) {
     showToast(result.error || 'Failed to create teacher account', 'error');
     return;
   }
+  
+  // Clear uploaded pic
+  if (window._adminUploadedPics) window._adminUploadedPics.teacher = null;
   
   showToast(`Teacher account created! Email: ${data.email}, Password: ${data.password}`, 'success');
   hideAddTeacherForm();
@@ -1886,6 +1960,7 @@ window.handleAddStaff = async function(e) {
     position: data.position === 'Select' ? '' : data.position,
     department: data.department === 'Select' ? '' : data.department,
     bloodGroup: data.bloodGroup === 'Select' ? '' : data.bloodGroup,
+    avatar: window._adminUploadedPics?.staff || null,
   };
   
   const result = await api.register(staffData);
@@ -1894,6 +1969,9 @@ window.handleAddStaff = async function(e) {
     showToast(result.error || 'Failed to create staff account', 'error');
     return;
   }
+  
+  // Clear uploaded pic
+  if (window._adminUploadedPics) window._adminUploadedPics.staff = null;
   
   showToast(`Staff account created! Email: ${data.email}, Password: ${data.password}`, 'success');
   hideAddStaffForm();
@@ -1931,6 +2009,7 @@ window.handleCreatePrincipal = async function(e) {
     password: data.password,
     role: 'principal',
     bloodGroup: data.bloodGroup === 'Select' ? '' : data.bloodGroup,
+    avatar: window._adminUploadedPics?.principal || null,
   };
   
   const result = await api.register(principalData);
@@ -1939,6 +2018,9 @@ window.handleCreatePrincipal = async function(e) {
     showToast(result.error || 'Failed to create principal account', 'error');
     return;
   }
+  
+  // Clear uploaded pic
+  if (window._adminUploadedPics) window._adminUploadedPics.principal = null;
   
   showToast(`Principal account created! Email: ${data.email}, Password: ${data.password}`, 'success');
   hideCreatePrincipalForm();
@@ -2059,3 +2141,61 @@ window.deleteBatch = async function(idx) {
   await _refreshTab('batches');
 };
 
+
+
+// ── Profile Picture Handler for Admin Forms ──
+window.adminProfilePicChange = async function(input, previewId, role) {
+  const previewImg = document.getElementById(previewId);
+  if (!previewImg) return;
+
+  const file = input.files?.[0];
+  if (!file) return;
+
+  try {
+    const base64 = await handleProfilePictureUpload(input, previewImg);
+    
+    // Store in global object by role
+    if (!window._adminUploadedPics) window._adminUploadedPics = {};
+    window._adminUploadedPics[role] = base64;
+    
+    showToast('Profile picture uploaded! ✓', 'success');
+  } catch (error) {
+    showToast(error.message || 'Failed to upload image', 'error');
+    input.value = '';
+    previewImg.src = getDefaultAvatar();
+    
+    if (window._adminUploadedPics) window._adminUploadedPics[role] = null;
+  }
+};
+
+
+// ── Change User Avatar (Admin Edit) ──
+window.changeUserAvatar = async function(userId) {
+  const input = document.getElementById('editUserAvatarInput');
+  if (!input) return;
+  
+  input.onchange = async function() {
+    const previewImg = document.getElementById('editUserAvatar');
+    if (!previewImg) return;
+
+    const file = input.files?.[0];
+    if (!file) return;
+
+    try {
+      const base64 = await handleProfilePictureUpload(input, previewImg);
+      
+      // Store in global variable
+      window._editUserNewAvatar = base64;
+      
+      showToast('Profile picture updated! Click "Save Changes" to apply.', 'success');
+    } catch (error) {
+      if (error.message !== 'Crop cancelled') {
+        showToast(error.message || 'Failed to upload image', 'error');
+      }
+      input.value = '';
+      window._editUserNewAvatar = null;
+    }
+  };
+  
+  input.click();
+};

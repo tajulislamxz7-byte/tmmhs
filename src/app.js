@@ -27,6 +27,7 @@ import { renderComplaintBox }   from './pages/complaints.js';
 import { icon } from './utils/icons.js';
 import { students } from './data/schoolConfig.js';
 import { generateStudentIDCard } from './utils/idCardGenerator.js';
+import { handleProfilePictureUpload, getDefaultAvatar } from './utils/imageHandler.js';
 
 // ── App State ──────────────────────────────────────
 let currentPage  = 'home';
@@ -392,6 +393,26 @@ function bindGlobalActions() {
     }
   };
 
+  window.profilePicChange = async function(input) {
+    const previewImg = document.getElementById('profilePicPreview');
+    if (!previewImg) return;
+
+    const file = input.files?.[0];
+    if (!file) return;
+
+    try {
+      const base64 = await handleProfilePictureUpload(input, previewImg);
+      // Store in hidden field or global variable
+      window._uploadedProfilePic = base64;
+      showToast('Profile picture uploaded! ✓', 'success');
+    } catch (error) {
+      showToast(error.message || 'Failed to upload image', 'error');
+      input.value = '';
+      previewImg.src = getDefaultAvatar();
+      window._uploadedProfilePic = null;
+    }
+  };
+
   window.selectRegRole = function(role, btn) {
     document.querySelectorAll('#regRoleTabs .role-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
@@ -539,7 +560,21 @@ function bindGlobalActions() {
     if (btn) { btn.disabled = true; btn.textContent = 'Creating account...'; }
 
     const role = document.getElementById('regRoleInput')?.value || 'student';
-    const result = await auth.register({ ...data, role });
+    
+    // REQUIRED: Profile picture must be uploaded
+    const avatar = window._uploadedProfilePic || null;
+    
+    if (!avatar) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
+      errBox.textContent = 'Profile picture is required. Please upload a clear photo of your face.';
+      errBox.style.display = 'block';
+      // Scroll to profile picture section
+      document.getElementById('regProfilePictureInput')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      showToast('Please upload your profile picture', 'error');
+      return;
+    }
+    
+    const result = await auth.register({ ...data, role, avatar });
 
     if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
 

@@ -4,6 +4,7 @@
 
 import { students as sampleStudents, classes } from '../data/schoolConfig.js';
 import { api } from '../utils/api.js';
+import { handleProfilePictureUpload, getDefaultAvatar } from '../utils/imageHandler.js';
 
 // Get all students: sampleData + registered users from API/localStorage
 async function fetchStudents() {
@@ -638,6 +639,15 @@ window.openEditProfile = function(studentId) {
         </button>
       </div>
       <div class="modal-body" style="max-height:70vh;overflow-y:auto;display:flex;flex-direction:column;gap:14px;">
+        <!-- Profile Picture Section -->
+        <div style="text-align:center;padding:20px;background:var(--bg-secondary);border-radius:12px;">
+          <img id="userEditAvatar" src="${u.avatar}" class="avatar" style="width:100px;height:100px;margin:0 auto 12px;" onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
+          <div><button class="btn btn-secondary btn-sm" onclick="changeMyAvatar('${studentId}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Change Photo
+          </button></div>
+        </div>
+        
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div class="form-group">
             <label class="form-label">First Name</label>
@@ -738,6 +748,7 @@ window.openEditProfile = function(studentId) {
           <textarea id="ep_achievements" class="form-input" rows="2" placeholder="e.g., First Prize Science Fair, Best Student Award">${(u.achievements||[]).join(', ')}</textarea>
         </div>
         
+        <input type="file" id="userEditAvatarInput" accept="image/*" style="display:none;">
         <div class="flex gap-3 justify-end" style="border-top:1px solid var(--border);padding-top:16px;margin-top:8px;">
           <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
           <button class="btn btn-primary" onclick="saveEditProfile('${studentId}')">Save Changes</button>
@@ -768,6 +779,12 @@ window.saveEditProfile = async function(studentId) {
     skills:   get('ep_skills').split(',').map(s=>s.trim()).filter(Boolean),
     achievements: get('ep_achievements').split(',').map(a=>a.trim()).filter(Boolean),
   };
+  
+  // Include updated avatar if changed
+  if (window._userEditNewAvatar) {
+    updates.avatar = window._userEditNewAvatar;
+    window._userEditNewAvatar = null;
+  }
 
   // Import and use API
   const { api } = await import('../utils/api.js');
@@ -789,4 +806,36 @@ window.saveEditProfile = async function(studentId) {
   } else {
     showToast(result?.error || 'Failed to update profile', 'error');
   }
+};
+
+
+// ── Change My Avatar (User Profile Edit) ──
+window.changeMyAvatar = async function(userId) {
+  const input = document.getElementById('userEditAvatarInput');
+  if (!input) return;
+  
+  input.onchange = async function() {
+    const previewImg = document.getElementById('userEditAvatar');
+    if (!previewImg) return;
+
+    const file = input.files?.[0];
+    if (!file) return;
+
+    try {
+      const base64 = await handleProfilePictureUpload(input, previewImg);
+      
+      // Store in global variable
+      window._userEditNewAvatar = base64;
+      
+      showToast('Profile picture updated! Click "Save Changes" to apply.', 'success');
+    } catch (error) {
+      if (error.message !== 'Crop cancelled') {
+        showToast(error.message || 'Failed to upload image', 'error');
+      }
+      input.value = '';
+      window._userEditNewAvatar = null;
+    }
+  };
+  
+  input.click();
 };
