@@ -5,7 +5,7 @@
 
 /* === NAVBAR === */
 .navbar {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 10000;
   height: var(--nav-height); background: rgba(255,255,255,0.92);
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
@@ -169,25 +169,26 @@
   position: fixed; 
   top: var(--nav-height);  /* Start below navbar */
   left: 0;
-  width: 70%;  /* Sidebar takes 70% of screen width (narrower) */
-  max-width: 320px;  /* Maximum width on larger phones */
+  width: 280px;  /* Fixed width for mobile menu */
+  max-width: 85vw;  /* Don't take more than 85% of screen */
   height: calc(100vh - var(--nav-height));  /* Full height minus navbar */
   background: #0f172a;  /* Dark blue background */
   z-index: 9999;  /* High z-index */
   overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: 4px 0 20px rgba(0,0,0,0.3);
   transform: translateX(-100%);  /* Hidden off-screen by default */
-  transition: transform 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mobile-menu.hidden {
   transform: translateX(-100%);  /* Slide out off-screen */
-  visibility: hidden;
+  pointer-events: none;
 }
 
 .mobile-menu:not(.hidden) {
   transform: translateX(0);  /* Slide in when visible */
-  visibility: visible;
+  pointer-events: auto;
 }
 
 /* Overlay behind menu to show page content dimmed */
@@ -198,23 +199,28 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 9998;
+  backdrop-filter: blur(4px);
+  z-index: 9998;  /* Below menu but above everything else */
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .mobile-menu-overlay.active {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 [data-theme="dark"] .mobile-menu {
   background: #0f172a;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .mobile-menu-inner { 
-  padding: 24px 20px 40px 20px;  /* Normal padding, no extra space needed */
+  padding: 20px 16px 40px 16px;
+  min-height: 100%;
 }
 
 .mobile-nav-link { 
