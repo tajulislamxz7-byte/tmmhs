@@ -22,5 +22,36 @@
   ],
   "achievements": [
     "1111"
+  ],
+  "leadershipCards": [
+    {
+      "id": "card-1",
+      "role": "principal",
+      "title": "MESSAGE FROM THE PRINCIPAL",
+      "heading": "A Word from Our Leader",
+      "enabled": true
+    },
+    {
+      "id": "card-2",
+      "role": "vice-principal",
+      "title": "MESSAGE FROM THE VICE PRINCIPAL",
+      "heading": "Excellence in Education",
+      "message": "We are committed to providing holistic education that prepares students for the challenges of tomorrow.",
+      "name": "Vice Principal Name",
+      "designation": "Vice Principal, Tiarkhali M.M High School and College",
+      "qualification": "M.Ed, MA English · 15+ Years Experience",
+      "enabled": true
+    },
+    {
+      "id": "card-3",
+      "role": "head-teacher",
+      "title": "MESSAGE FROM THE HEAD TEACHER",
+      "heading": "Building Future Leaders",
+      "message": "Our focus is on character building alongside academic excellence, creating well-rounded individuals.",
+      "name": "Head Teacher Name",
+      "designation": "Head Teacher, Tiarkhali M.M High School and College",
+      "qualification": "M.Sc Mathematics · 12+ Years Experience",
+      "enabled": true
+    }
   ]
 }

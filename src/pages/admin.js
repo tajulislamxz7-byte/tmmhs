@@ -49,6 +49,7 @@ const ADMIN_NAV = [
   {key:'results',     label:'Results',      icon:'results'},
   {key:'notices',     label:'Notices',      icon:'notices'},
   {key:'events',      label:'Events',       icon:'events'},
+  {key:'gallery',     label:'Gallery',      icon:'image'},
   {key:'messages',    label:'Messages',     icon:'messages'},
   {key:'principal',   label:'Principal',    icon:'users2'},
   {key:'roles',       label:'Users',        icon:'roles'},
@@ -66,10 +67,11 @@ const _cache = {
   exams: [],
   results: [],
   settings: {},
+  gallery: [],
 };
 
 async function _loadCache() {
-  const [users, notices, events, batches, exams, results, settings, notifications] = await Promise.all([
+  const [users, notices, events, batches, exams, results, settings, notifications, gallery] = await Promise.all([
     api.getUsers(),
     api.getNotices(),
     api.getEvents(),
@@ -78,6 +80,7 @@ async function _loadCache() {
     api.getResults(),
     api.getSettings(),
     api.getNotifications(),
+    api.getGallery(),
   ]);
   _cache.users          = users          || [];
   _cache.notices        = notices        || [];
@@ -87,6 +90,7 @@ async function _loadCache() {
   _cache.results        = results        || [];
   _cache.settings       = settings       || {};
   _cache.notifications  = notifications  || [];
+  _cache.gallery        = gallery        || [];
 }
 
 export async function renderAdminDashboard() {
@@ -151,6 +155,7 @@ function renderAdminTab(tab) {
     case 'batches':      return renderAdminBatches();
     case 'notices':      return renderAdminNoticesManager();
     case 'events':       return renderAdminEventsManager();
+    case 'gallery':      return renderAdminGallery();
     case 'results':      return renderAdminResults();
     case 'principal':    return renderAdminPrincipal();
     case 'settings':     return renderAdminSettings();
@@ -1371,6 +1376,70 @@ function renderAdminSettings() {
           </div>
         </div>
       </div>
+      
+      <!-- Leadership Cards Management -->
+      <div style="margin-top:32px;">
+        <h2 style="font-size:20px;font-weight:800;margin-bottom:16px;">Leadership Message Cards</h2>
+        <p style="color:var(--text-muted);margin-bottom:20px;">Manage the leadership message cards displayed on the home page</p>
+        
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          ${(s.leadershipCards && Array.isArray(s.leadershipCards) && s.leadershipCards.length > 0) ? s.leadershipCards.map((card, index) => `
+            <div class="card">
+              <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+                <div class="font-semibold">Card ${index + 1}: ${card.role ? card.role.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'Unknown'}</div>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                  <input type="checkbox" ${card.enabled !== false ? 'checked' : ''} onchange="toggleLeadershipCard(${index}, this.checked)" style="width:18px;height:18px;cursor:pointer;">
+                  <span style="font-size:13px;color:var(--text-secondary);">Enabled</span>
+                </label>
+              </div>
+              <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                  <div class="form-group">
+                    <label class="form-label">Role ID</label>
+                    <input class="form-input" id="lc_${index}_role" value="${card.role || ''}" readonly style="background:var(--bg-secondary);cursor:not-allowed;">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Section Title (e.g., "MESSAGE FROM THE PRINCIPAL")</label>
+                    <input class="form-input" id="lc_${index}_title" value="${card.title || ''}">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Heading (e.g., "A Word from Our Leader")</label>
+                    <input class="form-input" id="lc_${index}_heading" value="${card.heading || ''}">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Person Name</label>
+                    <input class="form-input" id="lc_${index}_name" value="${card.name || ''}" ${card.role === 'principal' ? 'readonly style="background:var(--bg-secondary);cursor:not-allowed;" placeholder="Use Principal Name from School Info above"' : ''}>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                  <div class="form-group">
+                    <label class="form-label">Designation</label>
+                    <input class="form-input" id="lc_${index}_designation" value="${card.designation || ''}" ${card.role === 'principal' ? 'readonly style="background:var(--bg-secondary);cursor:not-allowed;"' : ''}>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Qualification</label>
+                    <input class="form-input" id="lc_${index}_qualification" value="${card.qualification || ''}" ${card.role === 'principal' ? 'readonly style="background:var(--bg-secondary);cursor:not-allowed;"' : ''}>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Message</label>
+                    <textarea class="form-input" id="lc_${index}_message" rows="4" style="resize:vertical;" ${card.role === 'principal' ? 'readonly style="background:var(--bg-secondary);cursor:not-allowed;" placeholder="Use Principal\'s Message from School Info above"' : ''}>${card.message || ''}</textarea>
+                  </div>
+                </div>
+                <div style="grid-column:1/-1;">
+                  <button class="btn btn-primary" onclick="saveLeadershipCard(${index})">Save Card ${index + 1}</button>
+                </div>
+              </div>
+            </div>
+          `).join('') : `
+            <div class="card">
+              <div class="card-body text-center text-muted" style="padding:40px;">
+                <p>No leadership cards configured yet.</p>
+                <p style="margin-top:12px;font-size:14px;">Leadership cards will be initialized automatically on first save.</p>
+              </div>
+            </div>
+          `}
+        </div>
+      </div>
     </div>
   `;
 }
@@ -1463,6 +1532,78 @@ function renderAdminEventsManager() {
             <thead><tr><th>Title</th><th>Date</th><th>Category</th><th>Location</th><th>Actions</th></tr></thead>
             <tbody>${events.map((e,i) => _eventRow(e,i)).join('')}</tbody>
           </table></div></div>`
+      }
+    </div>
+  `;
+}
+
+function renderAdminGallery() {
+  const photos = _cache.gallery || [];
+  const categories = ['All', 'Annual Function', 'Science Fair', 'Sports', 'Farewell', 'Tour', 'Reunion', 'General'];
+  
+  return `
+    <div>
+      <div class="flex items-center justify-between mb-6">
+        <h1 style="font-size:22px;font-weight:800;">Photo Gallery</h1>
+        <button class="btn btn-primary" onclick="openUploadPhotoModal()">
+          ${SVG('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',14,'white')} Upload Photos
+        </button>
+      </div>
+      
+      <!-- Category Filter -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="galleryCategories">
+            ${categories.map((cat, idx) => `
+              <button class="btn ${idx === 0 ? 'btn-primary' : 'btn-secondary'} btn-sm" 
+                      onclick="filterGalleryByCategory('${cat}', this)">
+                ${cat}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+
+      ${photos.length === 0
+        ? `<div class="card">
+            <div class="card-body text-center text-muted" style="padding:60px;">
+              <div style="font-size:48px;margin-bottom:12px;">📸</div>
+              <div class="font-semibold" style="font-size:18px;">No photos yet</div>
+              <div class="text-sm mt-2 mb-4">Upload photos to showcase school events and activities</div>
+              <button class="btn btn-primary" onclick="openUploadPhotoModal()">
+                ${SVG('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',14,'white')} Upload First Photo
+              </button>
+            </div>
+          </div>`
+        : `<div class="gallery-grid" id="galleryPhotosGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;">
+            ${photos.map((photo, idx) => `
+              <div class="gallery-photo-card" data-category="${photo.category || 'All'}" style="background:var(--card-bg);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-sm);transition:transform 0.2s,box-shadow 0.2s;">
+                <div style="aspect-ratio:4/3;overflow:hidden;position:relative;background:#f3f4f6;">
+                  <img src="${photo.url}" alt="${photo.title}" 
+                       style="width:100%;height:100%;object-fit:cover;transition:transform 0.3s;"
+                       onerror="this.src='https://via.placeholder.com/400x300?text=Image+Not+Found'"
+                       onload="this.style.opacity=1"
+                       onclick="viewGalleryPhoto(${idx})">
+                  <div style="position:absolute;top:8px;right:8px;display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-icon btn-sm" 
+                            onclick="event.stopPropagation();deleteGalleryPhoto(${idx},'${photo.title}')"
+                            style="background:rgba(0,0,0,0.6);color:white;border:none;"
+                            title="Delete">
+                      ${SVG('<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>',16,'white')}
+                    </button>
+                  </div>
+                </div>
+                <div style="padding:12px;">
+                  <div style="font-weight:600;font-size:14px;margin-bottom:4px;">${photo.title}</div>
+                  ${photo.description ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">${photo.description}</div>` : ''}
+                  <div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-muted);">
+                    <span class="badge badge-primary" style="font-size:10px;">${photo.category || 'General'}</span>
+                    <span>${new Date(photo.uploadedAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>`
       }
     </div>
   `;
@@ -1568,6 +1709,71 @@ window.saveSettings = async function() {
   await api.saveSettings(s);
   showToast('Settings saved successfully!', 'success');
   await _refreshTab('settings');
+};
+
+// ── Leadership Cards Management ──
+window.saveLeadershipCard = async function(index) {
+  try {
+    const settings = _cache.settings;
+    
+    // Initialize leadershipCards if it doesn't exist
+    if (!settings.leadershipCards || !Array.isArray(settings.leadershipCards)) {
+      showToast('Leadership cards not initialized', 'error');
+      return;
+    }
+    
+    if (!settings.leadershipCards[index]) {
+      showToast('Leadership card not found', 'error');
+      return;
+    }
+    
+    const card = settings.leadershipCards[index];
+    
+    // Update card data
+    card.title = document.getElementById(`lc_${index}_title`)?.value || card.title;
+    card.heading = document.getElementById(`lc_${index}_heading`)?.value || card.heading;
+    
+    // Only update name, designation, qualification, message for non-principal cards
+    if (card.role !== 'principal') {
+      card.name = document.getElementById(`lc_${index}_name`)?.value || '';
+      card.designation = document.getElementById(`lc_${index}_designation`)?.value || '';
+      card.qualification = document.getElementById(`lc_${index}_qualification`)?.value || '';
+      card.message = document.getElementById(`lc_${index}_message`)?.value || '';
+    }
+    
+    // Save to backend
+    await api.saveSettings(settings);
+    showToast(`Card ${index + 1} saved successfully!`, 'success');
+    await _refreshTab('settings');
+  } catch (error) {
+    console.error('Error saving leadership card:', error);
+    showToast('Failed to save leadership card', 'error');
+  }
+};
+
+window.toggleLeadershipCard = async function(index, enabled) {
+  try {
+    const settings = _cache.settings;
+    
+    // Initialize leadershipCards if it doesn't exist
+    if (!settings.leadershipCards || !Array.isArray(settings.leadershipCards)) {
+      showToast('Leadership cards not initialized', 'error');
+      return;
+    }
+    
+    if (!settings.leadershipCards[index]) {
+      showToast('Leadership card not found', 'error');
+      return;
+    }
+    
+    settings.leadershipCards[index].enabled = enabled;
+    await api.saveSettings(settings);
+    showToast(`Card ${index + 1} ${enabled ? 'enabled' : 'disabled'}`, 'success');
+    // Don't refresh to avoid losing form state
+  } catch (error) {
+    console.error('Error toggling leadership card:', error);
+    showToast('Failed to toggle leadership card', 'error');
+  }
 };
 
 // ── Admin Notices ──
@@ -2206,4 +2412,203 @@ window.changeUserAvatar = async function(userId) {
   };
   
   input.click();
+};
+
+
+// ══════════════════════════════════════════════════════════════════
+// GALLERY MANAGEMENT FUNCTIONS
+// ══════════════════════════════════════════════════════════════════
+
+window.openUploadPhotoModal = function() {
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.onclick = e => { if (e.target === modal) modal.remove(); };
+  modal.innerHTML = `
+    <div class="modal">
+      <div class="modal-header">
+        <div class="font-semibold">Upload Photos</div>
+        <button class="btn btn-ghost btn-icon" onclick="this.closest('.modal-overlay').remove()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="max-height:600px;overflow-y:auto;">
+        <form id="uploadPhotoForm" onsubmit="handleUploadPhoto(event)">
+          <div class="form-group">
+            <label class="form-label">Photo(s) *</label>
+            <input type="file" id="photoFiles" class="form-input" accept="image/*" multiple required 
+                   onchange="previewPhotos(this)">
+            <div class="text-xs text-muted mt-1">You can select multiple photos at once</div>
+          </div>
+          
+          <div id="photoPreviewContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;margin-bottom:16px;"></div>
+          
+          <div class="form-group">
+            <label class="form-label">Title *</label>
+            <input type="text" id="photoTitle" class="form-input" placeholder="e.g., Annual Function 2026" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea id="photoDescription" class="form-input" rows="3" placeholder="Brief description of the event or photos"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <select id="photoCategory" class="form-input" required>
+              <option value="">Select category</option>
+              <option value="Annual Function">Annual Function</option>
+              <option value="Science Fair">Science Fair</option>
+              <option value="Sports">Sports</option>
+              <option value="Farewell">Farewell</option>
+              <option value="Tour">Tour</option>
+              <option value="Reunion">Reunion</option>
+              <option value="General">General</option>
+            </select>
+          </div>
+          
+          <div class="flex gap-3 mt-4">
+            <button type="submit" class="btn btn-primary">
+              ${SVG('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',14,'white')} Upload
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+};
+
+window.previewPhotos = function(input) {
+  const container = document.getElementById('photoPreviewContainer');
+  container.innerHTML = '';
+  
+  if (input.files && input.files.length > 0) {
+    Array.from(input.files).forEach((file, idx) => {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const div = document.createElement('div');
+        div.style.cssText = 'position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#f3f4f6;';
+        div.innerHTML = `
+          <img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">
+          <div style="position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,0.6);color:white;padding:2px 6px;border-radius:4px;font-size:10px;">${idx + 1}</div>
+        `;
+        container.appendChild(div);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+};
+
+window.handleUploadPhoto = async function(e) {
+  e.preventDefault();
+  
+  const files = document.getElementById('photoFiles').files;
+  const title = document.getElementById('photoTitle').value.trim();
+  const description = document.getElementById('photoDescription').value.trim();
+  const category = document.getElementById('photoCategory').value;
+  
+  if (!files || files.length === 0) {
+    showToast('Please select at least one photo', 'error');
+    return;
+  }
+  
+  const btn = e.target.querySelector('button[type="submit"]');
+  btn.disabled = true;
+  btn.textContent = `Uploading ${files.length} photo(s)...`;
+  
+  try {
+    // Convert files to base64
+    const photoPromises = Array.from(files).map(file => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    });
+    
+    const photoDataUrls = await Promise.all(photoPromises);
+    
+    // Upload each photo
+    for (let i = 0; i < photoDataUrls.length; i++) {
+      await api.addGalleryPhoto({
+        url: photoDataUrls[i],
+        title: files.length > 1 ? `${title} - Photo ${i + 1}` : title,
+        description: description,
+        category: category,
+        uploadedAt: new Date().toISOString(),
+        uploadedBy: 'admin'
+      });
+    }
+    
+    showToast(`${files.length} photo(s) uploaded successfully!`, 'success');
+    document.querySelector('.modal-overlay').remove();
+    await _refreshTab('gallery');
+  } catch (error) {
+    console.error('Upload failed:', error);
+    showToast('Failed to upload photos', 'error');
+    btn.disabled = false;
+    btn.innerHTML = `${SVG('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',14,'white')} Upload`;
+  }
+};
+
+window.filterGalleryByCategory = function(category, btn) {
+  // Update active button
+  document.querySelectorAll('#galleryCategories button').forEach(b => {
+    b.className = 'btn btn-secondary btn-sm';
+  });
+  btn.className = 'btn btn-primary btn-sm';
+  
+  // Filter photos
+  const photos = document.querySelectorAll('.gallery-photo-card');
+  photos.forEach(photo => {
+    if (category === 'All' || photo.dataset.category === category) {
+      photo.style.display = 'block';
+    } else {
+      photo.style.display = 'none';
+    }
+  });
+};
+
+window.viewGalleryPhoto = function(index) {
+  const photo = _cache.gallery[index];
+  if (!photo) return;
+  
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.onclick = e => { if (e.target === modal) modal.remove(); };
+  modal.innerHTML = `
+    <div class="modal" style="max-width:900px;">
+      <div class="modal-header">
+        <div>
+          <div class="font-semibold">${photo.title}</div>
+          <div class="text-xs text-muted">${photo.category || 'General'} • ${new Date(photo.uploadedAt).toLocaleDateString()}</div>
+        </div>
+        <button class="btn btn-ghost btn-icon" onclick="this.closest('.modal-overlay').remove()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="padding:0;">
+        <img src="${photo.url}" style="width:100%;height:auto;display:block;background:#000;" alt="${photo.title}">
+        ${photo.description ? `<div style="padding:20px;"><p style="color:var(--text-muted);">${photo.description}</p></div>` : ''}
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" onclick="deleteGalleryPhoto(${index},'${photo.title}');this.closest('.modal-overlay').remove();">
+          ${SVG('<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',14,'white')} Delete Photo
+        </button>
+        <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Close</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+};
+
+window.deleteGalleryPhoto = async function(index, title) {
+  const confirmed = await confirmDialog(`Are you sure you want to delete "${title}"? This action cannot be undone.`, 'Delete Photo');
+  if (!confirmed) return;
+  
+  await api.deleteGalleryPhoto(index);
+  showToast('Photo deleted successfully', 'success');
+  await _refreshTab('gallery');
 };

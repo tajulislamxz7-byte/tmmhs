@@ -1,8 +1,8 @@
 // ================================================
-// HOME PAGE
+// HOME PAGE - Updated: 2026-08-02
 // ================================================
 
-import { schoolInfo, stats, notices, events, testimonials, gallery, batches } from '../data/schoolConfig.js';
+import { schoolInfo, stats, batches } from '../data/schoolConfig.js';
 import { api } from '../utils/api.js';
 
 export async function renderHome() {
@@ -18,11 +18,21 @@ export async function renderHome() {
   const passRate      = S.passRate || '100%';
   const yearsExcel    = new Date().getFullYear() - parseInt(schoolFounded || 1985);
   const achievements  = S.achievements && S.achievements.length > 0 ? S.achievements : [];
-
-  const heroStats = [
-    { label: 'Students',         value: totalStudents, svg: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
-    { label: 'Teachers',         value: totalTeachers, svg: '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>' },
-    { label: 'Years of Service', value: yearsExcel,    svg: '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>' },
+  
+  // Fetch real data from API
+  const users = await api.getUsers() || [];
+  const studentsCount = users.filter(u => u.role === 'student').length;
+  const teachersCount = users.filter(u => u.role === 'teacher').length;
+  const alumniCount = users.filter(u => u.role === 'alumni').length;
+  
+  // Update stats with real data
+  const liveStats = [
+    { label: "Students", value: studentsCount, svg: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>', color: "#2563eb" },
+    { label: "Teachers", value: teachersCount, svg: '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>', color: "#7c3aed" },
+    { label: "Alumni", value: alumniCount, svg: '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>', color: "#059669" },
+    { label: "Years of Excellence", value: yearsExcel, svg: '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>', color: "#d97706" },
+    { label: "Batches", value: batches.length, svg: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>', color: "#dc2626" },
+    { label: "Pass Rate", value: passRate, svg: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>', color: "#0891b2" },
   ];
 
   return `
@@ -70,18 +80,34 @@ export async function renderHome() {
                 <div class="school-illustration">
                   <div class="school-building">
                     <div class="building-students" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:480px;margin:0 auto;">
+                      <style>
+                        @media (max-width: 768px) {
+                          .building-students {
+                            grid-template-columns: 1fr !important;
+                            gap: 16px !important;
+                            max-width: 100% !important;
+                            padding: 0 16px;
+                          }
+                        }
+                        @media (min-width: 769px) and (max-width: 1024px) {
+                          .building-students {
+                            grid-template-columns: repeat(3, 1fr) !important;
+                            gap: 16px !important;
+                          }
+                        }
+                      </style>
                       <div style="background:rgba(37,99,235,0.1);backdrop-filter:blur(10px);border:1.5px solid rgba(37,99,235,0.2);border-radius:20px;padding:32px 24px;text-align:center;">
                         <div style="width:56px;height:56px;margin:0 auto 16px;background:linear-gradient(135deg,#2563eb,#3b82f6);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 16px rgba(37,99,235,0.3);">
                           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>
                         </div>
-                        <div style="font-weight:900;font-size:32px;color:var(--text-primary);line-height:1;margin-bottom:8px;">${totalStudents}+</div>
+                        <div style="font-weight:900;font-size:32px;color:var(--text-primary);line-height:1;margin-bottom:8px;">${studentsCount}+</div>
                         <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">Students</div>
                       </div>
                       <div style="background:rgba(124,58,237,0.1);backdrop-filter:blur(10px);border:1.5px solid rgba(124,58,237,0.2);border-radius:20px;padding:32px 24px;text-align:center;">
                         <div style="width:56px;height:56px;margin:0 auto 16px;background:linear-gradient(135deg,#7c3aed,#a78bfa);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 16px rgba(124,58,237,0.3);">
                           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
                         </div>
-                        <div style="font-weight:900;font-size:32px;color:var(--text-primary);line-height:1;margin-bottom:8px;">${totalTeachers}+</div>
+                        <div style="font-weight:900;font-size:32px;color:var(--text-primary);line-height:1;margin-bottom:8px;">${teachersCount}+</div>
                         <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">Teachers</div>
                       </div>
                       <div style="background:rgba(5,150,105,0.1);backdrop-filter:blur(10px);border:1.5px solid rgba(5,150,105,0.2);border-radius:20px;padding:32px 24px;text-align:center;">
@@ -119,8 +145,8 @@ export async function renderHome() {
     <!-- ANIMATED STATS BANNER -->
     <section class="stats-banner">
       <div class="container">
-        <div class="stats-grid">
-          ${stats.map(s => `
+        <div class="stats-grid" style="display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:16px;">
+          ${liveStats.map(s => `
             <div class="stat-item">
               <div class="stat-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${s.color}" stroke-width="2">${s.svg}</svg>
@@ -142,21 +168,51 @@ export async function renderHomeExtra() {
   const achievements  = S.achievements && S.achievements.length > 0 ? S.achievements : [];
   
   // Fetch principal user data to get avatar
-  const users = await api.getUsers();
+  const users = await api.getUsers() || [];
   const principal = users.find(u => u.role === 'principal' && u.status === 'active');
   const principalAvatar = principal?.avatar || 'https://i.imgur.com/x9wE0QT.png';
+  
+  // Fetch real data from API
+  const notices = await api.getNotices() || [];
+  const events = await api.getEvents() || [];
+  const galleryPhotos = await api.getGallery() || [];
+  
+  // Group gallery photos by category for preview
+  const galleryCategories = ['Annual Function', 'Science Fair', 'Sports', 'Farewell', 'Tour', 'Reunion', 'General'];
+  const galleryPreview = galleryCategories.map(cat => {
+    const photos = galleryPhotos.filter(p => p.category === cat);
+    return {
+      title: cat,
+      images: photos.length,
+      coverColor: getCategoryGradient(cat),
+      thumbnail: photos.length > 0 ? photos[0].url : null, // Get first photo as thumbnail
+    };
+  }).filter(g => g.images > 0).slice(0, 4); // Show only first 4 categories with photos
+  
+  function getCategoryGradient(category) {
+    const gradients = {
+      'Annual Function': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      'Science Fair': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      'Sports': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+      'Farewell': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+      'Tour': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+      'Reunion': 'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
+      'General': 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+    };
+    return gradients[category] || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+  }
 
   return `
     <!-- NOTICES & EVENTS -->
     <section class="section bg-secondary">
       <div class="container">
-        <div class="grid-2 gap-8" style="gap:32px;">
+        <div class="grid-2 gap-8" style="gap:48px;">
           <!-- Latest Notices -->
-          <div>
+          <div style="margin-bottom:24px;">
             <div class="flex items-center justify-between mb-6">
               <div>
-                <div class="section-tag" style="margin-bottom:8px;">Latest Updates</div>
-                <h2 style="font-size:var(--text-2xl);font-weight:800;">Notice Board</h2>
+                <div class="section-tag" style="margin-bottom:12px;display:block;">Latest Updates</div>
+                <h2 style="font-size:var(--text-2xl);font-weight:800;margin-top:0;">Notice Board</h2>
               </div>
               <button class="btn btn-secondary btn-sm" onclick="navigate('notices')">View All →</button>
             </div>
@@ -182,13 +238,14 @@ export async function renderHomeExtra() {
           </div>
 
           <!-- Upcoming Events -->
-          <div>
+          <div style="margin-top:24px;">
             <div class="flex items-center justify-between mb-6">
               <div>
-                <div class="section-tag" style="margin-bottom:8px;">What's Happening</div>
-                <h2 style="font-size:var(--text-2xl);font-weight:800;">Upcoming Events</h2>
+                <div class="section-tag" style="margin-bottom:12px;display:block;">What's Happening</div>
+                <h2 style="font-size:var(--text-2xl);font-weight:800;margin-top:0;">Upcoming Events</h2>
               </div>
               <button class="btn btn-secondary btn-sm" onclick="navigate('events')">View All →</button>
+            </div>
             </div>
             <div class="flex flex-col gap-3">
               ${events.slice(0,5).map(e => `
@@ -261,15 +318,20 @@ export async function renderHomeExtra() {
           <p class="section-subtitle">Capturing moments that last a lifetime</p>
         </div>
         <div class="gallery-preview-grid">
-          ${gallery.map((g,i) => `
-            <div class="gallery-preview-item ${i===0?'gallery-featured':''}" onclick="navigate('gallery')" style="background:${g.coverColor};">
-              <div class="gallery-overlay">
+          ${galleryPreview.map((g,i) => `
+            <div class="gallery-preview-item ${i===0?'gallery-featured':''}" onclick="navigate('gallery')" style="background:${g.coverColor};position:relative;overflow:hidden;">
+              ${g.thumbnail ? `
+                <img src="${g.thumbnail}" alt="${g.title}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.6;" loading="lazy">
+              ` : ''}
+              <div class="gallery-overlay" style="position:relative;z-index:1;">
                 <div class="gallery-label">${g.title}</div>
-                <div class="gallery-count">${g.images} Photos</div>
+                <div class="gallery-count">${g.images} Photo${g.images !== 1 ? 's' : ''}</div>
               </div>
-              <div style="opacity:0.2;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
-                <svg width="${i===0?'80':'50'}" height="${i===0?'80':'50'}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-              </div>
+              ${!g.thumbnail ? `
+                <div style="opacity:0.2;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:0;">
+                  <svg width="${i===0?'80':'50'}" height="${i===0?'80':'50'}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </div>
+              ` : ''}
             </div>
           `).join('')}
         </div>
@@ -279,7 +341,11 @@ export async function renderHomeExtra() {
       </div>
     </section>
 
-    <!-- PRINCIPAL'S MESSAGE -->
+    <!-- LEADERSHIP MESSAGES -->
+    ${(() => {
+      if (!S.leadershipCards || S.leadershipCards.length === 0) {
+        // Fallback to default principal card
+        return `
     <section class="section">
       <div class="container">
         <div class="principal-section">
@@ -305,6 +371,56 @@ export async function renderHomeExtra() {
         </div>
       </div>
     </section>
+        `;
+      }
+      
+      // Render all enabled leadership cards
+      return S.leadershipCards.filter(card => card.enabled !== false).map((card, index) => {
+        // Get user data based on role
+        let userAvatar = 'https://i.imgur.com/x9wE0QT.png';
+        let userName = card.name || '';
+        let userDesignation = card.designation || '';
+        let userQualification = card.qualification || '';
+        let userMessage = card.message || '';
+        
+        // For principal card, use the existing principal data
+        if (card.role === 'principal') {
+          userAvatar = principalAvatar;
+          userName = principalName;
+          userMessage = principalMsg;
+          userDesignation = 'Principal, Tiarkhali M.M High School and College';
+          userQualification = 'PhD Physics, BUET · 18+ Years Experience';
+        }
+        
+        return `
+    <section class="section ${index % 2 === 1 ? 'bg-secondary' : ''}">
+      <div class="container">
+        <div class="principal-section">
+          <div class="principal-image">
+            <div class="principal-avatar">
+              <img src="${userAvatar}" alt="${card.role}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
+            </div>
+            <div class="principal-badge">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--primary)"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              ${card.role.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+            </div>
+          </div>
+          <div class="principal-message">
+            <div class="section-tag">${card.title || 'Message'}</div>
+            <h2 class="font-display" style="font-size:var(--text-3xl);font-weight:700;margin-bottom:16px;margin-top:12px;">${card.heading || 'A Word from Our Leader'}</h2>
+            <blockquote class="principal-quote">"${userMessage}"</blockquote>
+            <div class="principal-info">
+              <div class="font-bold" style="font-size:var(--text-lg);">${userName}</div>
+              <div class="text-muted text-sm">${userDesignation}</div>
+              <div class="text-muted text-sm">${userQualification}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+        `;
+      }).join('');
+    })()}
 
     <!-- ACHIEVEMENTS (only show if achievements exist) -->
     ${achievements.length > 0 ? `
@@ -328,34 +444,6 @@ export async function renderHomeExtra() {
       </div>
     </section>
     ` : ''}
-
-    <!-- TESTIMONIALS -->
-    <section class="section bg-secondary">
-      <div class="container">
-        <div class="section-header">
-          <div class="section-tag">Voices</div>
-          <h2 class="section-title">What People Say</h2>
-          <p class="section-subtitle">Hear from our students, alumni, and parents</p>
-        </div>
-        <div class="testimonials-grid">
-          ${testimonials.map(t => `
-            <div class="testimonial-card card">
-              <div class="card-body">
-                <div class="testimonial-stars">★★★★★</div>
-                <p class="testimonial-text">"${t.text}"</p>
-                <div class="testimonial-author">
-                  <img src="${t.avatar}" alt="${t.name}" class="avatar avatar-md">
-                  <div>
-                    <div class="font-semibold text-sm">${t.name}</div>
-                    <div class="text-xs text-muted">${t.role}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    </section>
 
     <!-- CALL TO ACTION -->
     <section class="cta-section">

@@ -462,3 +462,22 @@ app.patch('/api/notifications/mark-all-read', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🎓 Tiarkhali M.M High School - API Server running at http://localhost:${PORT}`);
 });
+
+
+// ── GALLERY ───────────────────────────────────────
+app.get('/api/gallery', (_req, res) => res.json(readJSON('gallery.json')));
+
+app.post('/api/gallery', (req, res) => {
+  const gallery = readJSON('gallery.json');
+  const photo = { id: 'PHOTO-' + Date.now(), ...req.body };
+  gallery.unshift(photo);
+  writeJSON('gallery.json', gallery);
+  res.json({ ok: true, photo });
+});
+
+app.delete('/api/gallery/:idx', (req, res) => {
+  const gallery = readJSON('gallery.json');
+  gallery.splice(parseInt(req.params.idx), 1);
+  writeJSON('gallery.json', gallery);
+  res.json({ ok: true });
+});

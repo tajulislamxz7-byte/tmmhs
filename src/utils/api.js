@@ -433,4 +433,36 @@ export const api = {
     LS.set('gfa_notifications', notifs);
     return { ok: true };
   },
+
+  // Gallery
+  async getGallery() {
+    const r = await get('/gallery');
+    if (r) { 
+      LS.set('gfa_gallery', r); 
+      return r; 
+    }
+    return LS.get('gfa_gallery', []);
+  },
+  async addGalleryPhoto(data) {
+    const r = await post('/gallery', data);
+    if (r) return r;
+    // Fallback to localStorage
+    const gallery = LS.get('gfa_gallery', []);
+    const photo = {
+      id: 'PHOTO-' + Date.now(),
+      ...data,
+    };
+    gallery.unshift(photo);
+    LS.set('gfa_gallery', gallery);
+    return { ok: true, photo };
+  },
+  async deleteGalleryPhoto(idx) {
+    const r = await del(`/gallery/${idx}`);
+    if (r) return r;
+    // Fallback to localStorage
+    const gallery = LS.get('gfa_gallery', []);
+    gallery.splice(idx, 1);
+    LS.set('gfa_gallery', gallery);
+    return { ok: true };
+  },
 };

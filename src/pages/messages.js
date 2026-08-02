@@ -158,33 +158,34 @@ function formatTime(iso) {
 let activeConvId = null;
 
 export function renderMessages(loggedInUser) {
-  const me = loggedInUser || auth.getCurrentUser();
-  if (!me) return `
-    <div class="container section-sm text-center" style="padding:80px 0;">
-      <div style="font-size:48px;margin-bottom:16px;">💬</div>
-      <div class="font-semibold" style="font-size:20px;margin-bottom:8px;">Sign in to use Messages</div>
-      <button class="btn btn-primary" onclick="navigate('login')">Sign In</button>
-    </div>`;
+  try {
+    const me = loggedInUser || auth.getCurrentUser();
+    if (!me) return `
+      <div class="container section-sm text-center" style="padding:80px 0;">
+        <div style="font-size:48px;margin-bottom:16px;">💬</div>
+        <div class="font-semibold" style="font-size:20px;margin-bottom:8px;">Sign in to use Messages</div>
+        <button class="btn btn-primary" onclick="navigate('login')">Sign In</button>
+      </div>`;
 
-  // Get conversations and remove duplicates by conversation ID
-  let convs = getConversations().filter(c => c.participants.includes(me.id));
-  
-  // Remove duplicates based on conversation ID
-  const uniqueConvs = [];
-  const seenIds = new Set();
-  convs.forEach(c => {
-    if (!seenIds.has(c.id)) {
-      seenIds.add(c.id);
-      uniqueConvs.push(c);
-    }
-  });
-  convs = uniqueConvs;
-  
-  if (!activeConvId && convs.length > 0) activeConvId = convs[0].id;
+    // Get conversations and remove duplicates by conversation ID
+    let convs = getConversations().filter(c => c.participants && c.participants.includes(me.id));
+    
+    // Remove duplicates based on conversation ID
+    const uniqueConvs = [];
+    const seenIds = new Set();
+    convs.forEach(c => {
+      if (!seenIds.has(c.id)) {
+        seenIds.add(c.id);
+        uniqueConvs.push(c);
+      }
+    });
+    convs = uniqueConvs;
+    
+    if (!activeConvId && convs.length > 0) activeConvId = convs[0].id;
 
-  const activeConv = convs.find(c => c.id === activeConvId) || convs[0] || null;
+    const activeConv = convs.find(c => c.id === activeConvId) || convs[0] || null;
 
-  return `
+    return `
     <div style="height:calc(100vh - var(--nav-height));overflow:hidden;">
       <div class="messages-layout">
 
@@ -249,6 +250,15 @@ export function renderMessages(loggedInUser) {
       </div>
     </div>
   `;
+  } catch (error) {
+    console.error('Error rendering messages:', error);
+    return `
+      <div class="container section-sm text-center" style="padding:80px 0;">
+        <div style="font-size:48px;margin-bottom:16px;">⚠️</div>
+        <div class="font-semibold" style="font-size:20px;margin-bottom:8px;">Error loading messages</div>
+        <p class="text-muted">Please refresh the page or contact support.</p>
+      </div>`;
+  }
 }
 
 function renderConvItem(c, meId) {

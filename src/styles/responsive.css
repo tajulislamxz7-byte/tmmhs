@@ -485,7 +485,21 @@ img, video, iframe {
 /* === STATS GRID RESPONSIVE === */
 @media (max-width: 640px) {
   .stats-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-rows: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+  
+  .stat-item {
+    padding: 8px !important;
+  }
+  
+  .stat-value {
+    font-size: 20px !important;
+  }
+  
+  .stat-label {
+    font-size: 9px !important;
   }
   
   .stat-card {
