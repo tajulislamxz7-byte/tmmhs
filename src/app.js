@@ -332,11 +332,13 @@ function bindGlobalActions() {
           });
           const gUser = await res.json();
 
-          // Check if user exists in our system
+          // Check if user exists in our system (by email - for account linking)
           const users = JSON.parse(localStorage.getItem('gfa_users') || '[]');
           let user = users.find(u => u.email.toLowerCase() === gUser.email.toLowerCase());
 
           if (!user) {
+            // ========== NO EXISTING ACCOUNT WITH THIS EMAIL ==========
+            
             // SECURITY: Block teacher, staff, and principal registration via Google
             // Only admin can create these accounts
             if (selectedRole === 'teacher' || selectedRole === 'staff' || selectedRole === 'principal') {
@@ -344,43 +346,67 @@ function bindGlobalActions() {
               return;
             }
             
-            // For students, check if they want to link to existing unlinked account
+            // For students, check if they want to link to existing unlinked account BY STUDENT ID
             if (selectedRole === 'student') {
-              const studentId = prompt('Do you have a Student ID from the school? If yes, enter it to link your account.\n\nLeave blank to create a new profile:');
-              
-              if (studentId && studentId.trim()) {
-                // Try to find and link to existing unlinked student
-                const existingStudent = users.find(u => 
-                  u.id === studentId.trim() && 
-                  u.role === 'student' && 
+              // First, check backend for admin-created accounts without email
+              try {
+                const backendUsers = await api.getUsers();
+                const unmatchedAccounts = backendUsers.filter(u => 
+                  u.role && u.role.toLowerCase() === 'student' &&
+                  (!u.email || u.email === '') &&
                   u.status === 'unlinked'
                 );
                 
-                if (existingStudent) {
-                  // Link Google account to existing student
-                  existingStudent.email = gUser.email.toLowerCase();
-                  existingStudent.firstName = gUser.given_name || gUser.name.split(' ')[0];
-                  existingStudent.lastName = gUser.family_name || gUser.name.split(' ').slice(1).join(' ');
-                  existingStudent.name = gUser.name;
-                  existingStudent.avatar = gUser.picture;
-                  existingStudent.status = 'active'; // Auto-activate linked accounts
-                  existingStudent.googleAuth = true;
-                  existingStudent.linkedAt = new Date().toISOString();
+                if (unmatchedAccounts.length > 0) {
+                  const studentId = prompt(
+                    `The school has ${unmatchedAccounts.length} student record(s) ready for linking.\n\n` +
+                    `If the school created your profile, enter your Student ID to link it:\n` +
+                    `(Leave blank to create a new profile)`
+                  );
                   
-                  localStorage.setItem('gfa_users', JSON.stringify(users));
-                  localStorage.setItem('gfa_users_cache', JSON.stringify(users));
-                  
-                  // Save session
-                  const session = { ...existingStudent };
-                  delete session.password;
-                  localStorage.setItem('gfa_session', JSON.stringify(session));
-                  
-                  showToast(`Welcome, ${existingStudent.name.split(' ')[0]}! Your account has been linked.`, 'success');
-                  navigate('student-dashboard');
-                  return;
-                } else {
-                  showToast('Student ID not found or already linked. Creating new profile instead.', 'warning');
+                  if (studentId && studentId.trim()) {
+                    // Try to find and link to existing unlinked student
+                    const existingStudent = users.find(u => 
+                      u.id === studentId.trim() && 
+                      u.role && u.role.toLowerCase().trim() === 'student' &&
+                      u.status === 'unlinked'
+                    );
+                    
+                    if (existingStudent) {
+                      // Link Google account to existing student - PRESERVE ALL ADMIN DATA
+                      existingStudent.email = gUser.email.toLowerCase();
+                      existingStudent.avatar = gUser.picture; // Update with Google photo
+                      existingStudent.status = 'active'; // Auto-activate linked accounts
+                      existingStudent.googleAuth = true;
+                      existingStudent.linkedAt = new Date().toISOString();
+                      
+                      // Update backend
+                      await api.updateUser(existingStudent.id, {
+                        email: existingStudent.email,
+                        avatar: existingStudent.avatar,
+                        status: existingStudent.status,
+                        googleAuth: true,
+                        linkedAt: existingStudent.linkedAt
+                      });
+                      
+                      localStorage.setItem('gfa_users', JSON.stringify(users));
+                      localStorage.setItem('gfa_users_cache', JSON.stringify(users));
+                      
+                      // Save session
+                      const session = { ...existingStudent };
+                      delete session.password;
+                      localStorage.setItem('gfa_session', JSON.stringify(session));
+                      
+                      showToast(`Welcome, ${existingStudent.name.split(' ')[0]}! Your account has been linked.`, 'success');
+                      navigate('student-dashboard');
+                      return;
+                    } else {
+                      showToast('Student ID not found or already linked. Creating new profile instead.', 'warning');
+                    }
+                  }
                 }
+              } catch (err) {
+                console.warn('Could not check for unlinked accounts:', err);
               }
             }
             
@@ -443,10 +469,12 @@ function bindGlobalActions() {
             localStorage.setItem('gfa_users', JSON.stringify(users));
             localStorage.setItem('gfa_users_cache', JSON.stringify(users));
           } else {
-            // Existing user found - make sure they're in the users array with latest data
-            console.log('✅ Existing Google user found:', user.id);
+            // ========== EXISTING ACCOUNT FOUND WITH SAME EMAIL ==========
+            // AUTO-LINK: Admin created account with this email, now user is signing in with Google
             
-            // Update their data in the users array (in case anything changed)
+            console.log('✅ Account found with matching email - auto-linking:', user.id);
+            
+            // Update account with Google data - PRESERVE ALL ADMIN DATA
             const userIndex = users.findIndex(u => u.email.toLowerCase() === user.email.toLowerCase());
             if (userIndex >= 0) {
               // Update existing entry with latest Google data
