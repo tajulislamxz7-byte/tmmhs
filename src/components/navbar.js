@@ -143,11 +143,8 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
         ` : `
         <!-- Guest auth buttons -->
         <div style="display:flex;gap:8px;align-items:center;">
-          <button class="btn btn-secondary btn-sm" onclick="navigate('login')">
-            ${icon('logIn', 14)} Sign In
-          </button>
-          <button class="btn btn-primary btn-sm hide-mobile" onclick="navigate('register')">
-            ${icon('plus', 14)} Register
+          <button class="btn btn-primary btn-sm" onclick="navigate('login')">
+            ${icon('logIn', 14)} Login
           </button>
         </div>
         `}
@@ -207,8 +204,7 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
       </div>
       ` : `
       <div class="buttons-container">
-        <button class="btn btn-secondary w-full" onclick="toggleMobileMenu();navigate('login')">${icon('logIn',16)} Sign In</button>
-        <button class="btn btn-primary w-full" onclick="toggleMobileMenu();navigate('register')">${icon('plus',16)} Register</button>
+        <button class="btn btn-primary w-full" onclick="toggleMobileMenu();navigate('login')">${icon('logIn',16)} Login</button>
       </div>
       `}
     </div>

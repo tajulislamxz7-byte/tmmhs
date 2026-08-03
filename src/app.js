@@ -177,36 +177,369 @@ async function getPageContent(user, role) {
 function bindGlobalActions() {
 
   // ── Auth ──
+  window.switchLoginMethod = function(method) {
+    const phoneField  = document.getElementById('phoneLoginField');
+    const emailField  = document.getElementById('emailLoginField');
+    const emailNote   = document.getElementById('emailLoginNote');
+    const tabPhone    = document.getElementById('tabPhone');
+    const tabEmail    = document.getElementById('tabEmail');
+    if (method === 'phone') {
+      if (phoneField) phoneField.style.display = '';
+      if (emailField) emailField.style.display = 'none';
+      if (emailNote)  emailNote.style.display = 'none';
+      if (tabPhone) { tabPhone.style.background = 'var(--primary)'; tabPhone.style.color = 'white'; }
+      if (tabEmail) { tabEmail.style.background = 'transparent'; tabEmail.style.color = 'var(--text-muted)'; }
+    } else {
+      if (phoneField) phoneField.style.display = 'none';
+      if (emailField) emailField.style.display = '';
+      if (emailNote)  emailNote.style.display = 'flex';
+      if (tabEmail) { tabEmail.style.background = 'var(--primary)'; tabEmail.style.color = 'white'; }
+      if (tabPhone) { tabPhone.style.background = 'transparent'; tabPhone.style.color = 'var(--text-muted)'; }
+    }
+  };
+
   window.handleLogin = async function(e) {
     e.preventDefault();
+    const phone    = document.getElementById('loginPhone')?.value?.trim();
     const email    = document.getElementById('loginEmail')?.value?.trim();
     const password = document.getElementById('loginPassword')?.value;
     const errBox   = document.getElementById('loginError');
     const errText  = document.getElementById('loginErrorText');
     const btn      = document.querySelector('#loginForm button[type="submit"]');
-    if (btn) { btn.disabled = true; btn.textContent = 'Signing in...'; }
 
-    const result = await auth.login(email, password);
+    // Decide which identifier is active
+    const usingPhone = document.getElementById('phoneLoginField')?.style?.display !== 'none';
+    if (usingPhone && !phone) {
+      if (errText) errText.textContent = 'Please enter your phone number.';
+      if (errBox)  { errBox.style.display = 'flex'; errBox.style.alignItems = 'center'; errBox.style.gap = '8px'; }
+      return;
+    }
+    if (!usingPhone && !email) {
+      if (errText) errText.textContent = 'Please enter your email address.';
+      if (errBox)  { errBox.style.display = 'flex'; errBox.style.alignItems = 'center'; errBox.style.gap = '8px'; }
+      return;
+    }
 
-    if (btn) { btn.disabled = false; btn.textContent = 'Sign In'; }
+    if (errBox) errBox.style.display = 'none';
+    if (btn) { btn.disabled = true; btn.textContent = 'Verifying...'; }
+
+    const result = await auth.loginWithPhoneOrEmail(
+      usingPhone ? phone : null,
+      usingPhone ? null  : email,
+      password
+    );
+
+    if (btn) { btn.disabled = false; btn.textContent = 'Login'; }
 
     if (!result.ok) {
       if (errBox && errText) {
         errText.textContent = result.error;
         errBox.style.display = 'flex';
-        errBox.style.gap = '8px';
         errBox.style.alignItems = 'center';
+        errBox.style.gap = '8px';
       }
       return;
     }
 
-    showToast(`Welcome back, ${result.user.name.split(' ')[0]}!`, 'success');
-    if (result.user.role === 'admin') navigate('admin');
-    else if (result.user.role === 'principal') navigate('teacher-profile', result.user.id);
-    else if (result.user.role === 'teacher') navigate('teacher-dashboard');
-    else if (result.user.role === 'staff') navigate('staff-dashboard');
-    else navigate('student-dashboard');
+    // Check if OTP is required (based on SMS API configuration)
+    if (result.otpRequired) {
+      // SMS OTP verification needed
+      window._pendingUser = result.pendingUser;
+      _showOtpStep(result.maskedPhone, result.phone);
+    } else {
+      // Direct login (no OTP needed)
+      _loginSuccess(result.user);
+    }
   };
+
+  function _loginSuccess(user) {
+    localStorage.setItem('gfa_session', JSON.stringify(user));
+    showToast(`Welcome back, ${user.name.split(' ')[0]}!`, 'success');
+    if (user.role === 'admin') navigate('admin');
+    else if (user.role === 'principal') navigate('principal-dashboard');
+    else if (user.role === 'teacher') navigate('teacher-dashboard');
+    else if (user.role === 'staff') navigate('staff-dashboard');
+    else navigate('student-dashboard');
+  }
+
+  async function _showOtpStep(maskedPhone, phone) {
+    const container = document.querySelector('.auth-form-container');
+    if (!container) return;
+    container.innerHTML = `
+      <button onclick="navigate('login')" class="otp-back-btn">
+        ← Back to Login
+      </button>
+      
+      <div class="otp-seal-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L4 5.5V11C4 16.2 7.4 20.9 12 22C16.6 20.9 20 16.2 20 11V5.5L12 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M9 12.2L11 14.2L15.2 9.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      
+      <h1 class="otp-title">Verify it's you</h1>
+      <p class="otp-subtitle">Enter the 6-digit code sent to <span class="otp-masked">${maskedPhone}</span></p>
+      
+      <button id="sendOtpBtn" class="btn btn-secondary w-full otp-send-btn" onclick="handleSendOtp('${phone}')">
+        Send OTP via SMS
+      </button>
+      
+      <form id="otpForm" onsubmit="handleOtpVerify(event)" style="display:none;opacity:0;">
+        <div class="otp-stage" id="otpStage">
+          <div class="otp-row" id="otpRow">
+            <input class="otp-box" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" data-index="0">
+            <input class="otp-box" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-index="1">
+            <input class="otp-box" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-index="2">
+            <input class="otp-box" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-index="3">
+            <input class="otp-box" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-index="4">
+            <input class="otp-box" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-index="5">
+          </div>
+          
+          <div class="otp-capsule" id="otpCapsule">
+            <div class="otp-capsule-ring" id="otpCapsuleRing"></div>
+            <svg class="otp-capsule-mark" id="otpCheckMark" viewBox="0 0 26 26">
+              <path d="M5 13.5L10.5 19L21 7"/>
+            </svg>
+            <svg class="otp-capsule-mark" id="otpCrossMark" viewBox="0 0 26 26">
+              <path d="M6 6L20 20M20 6L6 20"/>
+            </svg>
+            <div class="otp-ripple" id="otpRipple"></div>
+            <div class="otp-particles" id="otpParticles"></div>
+          </div>
+        </div>
+        
+        <p class="otp-status-text" id="otpStatusText"></p>
+        
+        <button type="submit" class="btn btn-primary w-full btn-lg" style="margin-top:16px;">Verify & Login</button>
+        
+        <div style="text-align:center;margin-top:16px;">
+          <button type="button" onclick="handleSendOtp('${phone}')" class="otp-resend-link">
+            Didn't receive code? <strong>Resend</strong>
+          </button>
+        </div>
+      </form>
+    `;
+    
+    // Setup OTP input behavior
+    setTimeout(() => {
+      const otpInputs = document.querySelectorAll('.otp-box');
+      const otpRow = document.getElementById('otpRow');
+      const capsule = document.getElementById('otpCapsule');
+      const capsuleRing = document.getElementById('otpCapsuleRing');
+      const checkMark = document.getElementById('otpCheckMark');
+      const crossMark = document.getElementById('otpCrossMark');
+      const ripple = document.getElementById('otpRipple');
+      const particlesWrap = document.getElementById('otpParticles');
+      const statusText = document.getElementById('otpStatusText');
+      
+      let verifying = false;
+      
+      // Store these globally for verification handlers
+      window._otpUIElements = {
+        inputs: otpInputs,
+        capsule,
+        capsuleRing,
+        checkMark,
+        crossMark,
+        ripple,
+        particlesWrap,
+        statusText,
+        otpRow,
+        verifying: false
+      };
+      
+      otpInputs.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+          const value = e.target.value.replace(/[^0-9]/g, '');
+          e.target.value = value.slice(-1);
+          if (value) {
+            input.classList.remove('otp-filled-pop');
+            void input.offsetWidth;
+            input.classList.add('otp-filled-pop');
+            if (index < otpInputs.length - 1) otpInputs[index + 1].focus();
+          }
+          
+          // Auto-submit when all filled
+          const allFilled = Array.from(otpInputs).every(inp => inp.value);
+          if (allFilled && !verifying) {
+            setTimeout(() => document.getElementById('otpForm').requestSubmit(), 300);
+          }
+        });
+        
+        input.addEventListener('keydown', (e) => {
+          if (verifying) { e.preventDefault(); return; }
+          if (e.key === 'Backspace' && !input.value && index > 0) {
+            otpInputs[index - 1].focus();
+          }
+          if (e.key === 'ArrowLeft' && index > 0) { e.preventDefault(); otpInputs[index - 1].focus(); }
+          if (e.key === 'ArrowRight' && index < otpInputs.length - 1) { e.preventDefault(); otpInputs[index + 1].focus(); }
+        });
+        
+        input.addEventListener('paste', (e) => {
+          e.preventDefault();
+          const text = (e.clipboardData || window.clipboardData).getData('text');
+          const digits = text.replace(/[^0-9]/g, '').slice(0, 6).split('');
+          digits.forEach((d, idx) => { if (otpInputs[idx]) otpInputs[idx].value = d; });
+          const nextEmpty = Array.from(otpInputs).findIndex(inp => !inp.value);
+          (nextEmpty === -1 ? otpInputs[otpInputs.length - 1] : otpInputs[nextEmpty]).focus();
+          
+          const allFilled = Array.from(otpInputs).every(inp => inp.value);
+          if (allFilled && !verifying) {
+            setTimeout(() => document.getElementById('otpForm').requestSubmit(), 300);
+          }
+        });
+        
+        input.addEventListener('focus', () => input.select());
+      });
+    }, 100);
+  }
+
+  window.handleSendOtp = async function(phone) {
+    const btn     = document.getElementById('sendOtpBtn');
+    const form = document.getElementById('otpForm');
+    if (btn) { 
+      btn.disabled = true; 
+      btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite;"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Sending...</span>';
+    }
+
+    const { sendOtp } = await import('./utils/sms.js');
+    const result = await sendOtp(phone);
+
+    if (!result.ok) {
+      showToast(result.error, 'error');
+      if (btn) { btn.disabled = false; btn.textContent = 'Send OTP via SMS'; }
+      return;
+    }
+
+    // SMS sent successfully
+    showToast('OTP sent successfully! Check your SMS inbox.', 'success');
+    
+    if (btn) btn.style.display = 'none';
+    if (form) { 
+      form.style.display = 'block';
+      setTimeout(() => {
+        form.style.opacity = '1';
+        form.style.transition = 'opacity 0.5s ease';
+        const firstInput = document.querySelector('.otp-box');
+        if (firstInput) firstInput.focus();
+      }, 50);
+    }
+  };
+
+  window.handleOtpVerify = async function(e) {
+    e.preventDefault();
+    
+    const ui = window._otpUIElements;
+    if (!ui || ui.verifying) return;
+    
+    // Get OTP from individual inputs
+    const code = Array.from(ui.inputs).map(input => input.value).join('');
+    if (code.length !== 6) return;
+    
+    ui.verifying = true;
+    ui.inputs.forEach(i => i.disabled = true);
+    ui.statusText.textContent = 'Verifying code…';
+    ui.statusText.className = 'otp-status-text';
+    
+    // Animate boxes collapsing into capsule
+    setTimeout(() => {
+      const rowRect = ui.otpRow.getBoundingClientRect();
+      const centerX = rowRect.left + rowRect.width / 2;
+      
+      ui.inputs.forEach(inp => {
+        const r = inp.getBoundingClientRect();
+        const boxCenter = r.left + r.width / 2;
+        const dx = centerX - boxCenter;
+        inp.style.setProperty('--dx', dx + 'px');
+        inp.classList.add('otp-collapsing');
+      });
+      
+      setTimeout(() => {
+        ui.capsule.classList.add('otp-show');
+        ui.capsuleRing.classList.add('otp-show');
+      }, 140);
+      
+      // Verify OTP
+      setTimeout(async () => {
+        ui.capsuleRing.classList.remove('otp-show');
+        
+        const { verifyOtp } = await import('./utils/sms.js');
+        const result = await verifyOtp(code);
+        
+        if (!result.ok) {
+          // Error state
+          ui.capsule.classList.add('otp-error');
+          ui.statusText.textContent = result.error;
+          ui.statusText.classList.add('otp-is-error');
+          
+          setTimeout(() => {
+            ui.crossMark.classList.add('otp-draw');
+            ui.ripple.className = 'otp-ripple otp-error-ripple otp-go';
+            spawnOtpParticles(ui.particlesWrap, '#ff6b6b');
+            ui.capsule.classList.add('otp-shake');
+          }, 10);
+          
+          setTimeout(() => {
+            resetOtpInputs(ui);
+          }, 1600);
+        } else {
+          // Success state
+          ui.capsule.classList.add('otp-success');
+          ui.statusText.textContent = 'Code verified!';
+          ui.statusText.classList.add('otp-is-success');
+          
+          setTimeout(() => {
+            ui.checkMark.classList.add('otp-draw');
+            ui.ripple.className = 'otp-ripple otp-success-ripple otp-go';
+            spawnOtpParticles(ui.particlesWrap, '#2fd6a7');
+            ui.capsule.classList.add('otp-pulse');
+          }, 10);
+          
+          const user = window._pendingUser;
+          window._pendingUser = null;
+          if (!user) { navigate('login'); return; }
+          
+          setTimeout(() => _loginSuccess(user), 1200);
+        }
+      }, 1200);
+    }, 200);
+  };
+  
+  function spawnOtpParticles(container, color) {
+    container.innerHTML = '';
+    const count = 10;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'otp-particle';
+      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
+      const dist = 34 + Math.random() * 22;
+      p.style.setProperty('--px', Math.cos(angle) * dist + 'px');
+      p.style.setProperty('--py', Math.sin(angle) * dist + 'px');
+      p.style.background = color;
+      container.appendChild(p);
+      requestAnimationFrame(() => p.classList.add('otp-go'));
+    }
+  }
+  
+  function resetOtpInputs(ui) {
+    ui.capsule.classList.remove('otp-show', 'otp-success', 'otp-error', 'otp-shake', 'otp-pulse');
+    ui.checkMark.classList.remove('otp-draw');
+    ui.crossMark.classList.remove('otp-draw');
+    ui.ripple.className = 'otp-ripple';
+    ui.particlesWrap.innerHTML = '';
+    
+    ui.inputs.forEach(inp => {
+      inp.classList.remove('otp-collapsing');
+      inp.value = '';
+      inp.disabled = false;
+    });
+    
+    ui.verifying = false;
+    window._otpUIElements.verifying = false;
+    ui.statusText.textContent = '';
+    ui.statusText.className = 'otp-status-text';
+    ui.inputs[0].focus();
+  }
 
   window.handlePrincipalLogin = async function(e) {
     e.preventDefault();
@@ -504,7 +837,12 @@ function bindGlobalActions() {
     if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
 
     try {
-      await emailjs.send('service_au1x8wm', 'template_t9utqmv', {
+      // Read EmailJS config from settings (set in Admin → API Keys)
+      const _s = JSON.parse(localStorage.getItem('gfa_settings') || '{}');
+      const ejsService  = _s.emailjsServiceId  || 'service_au1x8wm';
+      const ejsTemplate = _s.emailjsTemplateId || 'template_t9utqmv';
+
+      await emailjs.send(ejsService, ejsTemplate, {
         to_email:    email,
         to_name:     userName,
         reset_code:  code,
@@ -583,17 +921,23 @@ function bindGlobalActions() {
       <div class="modal-overlay" id="addStudentOverlay" onclick="closeAddStudentModal()" style="display:flex;">
         <div class="modal-card" onclick="event.stopPropagation()" style="max-width:600px;width:90%;max-height:90vh;overflow-y:auto;">
           <div class="modal-header">
-            <h2 style="font-size:20px;font-weight:800;">Add Student to Database</h2>
+            <h2 style="font-size:20px;font-weight:800;">Add Student</h2>
             <button onclick="closeAddStudentModal()" class="btn-close" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--text-secondary);">&times;</button>
           </div>
           <div class="modal-body">
-            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;color:#1e40af;">
-              ${icon('info', 14, '#2563eb')} Students added here will exist in the database without login credentials. They can register later using their Student ID, Roll Number, and Date of Birth.
+            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;color:#1e40af;display:flex;align-items:flex-start;gap:8px;">
+              ${icon('info', 14, '#2563eb')} A temporary password will be auto-generated and sent to the student's phone number via SMS.
             </div>
             <form id="addStudentForm" onsubmit="adminAddStudent(event)">
               <div class="form-group">
                 <label>Full Name <span style="color:var(--danger);">*</span></label>
-                <input type="text" name="name" class="form-input" placeholder="e.g. John Doe" required>
+                <input type="text" name="name" class="form-input" placeholder="e.g. Tajul Islam" required>
+              </div>
+
+              <div class="form-group">
+                <label>Phone Number <span style="color:var(--danger);">*</span></label>
+                <input type="tel" name="phone" class="form-input" placeholder="01XXXXXXXXX" required>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Login credentials will be sent to this number via SMS.</div>
               </div>
               
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -602,8 +946,8 @@ function bindGlobalActions() {
                   <input type="text" name="roll" class="form-input" placeholder="e.g. 101" required>
                 </div>
                 <div class="form-group">
-                  <label>Date of Birth <span style="color:var(--danger);">*</span></label>
-                  <input type="date" name="birthday" class="form-input" required>
+                  <label>Date of Birth</label>
+                  <input type="date" name="birthday" class="form-input">
                 </div>
               </div>
 
@@ -651,21 +995,12 @@ function bindGlobalActions() {
                   <label>Blood Group</label>
                   <select name="bloodGroup" class="form-input form-select">
                     <option value="">Select</option>
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
+                    <option value="A+">A+</option><option value="A-">A-</option>
+                    <option value="B+">B+</option><option value="B-">B-</option>
+                    <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                    <option value="O+">O+</option><option value="O-">O-</option>
                   </select>
                 </div>
-              </div>
-
-              <div class="form-group">
-                <label>Phone (Optional)</label>
-                <input type="tel" name="phone" class="form-input" placeholder="Guardian contact number">
               </div>
 
               <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
@@ -694,66 +1029,69 @@ function bindGlobalActions() {
 
     const form = document.getElementById('addStudentForm');
     const data = Object.fromEntries(new FormData(form));
-    const btn = form.querySelector('button[type="submit"]');
-    
-    if (btn) {
-      btn.disabled = true;
-      btn.innerHTML = 'Adding...';
+    const btn  = form.querySelector('button[type="submit"]');
+
+    // Phone is mandatory
+    if (!data.phone || !data.phone.trim()) {
+      showToast('Phone number is required.', 'error');
+      return;
     }
 
+    if (btn) { btn.disabled = true; btn.innerHTML = 'Adding...'; }
+
     try {
-      // Get existing users to generate Student ID
       const users = await api.getUsers();
       const studentCount = users.filter(u => u.role === 'student').length;
       const studentId = `STU-${new Date().getFullYear()}-${String(studentCount + 1).padStart(4, '0')}`;
 
-      // Create student record without email/password
+      // Auto-generate a temporary password
+      const tempPassword = 'STU' + Math.floor(10000 + Math.random() * 90000);
+
       const studentData = {
         id: studentId,
         name: data.name.trim(),
         firstName: data.name.trim().split(' ')[0],
-        lastName: data.name.trim().split(' ').slice(1).join(' '),
+        lastName: data.name.trim().split(' ').slice(1).join(' ') || '',
         roll: data.roll.trim(),
-        birthday: data.birthday,
+        birthday: data.birthday || '',
         class: data.class,
         section: data.section,
         batch: data.batch,
         guardian: data.guardian?.trim() || '',
         bloodGroup: data.bloodGroup || '',
-        phone: data.phone?.trim() || '',
-        email: '', // No email yet
-        password: '', // No password yet
+        phone: data.phone.trim(),
+        email: '',
+        password: tempPassword,
         role: 'student',
-        status: 'unlinked', // Special status for pre-added students
-        avatar: `https://i.imgur.com/x9wE0QT.png`,
+        status: 'active',
+        avatar: 'https://i.imgur.com/x9wE0QT.png',
         createdAt: new Date().toISOString(),
-        address: '',
-        skills: [],
-        achievements: [],
-        gpa: 'N/A',
-        bio: '',
+        address: '', skills: [], achievements: [], gpa: 'N/A', bio: '',
       };
 
-      // Save to database using api
       const result = await api.addStudent(studentData);
-      
+
       if (result.ok) {
-        showToast(`Student ${data.name} added successfully! Student ID: ${studentId}`, 'success');
+        // Send SMS with login credentials (fire and forget)
+        const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const base  = isDev ? '/api' : 'https://school-project-qi8m.onrender.com/api';
+        const msg = `Tiarkhali M.M School: Account created for ${data.name.trim()}. Student ID: ${studentId}. Phone: ${data.phone.trim()}. Password: ${tempPassword}. Login at ${window.location.origin}`;
+        fetch(`${base}/send-sms`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: data.phone.trim(), message: msg }),
+        }).catch(() => {});
+
         closeAddStudentModal();
-        // Refresh the admin students tab
-        if (typeof switchAdminTab === 'function') {
-          await switchAdminTab('students', null);
-        }
+        if (typeof switchAdminTab === 'function') await switchAdminTab('students', null);
+        showToast(`${data.name.trim()} added — ID: ${studentId} · Pass: ${tempPassword} (click 👁 in table to view)`, 'success');
       } else {
         showToast(result.error || 'Failed to add student', 'error');
       }
     } catch (err) {
       showToast('Failed to add student. Please try again.', 'error');
     } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = icon('userPlus', 14, 'white') + ' Add Student';
-      }
+      if (btn) { btn.disabled = false; btn.innerHTML = icon('userPlus', 14, 'white') + ' Add Student'; }
     }
   };
 

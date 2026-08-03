@@ -1,67 +1,50 @@
 [
   {
-    "examId": "EX1735632000000",
+    "examId": "EX9001",
+    "id": "RES9001",
     "exam": "Annual Examination 2025",
     "studentId": "STU-2026-0001",
+    "studentName": "Tajul Islam",
+    "class": "Class 10",
+    "section": "A",
+    "roll": "27",
+    "subjects": {
+      "Bangla": 85,
+      "English": 78,
+      "Mathematics": 92,
+      "Physics": 88,
+      "Chemistry": 82,
+      "Biology": 80
+    },
+    "total": 505,
+    "outOf": 600,
+    "percentage": 84.2,
+    "gpa": "4.83",
+    "grade": "A",
+    "position": 3
+  },
+  {
+    "examId": "EX9001",
+    "id": "RES9002",
+    "exam": "Annual Examination 2025",
+    "studentId": "STU-2026-0002",
     "studentName": "Ayesha Rahman",
     "class": "Class 10",
     "section": "A",
-    "roll": "101",
+    "roll": "12",
     "subjects": {
-      "Mathematics": 95,
+      "Bangla": 95,
       "English": 92,
-      "Physics": 98,
-      "Chemistry": 94,
-      "Biology": 96,
-      "Bangla": 90
+      "Mathematics": 98,
+      "Physics": 94,
+      "Chemistry": 90,
+      "Biology": 96
     },
-    "totalMarks": 600,
-    "obtainedMarks": 565,
+    "total": 565,
+    "outOf": 600,
+    "percentage": 94.2,
     "gpa": "5.00",
     "grade": "A+",
     "position": 1
-  },
-  {
-    "examId": "EX1735632000000",
-    "exam": "Annual Examination 2025",
-    "studentId": "STU-2026-0002",
-    "studentName": "Mohammad Karim",
-    "class": "Class 9",
-    "section": "B",
-    "roll": "205",
-    "subjects": {
-      "Mathematics": 85,
-      "English": 80,
-      "Physics": 88,
-      "Chemistry": 82,
-      "Biology": 79,
-      "Bangla": 84
-    },
-    "totalMarks": 600,
-    "obtainedMarks": 498,
-    "gpa": "4.75",
-    "grade": "A",
-    "position": 5
-  },
-  {
-    "examId": "EX1735632000000",
-    "exam": "Annual Examination 2025",
-    "studentId": "STU-2026-0003",
-    "studentName": "Fatima Begum",
-    "class": "Class 8",
-    "section": "A",
-    "roll": "115",
-    "subjects": {
-      "Mathematics": 88,
-      "English": 90,
-      "Science": 92,
-      "Social Studies": 85,
-      "Bangla": 87
-    },
-    "totalMarks": 500,
-    "obtainedMarks": 442,
-    "gpa": "4.85",
-    "grade": "A+",
-    "position": 2
   }
 ]

@@ -28,9 +28,10 @@ const ICONS = {
   home:      `<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>`,
   users2:    `<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>`,
   image:     `<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>`,
+  api:       `<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>`,
 };
 
-// ── Notification Helper ──
+// Notification Helper
 async function createNotification(type, title, message, link = null) {
   await api.addNotification({
     type,  // 'notice', 'result', 'event'
@@ -55,11 +56,12 @@ const ADMIN_NAV = [
   {key:'principal',   label:'Principal',    icon:'users2'},
   {key:'roles',       label:'Users',        icon:'roles'},
   {key:'settings',    label:'Settings',     icon:'settings'},
+  {key:'api',         label:'API Keys',     icon:'api'},
 ];
 
 let adminTab = 'dashboard';
 
-// ── Admin data cache (populated async before rendering) ──
+// Admin data cache (populated async before rendering) 
 const _cache = {
   users: [],
   notices: [],
@@ -166,6 +168,7 @@ function renderAdminTab(tab) {
     case 'aboutpage':    return renderAdminAboutPage();
     case 'principal':    return renderAdminPrincipal();
     case 'settings':     return renderAdminSettings();
+    case 'api':          return renderAdminApiSettings();
     case 'roles':        return renderAdminUsers();
     default:             return renderAdminMain();
   }
@@ -204,14 +207,14 @@ function renderAdminMain() {
       <div class="flex items-center justify-between mb-6">
         <div>
           <h1 style="font-size:24px;font-weight:800;">Dashboard Overview</h1>
-          <div class="text-muted text-sm">${today} · ${S.year||'Academic Year 2025–26'}</div>
+          <div class="text-muted text-sm">${today}    ${S.year||'Academic Year 2025"26'}</div>
         </div>
         <button class="btn btn-primary" onclick="showToast('Report generation coming soon','info')">
           ${SVG('<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',14,'white')} Export Report
         </button>
       </div>
 
-      <!-- KPI Grid — live data -->
+      <!-- KPI Grid " live data -->
       <div class="kpi-grid mb-6">
         ${[
           {svg:`<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`, l:'Active Students',  v:studentCount,         c:'#2563eb', t:unlinkedCount>0?`${unlinkedCount} not linked yet`:(pendingCount>0?`${pendingCount} pending approval`:'All approved'), up:true},
@@ -262,7 +265,7 @@ function renderAdminMain() {
               </div>
             `).join('')}
             <div style="margin-top:8px;">
-              <button class="btn btn-secondary w-full btn-sm" onclick="switchAdminTab('settings',null)">Manage School Settings →</button>
+              <button class="btn btn-secondary w-full btn-sm" onclick="switchAdminTab('settings',null)">Manage School Settings '</button>
             </div>
           </div>
         </div>
@@ -274,7 +277,7 @@ function renderAdminMain() {
         <div class="card-header" style="background:#fffbeb;">
           <div class="flex items-center justify-between">
             <div class="font-semibold" style="color:#92400e;">${SVG('<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',16,'#92400e')} ${pendingCount} users awaiting approval</div>
-            <button class="btn btn-warning btn-sm" onclick="switchAdminTab('roles',null)">Review Now →</button>
+            <button class="btn btn-warning btn-sm" onclick="switchAdminTab('roles',null)">Review Now '</button>
           </div>
         </div>
       </div>` : ''}
@@ -286,12 +289,15 @@ function _studentRow(s) {
   const approveBtn = s.status==='pending' ? '<button class="btn btn-success btn-sm" onclick="approveUser(\''+s.id+'\')">Approve</button>' : '';
   const statusBadge = s.status==='active'?'success':s.status==='pending'?'warning':s.status==='unlinked'?'gray':'danger';
   const statusText = s.status==='unlinked'?'Not Linked':s.status;
-  const emailText = s.email || '<span style="color:var(--text-muted);font-style:italic;">Not linked yet</span>';
+  const emailText = s.email || '<span style="color:var(--text-muted);font-style:italic;">Not set</span>';
+  // Eye button to reveal password inline
+  const pwdBtn = `<button title="Show password" onclick="revealStudentPassword('${s.id}','pwd_${s.id}')" style="background:none;border:none;cursor:pointer;padding:2px 4px;color:var(--text-muted);">${SVG('<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',13)}</button><span id="pwd_${s.id}" style="font-family:monospace;font-size:11px;display:none;color:var(--primary);"></span>`;
   return '<tr>'
     + '<td><div class="flex items-center gap-3"><img src="'+s.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://i.imgur.com/x9wE0QT.png\'"><div><div class="font-semibold text-sm">'+s.name+'</div><div class="text-xs text-muted">'+emailText+'</div></div></div></td>'
     + '<td style="font-family:monospace;font-size:12px;">'+s.id+'</td>'
-    + '<td>'+(s.class||'—')+' '+(s.section?'· '+s.section:'')+'</td>'
-    + '<td><span class="badge badge-'+statusBadge+'">'+statusText+'</span></td>'
+    + '<td>'+(s.class||'"')+' '+(s.section?'   '+s.section:'')+'</td>'
+    + '<td style="font-size:12px;">'+(s.phone||'<span style="color:var(--text-muted);">"</span>')+'</td>'
+    + '<td><span class="badge badge-'+statusBadge+'">'+statusText+'</span> '+pwdBtn+'</td>'
     + '<td style="font-size:12px;">'+new Date(s.createdAt).toLocaleDateString()+'</td>'
     + '<td><div style="display:flex;gap:4px;">'+approveBtn+_userActions(s.id,s.name,s.status)+'</div></td>'
     + '</tr>';
@@ -299,11 +305,10 @@ function _studentRow(s) {
 
 function renderAdminStudents() {
   const allUsers = _cache.users;
-  // Case-insensitive role filtering for Google Sign-In compatibility
   const studentUsers = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'student');
   return `
     <div>
-      <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center justify-between mb-4">
         <h1 style="font-size:22px;font-weight:800;">Manage Students</h1>
         <div class="flex gap-3">
           <button class="btn btn-primary" onclick="openAddStudentModal()">
@@ -313,6 +318,16 @@ function renderAdminStudents() {
             ${SVG('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',14)} Import/Export
           </button>
         </div>
+      </div>
+      <!-- Search Bar -->
+      <div class="admin-filter-bar">
+        <div class="admin-search-wrap">
+          <span class="admin-search-icon">
+            ${SVG('<circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>',16,'var(--text-muted)')}
+          </span>
+          <input id="studentSearch" class="form-input admin-search-input" placeholder="Search by name, ID, class..." oninput="filterAdminStudents()">
+        </div>
+        <span id="studentCount" class="admin-count-badge">${studentUsers.length} students</span>
       </div>
       <div class="card">
         ${studentUsers.length === 0
@@ -324,8 +339,8 @@ function renderAdminStudents() {
                 ${SVG('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',14,'white')} Add First Student
               </button>
             </div>`
-          : `<div class="table-container"><table>
-            <thead><tr><th>Student</th><th>ID</th><th>Class</th><th>Status</th><th>Registered</th><th>Actions</th></tr></thead>
+          : `<div class="table-container"><table id="studentsTable">
+            <thead><tr><th>Student</th><th>ID</th><th>Class</th><th>Phone</th><th>Status</th><th>Registered</th><th>Actions</th></tr></thead>
             <tbody>${studentUsers.map(s => _studentRow(s)).join('')}</tbody>
           </table></div>`
         }
@@ -343,8 +358,8 @@ function _pendingUserRow(u) {
     + '<td><div style="display:flex;align-items:center;gap:10px;"><img src="'+u.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://i.imgur.com/x9wE0QT.png\'"><div><div class="font-semibold text-sm">'+u.name+'</div><div class="text-xs text-muted">'+u.id+'</div></div></div></td>'
     + '<td><span class="badge badge-'+roleBadge+'" style="text-transform:capitalize;">'+u.role+'</span></td>'
     + '<td style="font-size:12px;">'+u.email+'</td>'
-    + '<td style="font-size:12px;">'+(u.phone||'—')+'</td>'
-    + '<td>'+(u.class||'—')+' '+(u.section?'· '+u.section:'')+'</td>'
+    + '<td style="font-size:12px;">'+(u.phone||'"')+'</td>'
+    + '<td>'+(u.class||'"')+' '+(u.section?'   '+u.section:'')+'</td>'
     + '<td style="font-size:12px;">'+new Date(u.createdAt).toLocaleDateString()+'</td>'
     + '<td><span class="badge badge-warning">'+u.status+'</span></td>'
     + '<td><div style="display:flex;gap:6px;"><button class="btn btn-success btn-sm" onclick="approveUser(\''+u.id+'\')">'+approveIcon+' Approve</button>'
@@ -358,7 +373,7 @@ function _activeUserRow(u) {
     + '<td><div style="display:flex;align-items:center;gap:10px;"><img src="'+u.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://i.imgur.com/x9wE0QT.png\'"><div><div class="font-semibold text-sm">'+u.name+'</div><div class="text-xs text-muted">'+u.id+'</div></div></div></td>'
     + '<td style="font-size:12px;">'+u.email+'</td>'
     + '<td><span class="badge badge-'+roleBadge+'" style="text-transform:capitalize;">'+u.role+'</span></td>'
-    + '<td>'+(u.class||'—')+' '+(u.section?'· '+u.section:'')+'</td>'
+    + '<td>'+(u.class||'"')+' '+(u.section?'   '+u.section:'')+'</td>'
     + '<td style="font-size:12px;">'+new Date(u.createdAt).toLocaleDateString()+'</td>'
     + '<td><span class="badge badge-success">Active</span></td>'
     + '</tr>';
@@ -419,7 +434,7 @@ function _examCard(e, i) {
   return '<div class="card" style="border-left:4px solid '+borderColor+';">'
     + '<div class="card-body" style="padding:16px 20px;">'
     + '<div class="flex items-center gap-4">'
-    + '<div style="flex:1;"><div class="font-semibold">'+e.name+'</div><div class="text-xs text-muted">'+(e.scope||'')+' · '+(e.date||'')+' · Subjects: '+((e.subjects||[]).join(', '))+'</div></div>'
+    + '<div style="flex:1;"><div class="font-semibold">'+e.name+'</div><div class="text-xs text-muted">'+(e.scope||'')+'    '+(e.date||'')+'    Subjects: '+((e.subjects||[]).join(', '))+'</div></div>'
     + '<span class="badge badge-'+badgeClass+'">'+e.status+'</span>'
     + '<div class="flex gap-2"><button class="btn btn-secondary btn-sm" onclick="openMarksEntry('+i+')">Enter Marks</button>'+actionBtn+'<button class="btn btn-danger btn-sm" onclick="deleteExam('+i+')">Delete</button></div>'
     + '</div></div></div>';
@@ -441,7 +456,7 @@ function _batchCard(b, i) {
     + '</div>'
     + '<p class="text-sm text-secondary mb-3">'+(b.description||'')+'</p>'
     + achievementsHTML
-    + '<div class="text-xs text-muted mb-4">Class Teacher: '+(b.classTeacher||'—')+'</div>'
+    + '<div class="text-xs text-muted mb-4">Class Teacher: '+(b.classTeacher||'"')+'</div>'
     + '<div class="flex gap-2" style="padding-top:12px;border-top:1px solid var(--border);">'
     + '<button class="btn btn-secondary btn-sm" onclick="editBatch('+i+')">Edit</button>'
     + '<button class="btn btn-danger btn-sm" onclick="deleteBatch('+i+')">Delete</button>'
@@ -548,15 +563,24 @@ function renderAdminTeachers() {
       </div>
       
       <div class="card">
+        <div class="admin-filter-bar" style="border-bottom:1px solid var(--border);">
+          <div class="admin-search-wrap">
+            <span class="admin-search-icon">
+              ${SVG('<circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>',16,'var(--text-muted)')}
+            </span>
+            <input id="teacherSearch" class="form-input admin-search-input" placeholder="Search by name, subject..." oninput="filterAdminTeachers()">
+          </div>
+          <span id="teacherCount" class="admin-count-badge">${teacherUsers.length} teachers</span>
+        </div>
         ${teacherUsers.length === 0
           ? `<div class="card-body text-center text-muted" style="padding:60px;">No teachers registered yet.</div>`
-          : `<div class="table-container"><table>
+          : `<div class="table-container"><table id="teachersTable">
             <thead><tr><th>Teacher</th><th>ID</th><th>Subject</th><th>Status</th><th>Registered</th><th>Actions</th></tr></thead>
             <tbody>${teacherUsers.map(t =>
               '<tr>'
               + '<td><div class="flex items-center gap-3"><img src="'+t.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://i.imgur.com/x9wE0QT.png\'"><div><div class="font-semibold text-sm">'+t.name+'</div><div class="text-xs text-muted">'+t.email+'</div></div></div></td>'
               + '<td style="font-family:monospace;font-size:12px;">'+t.id+'</td>'
-              + '<td><span class="badge badge-primary">'+(t.subject||'—')+'</span></td>'
+              + '<td><span class="badge badge-primary">'+(t.subject||'-')+'</span></td>'
               + '<td><span class="badge badge-'+(t.status==='active'?'success':t.status==='pending'?'warning':'gray')+'">'+t.status+'</span></td>'
               + '<td style="font-size:12px;">'+new Date(t.createdAt).toLocaleDateString()+'</td>'
               + '<td><div style="display:flex;gap:4px;">'+_approveBtn(t.id,t.status)+_userActions(t.id,t.name,t.status)+'</div></td>'
@@ -665,16 +689,25 @@ function renderAdminStaff() {
       </div>
       
       <div class="card">
+        <div class="admin-filter-bar" style="border-bottom:1px solid var(--border);">
+          <div class="admin-search-wrap">
+            <span class="admin-search-icon">
+              ${SVG('<circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>',16,'var(--text-muted)')}
+            </span>
+            <input id="staffSearch" class="form-input admin-search-input" placeholder="Search by name, position..." oninput="filterAdminStaff()">
+          </div>
+          <span id="staffCount" class="admin-count-badge">${staffUsers.length} staff</span>
+        </div>
         ${staffUsers.length === 0
           ? `<div class="card-body text-center text-muted" style="padding:60px;">No staff registered yet.</div>`
-          : `<div class="table-container"><table>
+          : `<div class="table-container"><table id="staffTable">
             <thead><tr><th>Name</th><th>ID</th><th>Position</th><th>Department</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody>${staffUsers.map(s =>
               '<tr>'
               + '<td><div class="flex items-center gap-3"><img src="'+s.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://i.imgur.com/x9wE0QT.png\'"><div class="font-semibold text-sm">'+s.name+'</div></div></td>'
               + '<td style="font-family:monospace;font-size:12px;">'+s.id+'</td>'
-              + '<td>'+(s.position||'—')+'</td>'
-              + '<td>'+(s.department||'—')+'</td>'
+              + '<td>'+(s.position||'-')+'</td>'
+              + '<td>'+(s.department||'-')+'</td>'
               + '<td><span class="badge badge-'+(s.status==='active'?'success':'warning')+'">'+s.status+'</span></td>'
               + '<td><div style="display:flex;gap:4px;">'+_approveBtn(s.id,s.status)+_userActions(s.id,s.name,s.status)+'</div></td>'
               + '</tr>'
@@ -720,15 +753,15 @@ function renderAdminPrincipal() {
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px;">
               <div>
                 <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">PHONE</div>
-                <div style="font-size:13px;font-weight:600;">${currentPrincipal.phone || '—'}</div>
+                <div style="font-size:13px;font-weight:600;">${currentPrincipal.phone || '"'}</div>
               </div>
               <div>
                 <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">QUALIFICATION</div>
-                <div style="font-size:13px;font-weight:600;">${currentPrincipal.qualification || '—'}</div>
+                <div style="font-size:13px;font-weight:600;">${currentPrincipal.qualification || '"'}</div>
               </div>
               <div>
                 <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">BLOOD GROUP</div>
-                <div style="font-size:13px;font-weight:600;">${currentPrincipal.bloodGroup || '—'}</div>
+                <div style="font-size:13px;font-weight:600;">${currentPrincipal.bloodGroup || '"'}</div>
               </div>
               <div>
                 <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">CREATED</div>
@@ -1063,7 +1096,7 @@ function renderAdminResults() {
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div class="form-group"><label class="form-label">Class/Scope</label>
-              <input class="form-input" id="ex_scope" placeholder="e.g. Class 9–10, All Sections"></div>
+              <input class="form-input" id="ex_scope" placeholder="e.g. Class 9"10, All Sections"></div>
             <div class="form-group"><label class="form-label">Subjects (comma separated)</label>
               <input class="form-input" id="ex_subjects" placeholder="e.g. Bangla,English,Math,Science"></div>
           </div>
@@ -1184,7 +1217,7 @@ window.editResult = async function(resultId) {
   modal.innerHTML = `
     <div class="modal" style="max-width:600px;">
       <div class="modal-header">
-        <div class="font-semibold">Edit Result — ${result.studentName}</div>
+        <div class="font-semibold">Edit Result " ${result.studentName}</div>
         <button class="btn btn-ghost btn-icon" onclick="this.closest('.modal-overlay').remove()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -1307,7 +1340,7 @@ window.openMarksEntry = function(examIndex) {
 
   panel.style.display = 'block';
   panel.dataset.examIndex = examIndex;
-  title.textContent = `Enter Marks — ${exam.name}`;
+  title.textContent = `Enter Marks " ${exam.name}`;
 
   const subjects = exam.subjects || [];
   thead.innerHTML = '<tr><th>Student</th>'+subjects.map(s=>'<th>'+s+'<br><small style="font-weight:400;font-size:10px;">(/100)</small></th>').join('')+'<th>Total</th><th>%</th><th>Grade</th></tr>';
@@ -1321,9 +1354,9 @@ window.openMarksEntry = function(examIndex) {
     return '<tr data-student-id="'+st.id+'" data-student-name="'+st.name+'">'
       + '<td><div class="flex items-center gap-2"><img src="'+(st.avatar||'')+'" class="avatar avatar-xs" onerror="this.src=\'https://api.dicebear.com/7.x/avataaars/svg?seed='+encodeURIComponent(st.name)+'\'"><span class="font-medium text-sm">'+st.name+'</span></div></td>'
       + subjectInputs
-      + '<td class="total-cell font-bold">—</td>'
-      + '<td class="pct-cell">—</td>'
-      + '<td class="grade-cell">—</td>'
+      + '<td class="total-cell font-bold">"</td>'
+      + '<td class="pct-cell">"</td>'
+      + '<td class="grade-cell">"</td>'
       + '</tr>';
   }).join('');
 
@@ -1341,7 +1374,7 @@ function recalcRowEl(row, subjects) {
   let total = 0; let filled = 0;
   inputs.forEach(inp => { if (inp.value !== '') { total += parseInt(inp.value)||0; filled++; } });
   const outOf = subjects.length * 100;
-  if (filled === 0) { row.querySelector('.total-cell').textContent='—'; row.querySelector('.pct-cell').textContent='—'; row.querySelector('.grade-cell').textContent='—'; return; }
+  if (filled === 0) { row.querySelector('.total-cell').textContent='"'; row.querySelector('.pct-cell').textContent='"'; row.querySelector('.grade-cell').textContent='"'; return; }
   const pct = (total / outOf * 100).toFixed(1);
   const g = (pct>=80?'A+':pct>=70?'A':pct>=60?'A-':pct>=50?'B':pct>=40?'C':pct>=33?'D':'F');
   row.querySelector('.total-cell').textContent = total+'/'+outOf;
@@ -1403,9 +1436,9 @@ window.saveMarks = async function() {
   showToast('Marks saved! Use "Publish" to make results visible to students.','success');
 };
 
-// ═══════════════════════════════════════════════════════════
+// 
 // MESSAGES
-// ═══════════════════════════════════════════════════════════
+// 
 function renderAdminMessages() {
   const conversations = _cache.conversations || [];
   const users = _cache.allUsers || [];
@@ -1494,7 +1527,7 @@ function renderAdminMessages() {
                       <tr>
                         <td>
                           <div style="display:flex;flex-direction:column;gap:4px;">
-                            <div style="font-weight:600;font-size:13px;">${participant1.name || 'Unknown'} ↔ ${participant2.name || 'Unknown'}</div>
+                            <div style="font-weight:600;font-size:13px;">${participant1.name || 'Unknown'} " ${participant2.name || 'Unknown'}</div>
                             <div style="font-size:11px;color:var(--text-muted);">${participant1.role || ''} & ${participant2.role || ''}</div>
                           </div>
                         </td>
@@ -1528,9 +1561,9 @@ window.viewConversation = function(convId) {
   showToast('Opening conversation...', 'info');
 };
 
-// ═══════════════════════════════════════════════════════════
+// 
 // ABOUT PAGE EDITOR
-// ═══════════════════════════════════════════════════════════
+// 
 function renderAdminAboutPage() {
   const s = _cache.settings;
   const aboutPage = s.aboutPage || {};
@@ -1729,19 +1762,18 @@ function renderAdminSettings() {
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                 </div>
                 <div style="font-size:13px;font-weight:600;color:var(--text-primary);">${s.schoolPhoto ? 'Replace Photo' : 'Upload School Photo'}</div>
-                <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">JPG, PNG — shown in the hero section</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">JPG, PNG " shown in the hero section</div>
               </div>
               <input type="file" id="schoolPhotoInput" accept="image/*" style="display:none;" onchange="previewSchoolPhoto(this)">
               <button class="btn btn-primary" onclick="saveSchoolPhoto()" id="saveSchoolPhotoBtn" style="display:none;">Save Photo</button>
             </div>
           </div>
 
-          <!-- Academic Year -->
-          <div class="card">
-            <div class="card-header"><div class="font-semibold">Academic Year</div></div>
+        <div class="card">
+          <div class="card-header"><div class="font-semibold">Academic Year</div></div>
             <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
               <div class="form-group"><label class="form-label">Current Academic Year</label>
-                <input class="form-input" id="s_year" value="${s.year || '2025–2026'}"></div>
+                <input class="form-input" id="s_year" value="${s.year || '2025"2026'}"></div>
               <div class="form-group"><label class="form-label">Current Term</label>
                 <select class="form-input form-select" id="s_term">
                   <option ${s.term==='First'?'selected':''}>First</option>
@@ -1764,11 +1796,10 @@ function renderAdminSettings() {
             <div class="form-group"><label class="form-label">Total Teachers</label>
               <input class="form-input" id="s_teachers" type="number" value="${s.totalTeachers || 0}"></div>
             <div class="form-group"><label class="form-label">Pass Rate</label>
-              <input class="form-input" id="s_passrate" value="${s.passRate || '—'}"></div>
+              <input class="form-input" id="s_passrate" value="${s.passRate || '-'}"></div>
             <button class="btn btn-primary" onclick="saveSettings()">Update Stats</button>
           </div>
         </div>
-
         <div class="card">
           <div class="card-header"><div class="font-semibold">Facilities</div></div>
           <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
@@ -1777,7 +1808,6 @@ function renderAdminSettings() {
             <button class="btn btn-primary" onclick="saveSettings()">Update Facilities</button>
           </div>
         </div>
-
         <div class="card">
           <div class="card-header"><div class="font-semibold">Achievements</div></div>
           <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
@@ -1785,6 +1815,58 @@ function renderAdminSettings() {
               <textarea class="form-input" id="s_achievements" rows="5" style="resize:vertical;">${(s.achievements || []).join(', ')}</textarea></div>
             <button class="btn btn-primary" onclick="saveSettings()">Update Achievements</button>
           </div>
+        </div>
+      </div>
+
+      <!-- Row 3: Batches Config + Classes Config -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="font-semibold">Batches / Passing Years</div>
+            <button class="btn btn-primary btn-sm" onclick="addBatchConfig()">+ Add Batch</button>
+          </div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:10px;" id="batchConfigList">
+            ${(s.batchConfig || [{id:'B2026',name:'Batch 2026',year:'2026',class:'Class 10'},{id:'B2027',name:'Batch 2027',year:'2027',class:'Class 9'},{id:'B2028',name:'Batch 2028',year:'2028',class:'Class 8'}]).map((b,i) => `
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;" data-batch-idx="${i}">
+                <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Batch Name</label>
+                  <input class="form-input bc_name" style="height:32px;font-size:12px;" value="${b.name || ''}"></div>
+                <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Class</label>
+                  <input class="form-input bc_class" style="height:32px;font-size:12px;" value="${b.class || ''}"></div>
+                <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Passing Year</label>
+                  <input class="form-input bc_year" style="height:32px;font-size:12px;" value="${b.year || ''}"></div>
+                <button onclick="removeBatchConfig(this)" style="height:32px;padding:0 10px;background:var(--danger);color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;">X</button>
+              </div>
+            `).join('')}
+          </div>
+          <div style="padding:12px 16px 16px;">
+            <button class="btn btn-primary btn-sm w-full" onclick="saveBatchConfig()">Save Batches</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="font-semibold">Classes & Subjects</div>
+            <button class="btn btn-primary btn-sm" onclick="addClassConfig()">+ Add Class</button>
+          </div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:10px;" id="classConfigList">
+            ${(s.classConfig || [{name:'Class 6',sections:'A,B,C',subjects:'Bangla,English,Mathematics,Science,Social Studies,Religion'},{name:'Class 7',sections:'A,B,C',subjects:'Bangla,English,Mathematics,Science,Social Studies,Religion,ICT'},{name:'Class 8',sections:'A,B,C',subjects:'Bangla,English,Mathematics,Science,Social Studies,Religion,ICT'},{name:'Class 9',sections:'A,B,C,D',subjects:'Bangla,English,Physics,Chemistry,Biology,Mathematics,ICT,Religion'},{name:'Class 10',sections:'A,B,C,D',subjects:'Bangla,English,Physics,Chemistry,Biology,Mathematics,ICT,Religion'}]).map((c,i) => `
+              <div style="border:1px solid var(--border);border-radius:8px;padding:10px;" data-class-idx="${i}">
+                <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-bottom:6px;">
+                  <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Class Name</label>
+                    <input class="form-input cc_name" style="height:32px;font-size:12px;" value="${c.name || ''}"></div>
+                  <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Sections (comma)</label>
+                    <input class="form-input cc_sections" style="height:32px;font-size:12px;" value="${c.sections || ''}"></div>
+                  <button onclick="removeClassConfig(this)" style="height:32px;padding:0 10px;background:var(--danger);color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;">X</button>
+                </div>
+                <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Subjects (comma-separated)</label>
+                  <input class="form-input cc_subjects" style="height:32px;font-size:12px;" value="${c.subjects || ''}"></div>
+              </div>
+            `).join('')}
+          </div>
+          <div style="padding:12px 16px 16px;">
+            <button class="btn btn-primary btn-sm w-full" onclick="saveClassConfig()">Save Classes</button>
+          </div>
+        </div>
+      </div>
         </div>
       </div>
   
@@ -1855,6 +1937,157 @@ function renderAdminSettings() {
   `;
 }
 
+function _apiBanner(id, warning, details) {
+  const bg       = warning ? '#fef3c7' : '#eff6ff';
+  const border   = warning ? '#fbbf24' : '#bfdbfe';
+  const color    = warning ? '#92400e' : '#1e40af';
+  const darkClr  = warning ? '#78350f' : '#1e3a8a';
+  const warnIcon = warning ? SVG('<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',13,color) : SVG('<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',13,color);
+  return '<div style="background:'+bg+';border:1px solid '+border+';border-radius:8px;padding:10px 12px;">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'
+    + '<div style="display:flex;align-items:center;gap:7px;font-size:12px;color:'+color+';font-weight:600;">'
+    + warnIcon + (warning || 'About this API')
+    + '</div>'
+    + '<button onclick="toggleApiInfo(\''+id+'\')" id="btn_'+id+'"'
+    + ' style="flex-shrink:0;background:none;border:1px solid '+border+';border-radius:6px;padding:3px 9px;font-size:11px;color:'+color+';cursor:pointer;font-weight:600;display:flex;align-items:center;gap:4px;white-space:nowrap;">'
+    + SVG('<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',11,color)
+    + ' Read more</button>'
+    + '</div>'
+    + '<div id="'+id+'" style="display:none;margin-top:10px;font-size:12px;color:'+darkClr+';line-height:1.8;border-top:1px solid '+border+';padding-top:10px;">'
+    + details
+    + '</div></div>';
+}
+
+function renderAdminApiSettings() {
+  const s = _cache.settings;
+  return `
+    <div>
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 style="font-size:22px;font-weight:800;">API Keys</h1>
+          <p style="color:var(--text-muted);font-size:13px;margin-top:4px;">Configure third-party integrations. Keys are stored in settings and apply instantly.</p>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+
+        <!-- Universal SMS Gateway -->
+        <div class="card">
+          <div class="card-header"><div class="font-semibold" style="display:flex;align-items:center;gap:8px;">
+            ${SVG('<path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 013.62 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L7.59 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>',16,'var(--primary)')}
+            SMS Gateway - OTP Login
+            <span class="badge badge-${s.smsApiKey ? 'success' : 'warning'}" style="font-size:10px;">${s.smsApiKey ? 'Active' : 'Not Configured'}</span>
+          </div></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+            ${_apiBanner('info_sms', s.smsApiKey ? 'SMS OTP is enabled. Users will receive verification codes via SMS.' : 'Configure your SMS provider to enable OTP verification.',
+              '<strong>What it does:</strong> Sends 6-digit OTP codes via SMS for phone login verification.<br><br>'
+              + '<strong>Supported Providers:</strong><br>'
+              + '• SMS.net.bd - <code>https://api.sms.net.bd/sendsms</code><br>'
+              + '• BulkSMSBD - <code>https://bulksmsbd.net/api/smsapi</code><br>'
+              + '• Any custom SMS API with configurable URL<br><br>'
+              + '<strong>Who bypasses OTP:</strong> Admin accounts and email logins'
+            )}
+            
+            <div class="form-group">
+              <label class="form-label">SMS Provider</label>
+              <select class="form-input form-select" id="api_smsProvider" onchange="toggleSmsFields(this.value)">
+                <option value="sms.net.bd" ${(s.smsProvider || 'sms.net.bd') === 'sms.net.bd' ? 'selected' : ''}>SMS.net.bd</option>
+                <option value="bulksmsbd" ${s.smsProvider === 'bulksmsbd' ? 'selected' : ''}>BulkSMSBD</option>
+                <option value="custom" ${s.smsProvider === 'custom' ? 'selected' : ''}>Custom API</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">API Key</label>
+              <div style="position:relative;">
+                <input class="form-input" id="api_smsKey" type="password" style="font-family:monospace;font-size:12px;padding-right:40px;"
+                  value="${s.smsApiKey || ''}" placeholder="Paste your SMS API key">
+                <button type="button" onclick="togglePassword('api_smsKey','eye_sms1')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);" id="eye_sms1">${SVG('<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',14)}</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">API Endpoint URL <small style="color:var(--text-muted);">(Auto-filled based on provider, editable)</small></label>
+              <input class="form-input" id="api_smsUrl" type="text" style="font-family:monospace;font-size:11px;"
+                value="${s.smsApiUrl || 'https://api.sms.net.bd/sendsms'}"
+                placeholder="https://api.sms.net.bd/sendsms">
+            </div>
+
+            <div id="smsCustomUrlHelp" style="display:${s.smsProvider === 'custom' ? 'block' : 'none'};">
+              <div style="background:var(--primary-50);border:1px solid var(--primary-200);border-radius:8px;padding:12px;font-size:12px;color:var(--text);">
+                <strong>Custom API Placeholders:</strong><br>
+                Use these in your URL: <code>{api_key}</code>, <code>{phone}</code>, <code>{message}</code>, <code>{sender_id}</code><br>
+                Example: <code>https://api.example.com/send?key={api_key}&to={phone}&text={message}</code>
+              </div>
+            </div>
+
+            <div id="smsSenderField" style="display:${s.smsProvider === 'bulksmsbd' || s.smsProvider === 'custom' ? 'block' : 'none'};">
+              <div class="form-group">
+                <label class="form-label">Sender ID <small style="color:var(--text-muted);">(Optional - for BulkSMSBD)</small></label>
+                <input class="form-input" id="api_smsSender" type="text" style="font-family:monospace;font-size:12px;"
+                  value="${s.smsSenderId || '8809617611019'}" placeholder="8809617611019">
+              </div>
+            </div>
+
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-primary btn-sm" onclick="saveApiSettings('sms')">Save SMS Config</button>
+              <button class="btn btn-secondary btn-sm" onclick="testSmsApi()">Send Test SMS</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Server URL -->
+        <div class="card">
+          <div class="card-header"><div class="font-semibold" style="display:flex;align-items:center;gap:8px;">
+            ${SVG('<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',16,'#6366f1')}
+            Server / API Base URL
+          </div></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+            ${_apiBanner('info_server', 'Changing this affects ALL data in production',
+              '<strong>What it does:</strong> Every API call - login, student data, notices, results - goes to this URL. Changing it redirects all traffic to a new backend server.<br><br>'
+              + '<strong>When to use:</strong><br>'
+              + '&bull; You redeployed to a new Render.com / Railway / VPS<br>'
+              + '&bull; Your Render service URL changed<br><br>'
+              + '<strong>Before switching:</strong><br>'
+              + '&bull; Make sure the new server is running and has your data<br>'
+              + '&bull; Use "Send Test SMS" to verify after saving<br><br>'
+              + '<strong>Note:</strong> Localhost always uses /api regardless of this setting.'
+            )}
+            <div class="form-group"><label class="form-label">Production API URL</label>
+              <input class="form-input" id="api_baseUrl" type="text" style="font-family:monospace;font-size:12px;"
+                value="${s.apiBaseUrl || 'https://school-project-qi8m.onrender.com/api'}"></div>
+            <button class="btn btn-primary btn-sm" onclick="saveApiSettings('server')">Save Server URL</button>
+          </div>
+        </div>
+
+        <!-- EmailJS -->
+        <div class="card">
+          <div class="card-header"><div class="font-semibold" style="display:flex;align-items:center;gap:8px;">
+            ${SVG('<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>',16,'#059669')}
+            EmailJS - Password Reset
+            <span class="badge badge-success" style="font-size:10px;">Active</span>
+          </div></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+            ${_apiBanner('info_emailjs', '',
+              '<strong>What it does:</strong> Sends a 6-digit password reset code to a user\'s email. The user enters the code to set a new password.<br><br>'
+              + '<strong>Free tier:</strong> 200 emails/month - more than enough for a school.<br><br>'
+              + '<strong>Where to get IDs:</strong> <a href="https://dashboard.emailjs.com" target="_blank" style="color:var(--primary);">dashboard.emailjs.com</a> - Email Services (Service ID) and Email Templates (Template ID).<br><br>'
+              + '<strong>After saving:</strong> Takes effect on the next password reset request - no restart needed.'
+            )}
+            <div class="form-group"><label class="form-label">Service ID</label>
+              <input class="form-input" id="api_ejsService" type="text" style="font-family:monospace;font-size:12px;"
+                value="${s.emailjsServiceId || 'service_au1x8wm'}"></div>
+            <div class="form-group"><label class="form-label">Template ID</label>
+              <input class="form-input" id="api_ejsTemplate" type="text" style="font-family:monospace;font-size:12px;"
+                value="${s.emailjsTemplateId || 'template_t9utqmv'}"></div>
+            <button class="btn btn-primary btn-sm" onclick="saveApiSettings('emailjs')">Save EmailJS Config</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  `;
+}
+
 function renderAdminNoticesManager() {
   const notices = _cache.notices;
   return `
@@ -1864,7 +2097,6 @@ function renderAdminNoticesManager() {
         <button class="btn btn-primary" onclick="showAddNoticeModal()">+ Publish Notice</button>
       </div>
 
-      <!-- Add/Edit Notice Form -->
       <div class="card mb-6" id="addNoticeForm" style="display:none;">
         <div class="card-header">
           <div class="font-semibold" id="noticeFormTitle">New Notice</div>
@@ -2114,7 +2346,179 @@ window.switchAdminTab = async function(tab, btn) {
   await _refreshTab(tab);
 };
 
-// ── Admin Settings ──
+// ── Batch Config ──
+window.addBatchConfig = function() {
+  const list = document.getElementById('batchConfigList');
+  if (!list) return;
+  const idx = list.children.length;
+  const row = document.createElement('div');
+  row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;';
+  row.dataset.batchIdx = idx;
+  row.innerHTML = `
+    <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Batch Name</label>
+      <input class="form-input bc_name" style="height:32px;font-size:12px;" placeholder="Batch 2029"></div>
+    <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Class</label>
+      <input class="form-input bc_class" style="height:32px;font-size:12px;" placeholder="Class 7"></div>
+    <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Passing Year</label>
+      <input class="form-input bc_year" style="height:32px;font-size:12px;" placeholder="2029"></div>
+    <button onclick="removeBatchConfig(this)" style="height:32px;padding:0 10px;background:var(--danger);color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;">X</button>`;
+  list.appendChild(row);
+};
+
+window.removeBatchConfig = function(btn) {
+  btn.closest('[data-batch-idx]')?.remove();
+};
+
+window.saveBatchConfig = async function() {
+  const rows = document.querySelectorAll('#batchConfigList [data-batch-idx]');
+  const batchConfig = Array.from(rows).map((row, i) => ({
+    id: 'B' + (row.querySelector('.bc_year')?.value?.trim() || (2026 + i)),
+    name: row.querySelector('.bc_name')?.value?.trim() || '',
+    class: row.querySelector('.bc_class')?.value?.trim() || '',
+    year: row.querySelector('.bc_year')?.value?.trim() || '',
+  })).filter(b => b.name);
+  const settings = await api.getSettings() || {};
+  settings.batchConfig = batchConfig;
+  await api.saveSettings(settings);
+  _cache.settings = settings;
+  showToast('Batches saved! Reload the page to apply to dropdowns.', 'success');
+};
+
+// ── Class Config ──
+window.addClassConfig = function() {
+  const list = document.getElementById('classConfigList');
+  if (!list) return;
+  const idx = list.children.length;
+  const div = document.createElement('div');
+  div.style.cssText = 'border:1px solid var(--border);border-radius:8px;padding:10px;';
+  div.dataset.classIdx = idx;
+  div.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-bottom:6px;">
+      <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Class Name</label>
+        <input class="form-input cc_name" style="height:32px;font-size:12px;" placeholder="Class 11"></div>
+      <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Sections (comma)</label>
+        <input class="form-input cc_sections" style="height:32px;font-size:12px;" placeholder="A,B"></div>
+      <button onclick="removeClassConfig(this)" style="height:32px;padding:0 10px;background:var(--danger);color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;">X</button>
+    </div>
+    <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Subjects (comma-separated)</label>
+      <input class="form-input cc_subjects" style="height:32px;font-size:12px;" placeholder="Bangla,English,Mathematics"></div>`;
+  list.appendChild(div);
+};
+
+window.removeClassConfig = function(btn) {
+  btn.closest('[data-class-idx]')?.remove();
+};
+
+window.saveClassConfig = async function() {
+  const rows = document.querySelectorAll('#classConfigList [data-class-idx]');
+  const classConfig = Array.from(rows).map(row => ({
+    name:     row.querySelector('.cc_name')?.value?.trim() || '',
+    sections: row.querySelector('.cc_sections')?.value?.trim() || '',
+    subjects: row.querySelector('.cc_subjects')?.value?.trim() || '',
+  })).filter(c => c.name);
+  const settings = await api.getSettings() || {};
+  settings.classConfig = classConfig;
+  await api.saveSettings(settings);
+  _cache.settings = settings;
+  showToast('Classes saved! Reload the page to apply to dropdowns.', 'success');
+};
+
+window.saveSmsSettings = async function() {
+  const key = document.getElementById('s_smsApiKey')?.value?.trim();
+  const settings = await api.getSettings() || {};
+  settings.smsApiKey = key;
+  await api.saveSettings(settings);
+  _cache.settings = settings;
+  showToast(key ? 'SMS API key saved! SMS will now be sent automatically.' : 'SMS key cleared.', 'success');
+  await _refreshTab('settings');
+};
+
+window.toggleApiInfo = function(id) {
+  const el  = document.getElementById(id);
+  const btn = document.getElementById('btn_' + id);
+  if (!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  if (btn) btn.innerHTML = btn.innerHTML.replace(isOpen ? 'Close' : 'Read more', isOpen ? 'Read more' : 'Close');
+};
+
+window.toggleServerUrlInfo = window.toggleApiInfo; // backward compat
+
+window.saveApiSettings = async function(type) {
+  const settings = await api.getSettings() || {};
+  if (type === 'sms') {
+    settings.smsProvider = document.getElementById('api_smsProvider')?.value?.trim();
+    settings.smsApiKey = document.getElementById('api_smsKey')?.value?.trim();
+    settings.smsApiUrl = document.getElementById('api_smsUrl')?.value?.trim();
+    settings.smsSenderId = document.getElementById('api_smsSender')?.value?.trim();
+    
+    // Set default URLs based on provider
+    if (settings.smsProvider === 'sms.net.bd' && !settings.smsApiUrl) {
+      settings.smsApiUrl = 'https://portal.sms.net.bd/api/v1/send';
+    } else if (settings.smsProvider === 'bulksmsbd' && !settings.smsApiUrl) {
+      settings.smsApiUrl = 'https://bulksmsbd.net/api/smsapi';
+    }
+    
+    showToast('SMS config saved! Changes apply on next login.', 'success');
+  } else if (type === 'server') {
+    settings.apiBaseUrl = document.getElementById('api_baseUrl')?.value?.trim();
+    showToast('Server URL saved!', 'success');
+  } else if (type === 'emailjs') {
+    settings.emailjsServiceId  = document.getElementById('api_ejsService')?.value?.trim();
+    settings.emailjsTemplateId = document.getElementById('api_ejsTemplate')?.value?.trim();
+    showToast('EmailJS config saved!', 'success');
+  }
+  await api.saveSettings(settings);
+  _cache.settings = settings;
+  await _refreshTab('api');
+};
+
+window.toggleSmsFields = function(provider) {
+  const senderField = document.getElementById('smsSenderField');
+  const customUrlHelp = document.getElementById('smsCustomUrlHelp');
+  const urlInput = document.getElementById('api_smsUrl');
+  
+  if (provider === 'custom') {
+    senderField.style.display = 'block';
+    customUrlHelp.style.display = 'block';
+    // Don't change URL for custom - let admin define it
+  } else if (provider === 'bulksmsbd') {
+    senderField.style.display = 'block';
+    customUrlHelp.style.display = 'none';
+    urlInput.value = 'https://bulksmsbd.net/api/smsapi';
+  } else { // sms.net.bd
+    senderField.style.display = 'none';
+    customUrlHelp.style.display = 'none';
+    urlInput.value = 'https://api.sms.net.bd/sendsms';
+  }
+};
+
+window.testSmsApi = async function() {
+  const phone = prompt('Enter a phone number to send a test SMS (e.g. 01XXXXXXXXX):');
+  if (!phone) return;
+  const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const base  = isDev ? '/api' : 'https://school-project-qi8m.onrender.com/api';
+  showToast('Sending test SMS...', 'info');
+  try {
+    const res = await fetch(`${base}/send-sms`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, message: 'Tiarkhali M.M School: Test SMS from admin panel. System is working correctly.' }),
+    });
+    const data = await res.json();
+    if (data.demo) {
+      showToast('Demo mode " no API key set. Check server console for message.', 'warning');
+    } else if (data.ok) {
+      showToast('Test SMS sent successfully!', 'success');
+    } else {
+      showToast('SMS failed: ' + (data.error || 'Unknown error'), 'error');
+    }
+  } catch (err) {
+    showToast('Could not reach server.', 'error');
+  }
+};
+
+// "" Admin Settings ""
 window.saveSettings = async function() {
   const facilitiesText = document.getElementById('s_facilities')?.value || '';
   const achievementsText = document.getElementById('s_achievements')?.value || '';
@@ -2144,7 +2548,7 @@ window.saveSettings = async function() {
   await _refreshTab('settings');
 };
 
-// ── School Photo ──
+// "" School Photo ""
 window.previewSchoolPhoto = function(input) {
   const file = input.files[0];
   if (!file) return;
@@ -2181,7 +2585,7 @@ window.removeSchoolPhoto = async function() {
   await _refreshTab('settings');
 };
 
-// ── Leadership Cards Management ──
+// "" Leadership Cards Management ""
 window.saveLeadershipCard = async function(index) {
   try {
     const settings = _cache.settings;
@@ -2244,7 +2648,7 @@ window.toggleLeadershipCard = async function(index, enabled) {
   }
 };
 
-// ── Admin Notices ──
+// "" Admin Notices ""
 window.showAddNoticeModal = function() {
   const form = document.getElementById('addNoticeForm');
   if (!form) return;
@@ -2314,7 +2718,7 @@ window.deleteNotice = async function(idx) {
   await _refreshTab('notices');
 };
 
-// ── Admin Events ──
+// "" Admin Events ""
 window.showAddEventForm = function() {
   const form = document.getElementById('addEventForm');
   if (!form) return;
@@ -2389,7 +2793,29 @@ window.deleteEvent = async function(idx) {
   await _refreshTab('events');
 };
 
-// ── Admin User Edit/Delete ──
+// "" Reveal student password inline ""
+window.revealStudentPassword = async function(userId, spanId) {
+  const span = document.getElementById(spanId);
+  if (!span) return;
+  if (span.style.display !== 'none') { span.style.display = 'none'; return; }
+  // Fetch password from server (admin only endpoint)
+  try {
+    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const base  = isDev ? '/api' : 'https://school-project-qi8m.onrender.com/api';
+    const res = await fetch(`${base}/users/${userId}/password`);
+    const data = await res.json();
+    if (data.password) {
+      span.textContent = data.password;
+      span.style.display = 'inline';
+    } else {
+      showToast('No password set for this account.', 'warning');
+    }
+  } catch {
+    showToast('Could not retrieve password.', 'error');
+  }
+};
+
+// "" Admin User Edit/Delete ""
 window.adminEditUser = function(id) {
   const u = _cache.users.find(x => x.id === id);
   if (!u) return;
@@ -2400,7 +2826,7 @@ window.adminEditUser = function(id) {
   modal.innerHTML = `
     <div class="modal" style="max-width:520px;">
       <div class="modal-header" style="padding:14px 20px;">
-        <div class="font-semibold" style="font-size:14px;">Edit User — ${u.name}</div>
+        <div class="font-semibold" style="font-size:14px;">Edit User " ${u.name}</div>
         <button class="btn btn-ghost btn-icon" onclick="this.closest('.modal-overlay').remove()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -2414,7 +2840,7 @@ window.adminEditUser = function(id) {
           </div>
           <div style="flex:1;min-width:0;">
             <div class="font-semibold" style="font-size:14px;">${u.name}</div>
-            <div class="text-xs text-muted">${u.id} · ${u.role}</div>
+            <div class="text-xs text-muted">${u.id}    ${u.role}</div>
           </div>
           <button class="btn btn-secondary btn-sm" onclick="changeUserAvatar('${id}')" style="flex-shrink:0;font-size:11px;padding:5px 10px;">
             ${SVG('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',13)} Photo
@@ -2488,7 +2914,7 @@ window.adminEditUnlinkedStudent = function(id) {
   modal.innerHTML = `
     <div class="modal">
       <div class="modal-header">
-        <div class="font-semibold">Edit Unlinked Student — ${u.name}</div>
+        <div class="font-semibold">Edit Unlinked Student " ${u.name}</div>
         <button class="btn btn-ghost btn-icon" onclick="this.closest('.modal-overlay').remove()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -2502,7 +2928,7 @@ window.adminEditUnlinkedStudent = function(id) {
         </div>
         <div class="flex items-center gap-3 mb-2">
           <img src="${u.avatar}" class="avatar avatar-lg" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=default'">
-          <div><div class="font-bold">${u.name}</div><div class="text-xs text-muted">${u.id} • Not Linked</div></div>
+          <div><div class="font-bold">${u.name}</div><div class="text-xs text-muted">${u.id}  Not Linked</div></div>
         </div>
         <div class="form-group">
           <label class="form-label">Full Name</label>
@@ -2665,7 +3091,24 @@ window.adminDeleteUser = async function(id, name) {
   await _refreshTab(adminTab);
 };
 
-// ── Add Teacher/Staff Functions ──
+// "" Add Teacher/Staff Functions ""
+
+// Send account credentials via SMS after admin creates an account
+async function _sendAccountSms(phone, name, password, role) {
+  try {
+    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const base = isDev ? '/api' : 'https://school-project-qi8m.onrender.com/api';
+    const msg = `Tiarkhali M.M School: Account created for ${name} (${role}). Phone: ${phone}. Password: ${password}. Login at ${window.location.origin}`;
+    await fetch(`${base}/send-sms`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, message: msg }),
+    });
+  } catch (err) {
+    console.warn('[SMS] Could not send account info:', err.message);
+  }
+}
+
 window.showAddTeacherForm = function() {
   document.getElementById('addTeacherForm').style.display = 'block';
   document.getElementById('teacherForm').reset();
@@ -2679,11 +3122,17 @@ window.handleAddTeacher = async function(e) {
   e.preventDefault();
   const formData = new FormData(e.target);
   const data = Object.fromEntries(formData);
-  
+
+  // Phone is mandatory
+  if (!data.phone || !data.phone.trim()) {
+    showToast('Phone number is required to create a teacher account.', 'error');
+    return;
+  }
+
   const teacherData = {
     firstName: data.firstName,
     lastName: data.lastName,
-    email: data.email,
+    email: data.email || '',          // email is optional
     phone: data.phone,
     password: data.password,
     role: 'teacher',
@@ -2692,18 +3141,20 @@ window.handleAddTeacher = async function(e) {
     bloodGroup: data.bloodGroup === 'Select' ? '' : data.bloodGroup,
     avatar: window._adminUploadedPics?.teacher || null,
   };
-  
+
   const result = await api.register(teacherData);
-  
+
   if (!result.ok) {
     showToast(result.error || 'Failed to create teacher account', 'error');
     return;
   }
-  
-  // Clear uploaded pic
+
   if (window._adminUploadedPics) window._adminUploadedPics.teacher = null;
-  
-  showToast(`Teacher account created! Email: ${data.email}, Password: ${data.password}`, 'success');
+
+  // Send account info via SMS
+  await _sendAccountSms(data.phone, `${data.firstName} ${data.lastName}`, data.password, 'Teacher');
+
+  showToast(`Teacher account created! Login: ${data.phone} | Pass: ${data.password}`, 'success');
   hideAddTeacherForm();
   await _refreshTab('teachers');
 };
@@ -2721,11 +3172,17 @@ window.handleAddStaff = async function(e) {
   e.preventDefault();
   const formData = new FormData(e.target);
   const data = Object.fromEntries(formData);
-  
+
+  // Phone is mandatory
+  if (!data.phone || !data.phone.trim()) {
+    showToast('Phone number is required to create a staff account.', 'error');
+    return;
+  }
+
   const staffData = {
     firstName: data.firstName,
     lastName: data.lastName,
-    email: data.email,
+    email: data.email || '',
     phone: data.phone,
     password: data.password,
     role: 'staff',
@@ -2734,23 +3191,24 @@ window.handleAddStaff = async function(e) {
     bloodGroup: data.bloodGroup === 'Select' ? '' : data.bloodGroup,
     avatar: window._adminUploadedPics?.staff || null,
   };
-  
+
   const result = await api.register(staffData);
-  
+
   if (!result.ok) {
     showToast(result.error || 'Failed to create staff account', 'error');
     return;
   }
-  
-  // Clear uploaded pic
+
   if (window._adminUploadedPics) window._adminUploadedPics.staff = null;
-  
-  showToast(`Staff account created! Email: ${data.email}, Password: ${data.password}`, 'success');
+
+  await _sendAccountSms(data.phone, `${data.firstName} ${data.lastName}`, data.password, 'Staff');
+
+  showToast(`Staff account created! Login: ${data.phone} | Pass: ${data.password}`, 'success');
   hideAddStaffForm();
   await _refreshTab('staff');
 };
 
-// ── Manage Principal Functions ──
+// "" Manage Principal Functions ""
 window.showEditPrincipalForm = function(id) {
   const form = document.getElementById('editPrincipalForm');
   if (form) {
@@ -2831,39 +3289,46 @@ window.hideCreatePrincipalForm = function() {
 
 window.handleCreatePrincipal = async function(e) {
   e.preventDefault();
-  
+
   // Check if principal already exists
   const existingPrincipal = _cache.users.find(u => u.role === 'principal' && u.status === 'active');
   if (existingPrincipal) {
     showToast('A principal already exists. Please demote them first.', 'error');
     return;
   }
-  
+
   const formData = new FormData(e.target);
   const data = Object.fromEntries(formData);
-  
+
+  // Phone is mandatory
+  if (!data.phone || !data.phone.trim()) {
+    showToast('Phone number is required to create a principal account.', 'error');
+    return;
+  }
+
   const principalData = {
     firstName: data.firstName,
     lastName: data.lastName,
-    email: data.email,
+    email: data.email || '',
     phone: data.phone,
     password: data.password,
     role: 'principal',
     bloodGroup: data.bloodGroup === 'Select' ? '' : data.bloodGroup,
     avatar: window._adminUploadedPics?.principal || null,
   };
-  
+
   const result = await api.register(principalData);
-  
+
   if (!result.ok) {
     showToast(result.error || 'Failed to create principal account', 'error');
     return;
   }
-  
-  // Clear uploaded pic
+
   if (window._adminUploadedPics) window._adminUploadedPics.principal = null;
-  
-  showToast(`Principal account created! Email: ${data.email}, Password: ${data.password}`, 'success');
+
+  await _sendAccountSms(data.phone, `${data.firstName} ${data.lastName}`, data.password, 'Principal');
+
+  showToast(`Principal account created! Login: ${data.phone} | Pass: ${data.password}`, 'success');
   hideCreatePrincipalForm();
   await _refreshTab('principal');
 };
@@ -2893,7 +3358,7 @@ window.showTeacherPreview = function(teacherId) {
         <div>
           <div style="font-weight:700;">${teacher.name}</div>
           <div style="font-size:12px;color:var(--text-muted);">${teacher.email}</div>
-          <div style="font-size:11px;color:var(--text-muted);">Subject: ${teacher.subject || 'N/A'} · Qualification: ${teacher.qualification || 'N/A'}</div>
+          <div style="font-size:11px;color:var(--text-muted);">Subject: ${teacher.subject || 'N/A'}    Qualification: ${teacher.qualification || 'N/A'}</div>
         </div>
       </div>
     </div>
@@ -2954,7 +3419,7 @@ window.demotePrincipal = async function(principalId, principalName) {
   await _refreshTab('principal');
 };
 
-// ── Batch Management ──
+// "" Batch Management ""
 let _batchAchievements = [];
 
 window.addBatchAchievement = function() {
@@ -3110,7 +3575,7 @@ window.deleteBatch = async function(idx) {
 
 
 
-// ── Profile Picture Handler for Admin Forms ──
+// "" Profile Picture Handler for Admin Forms ""
 window.adminProfilePicChange = async function(input, previewId, role) {
   const previewImg = document.getElementById(previewId);
   if (!previewImg) return;
@@ -3125,7 +3590,7 @@ window.adminProfilePicChange = async function(input, previewId, role) {
     if (!window._adminUploadedPics) window._adminUploadedPics = {};
     window._adminUploadedPics[role] = base64;
     
-    showToast('Profile picture uploaded! ✓', 'success');
+    showToast('Profile picture uploaded! "', 'success');
   } catch (error) {
     showToast(error.message || 'Failed to upload image', 'error');
     input.value = '';
@@ -3136,7 +3601,7 @@ window.adminProfilePicChange = async function(input, previewId, role) {
 };
 
 
-// ── Change User Avatar (Admin Edit) ──
+// "" Change User Avatar (Admin Edit) ""
 window.changeUserAvatar = async function(userId) {
   const input = document.getElementById('editUserAvatarInput');
   if (!input) return;
@@ -3168,9 +3633,9 @@ window.changeUserAvatar = async function(userId) {
 };
 
 
-// ══════════════════════════════════════════════════════════════════
+// 
 // GALLERY MANAGEMENT FUNCTIONS
-// ══════════════════════════════════════════════════════════════════
+// 
 
 window.openUploadPhotoModal = function() {
   const modal = document.createElement('div');
@@ -3335,7 +3800,7 @@ window.viewGalleryPhoto = function(index) {
       <div class="modal-header">
         <div>
           <div class="font-semibold">${photo.title}</div>
-          <div class="text-xs text-muted">${photo.category || 'General'} • ${new Date(photo.uploadedAt).toLocaleDateString()}</div>
+          <div class="text-xs text-muted">${photo.category || 'General'}  ${new Date(photo.uploadedAt).toLocaleDateString()}</div>
         </div>
         <button class="btn btn-ghost btn-icon" onclick="this.closest('.modal-overlay').remove()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -3363,4 +3828,107 @@ window.deleteGalleryPhoto = async function(index, title) {
   await api.deleteGalleryPhoto(index);
   showToast('Photo deleted successfully', 'success');
   await _refreshTab('gallery');
+};
+
+
+// ================================================
+// ADMIN FILTER FUNCTIONS
+// ================================================
+
+// Filter students in admin panel
+window.filterAdminStudents = function() {
+  const searchQuery = document.getElementById('studentSearch')?.value?.toLowerCase() || '';
+  const classFilter = document.getElementById('studentClassFilter')?.value || '';
+  const sectionFilter = document.getElementById('studentSectionFilter')?.value || '';
+  const statusFilter = document.getElementById('studentStatusFilter')?.value || '';
+
+  const table = document.getElementById('studentsTable');
+  if (!table) return;
+
+  const rows = table.querySelectorAll('tbody tr');
+  let visibleCount = 0;
+
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length < 5) return;
+
+    const name = cells[0]?.textContent?.toLowerCase() || '';
+    const id = cells[1]?.textContent?.toLowerCase() || '';
+    const classText = cells[2]?.textContent || '';
+    const statusText = cells[4]?.textContent?.toLowerCase() || '';
+
+    const matchesSearch = !searchQuery || name.includes(searchQuery) || id.includes(searchQuery) || classText.toLowerCase().includes(searchQuery);
+    const matchesClass = !classFilter || classText.includes(classFilter);
+    const matchesSection = !sectionFilter || classText.includes('Sec ' + sectionFilter);
+    const matchesStatus = !statusFilter || statusText.includes(statusFilter);
+
+    const shouldShow = matchesSearch && matchesClass && matchesSection && matchesStatus;
+    row.style.display = shouldShow ? '' : 'none';
+    if (shouldShow) visibleCount++;
+  });
+
+  const countEl = document.getElementById('studentCount');
+  if (countEl) countEl.textContent = `${visibleCount} students`;
+};
+
+// Filter teachers in admin panel
+window.filterAdminTeachers = function() {
+  const searchQuery = document.getElementById('teacherSearch')?.value?.toLowerCase() || '';
+  const statusFilter = document.getElementById('teacherStatusFilter')?.value || '';
+
+  const table = document.getElementById('teachersTable');
+  if (!table) return;
+
+  const rows = table.querySelectorAll('tbody tr');
+  let visibleCount = 0;
+
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length < 5) return;
+
+    const name = cells[0]?.textContent?.toLowerCase() || '';
+    const subject = cells[2]?.textContent?.toLowerCase() || '';
+    const statusText = cells[4]?.textContent?.toLowerCase() || '';
+
+    const matchesSearch = !searchQuery || name.includes(searchQuery) || subject.includes(searchQuery);
+    const matchesStatus = !statusFilter || statusText.includes(statusFilter);
+
+    const shouldShow = matchesSearch && matchesStatus;
+    row.style.display = shouldShow ? '' : 'none';
+    if (shouldShow) visibleCount++;
+  });
+
+  const countEl = document.getElementById('teacherCount');
+  if (countEl) countEl.textContent = `${visibleCount} teachers`;
+};
+
+// Filter staff in admin panel
+window.filterAdminStaff = function() {
+  const searchQuery = document.getElementById('staffSearch')?.value?.toLowerCase() || '';
+  const deptFilter = document.getElementById('staffDeptFilter')?.value || '';
+
+  const table = document.getElementById('staffTable');
+  if (!table) return;
+
+  const rows = table.querySelectorAll('tbody tr');
+  let visibleCount = 0;
+
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length < 4) return;
+
+    const name = cells[0]?.textContent?.toLowerCase() || '';
+    const position = cells[1]?.textContent?.toLowerCase() || '';
+    const department = cells[2]?.textContent || '';
+
+    const matchesSearch = !searchQuery || name.includes(searchQuery) || position.includes(searchQuery);
+    const matchesDept = !deptFilter || department === deptFilter;
+
+    const shouldShow = matchesSearch && matchesDept;
+    row.style.display = shouldShow ? '' : 'none';
+    if (shouldShow) visibleCount++;
+  });
+
+  const countEl = document.getElementById('staffCount');
+  if (countEl) countEl.textContent = `${visibleCount} staff members`;
 };

@@ -1,22 +1,18 @@
 [
   {
-    "id": "2026",
+    "id": "B2026",
     "name": "Batch 2026",
     "year": "2026",
     "class": "Class 10",
-    "description": "SSC examination batch with focus on science and mathematics excellence.",
+    "description": "SSC examination batch focused on science and mathematics excellence.",
     "totalStudents": 45,
-    "classTeacher": "Dr. Abdullah Khan",
+    "classTeacher": "Abdullah Khan",
     "passingYear": "2026",
-    "achievements": [
-      "100% Pass Rate in 2025",
-      "5 Students scored GPA 5.00",
-      "District Science Fair Winners"
-    ],
+    "achievements": ["District Science Fair 2025 Winners", "5 Students scored GPA 5.00"],
     "createdAt": "2024-01-01T00:00:00.000Z"
   },
   {
-    "id": "2027",
+    "id": "B2027",
     "name": "Batch 2027",
     "year": "2027",
     "class": "Class 9",
@@ -24,10 +20,19 @@
     "totalStudents": 52,
     "classTeacher": "Nasrin Akter",
     "passingYear": "2027",
-    "achievements": [
-      "District Sports Champions",
-      "Best Cultural Performance 2025"
-    ],
+    "achievements": ["District Sports Champions 2025", "Best Cultural Performance 2025"],
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "B2028",
+    "name": "Batch 2028",
+    "year": "2028",
+    "class": "Class 8",
+    "description": "Enthusiastic learners with strong foundation in core subjects.",
+    "totalStudents": 48,
+    "classTeacher": "Kamal Uddin",
+    "passingYear": "2028",
+    "achievements": ["Best Debate Team 2025"],
     "createdAt": "2024-01-01T00:00:00.000Z"
   }
 ]

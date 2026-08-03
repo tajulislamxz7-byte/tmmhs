@@ -1,5 +1,6 @@
 // ================================================
 // AUTH — uses API server, session in localStorage
+// Phone-based authentication
 // ================================================
 
 import { api } from './api.js';
@@ -12,10 +13,18 @@ export async function register(data) {
   return result;
 }
 
+// Phone or email login — does NOT store session (waits for OTP)
+export async function loginWithPhoneOrEmail(phone, email, password) {
+  const result = await api.loginWithPhoneOrEmail(phone, email, password);
+  if (!result) return { ok: false, error: 'Server unavailable. Please try again.' };
+  return result;
+}
+
+// Legacy email login kept for admin (no OTP)
 export async function login(email, password) {
   const result = await api.login(email, password);
   if (!result) return { ok: false, error: 'Server unavailable. Please try again.' };
-  if (result.ok) {
+  if (result.ok && result.user) {
     localStorage.setItem(SESSION_KEY, JSON.stringify(result.user));
   }
   return result;

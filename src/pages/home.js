@@ -16,7 +16,7 @@ export async function renderHome() {
   const totalStudents = S.totalStudents != null ? S.totalStudents : schoolInfo.totalStudents;
   const totalTeachers = S.totalTeachers != null ? S.totalTeachers : schoolInfo.totalTeachers;
   const passRate      = S.passRate || '100%';
-  const yearsExcel    = new Date().getFullYear() - parseInt(schoolFounded || 1985);
+  const yearsExcel    = new Date().getFullYear() - parseInt(schoolFounded || 1999);
   const achievements  = S.achievements && S.achievements.length > 0 ? S.achievements : [];
   
   // Fetch real data from API
@@ -64,7 +64,7 @@ export async function renderHome() {
               </button>
             </div>
             <div class="hero-stats">
-              ${stats.slice(0,3).map(s => `
+              ${liveStats.slice(0,3).map(s => `
                 <div class="hero-stat">
                   <div class="hero-stat-value">${s.value}${typeof s.value === 'number' ? '+' : ''}</div>
                   <div class="hero-stat-label">${s.label}</div>
@@ -99,6 +99,8 @@ export async function renderHome() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
       <!-- Scroll indicator -->
       <div class="hero-scroll-indicator">

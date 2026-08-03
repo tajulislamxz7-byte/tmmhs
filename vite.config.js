@@ -23,6 +23,16 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,
+        secure: false,
+        // Log proxy errors to help debugging
+        configure: (proxy, options) => {
+          proxy.on('error', (err, req, res) => {
+            console.log('[Proxy Error]', err.message);
+          });
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            console.log('[Proxy Request]', req.method, req.url);
+          });
+        },
       },
     },
   },

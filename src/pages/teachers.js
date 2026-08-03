@@ -484,3 +484,25 @@ window.editTeacherProfile = async function(id) {
     }
   };
 };
+
+
+// ================================================
+// FILTER FUNCTION
+// ================================================
+
+// Filter teachers function
+window.filterTeachers = function() {
+  const q = document.getElementById('teacherSearch')?.value?.toLowerCase() || '';
+  const status = document.getElementById('statusFilter')?.value || '';
+  
+  document.querySelectorAll('.teacher-card').forEach(card => {
+    const name = card.dataset.name || '';
+    const subject = card.dataset.subject || '';
+    const cardStatus = card.dataset.status || '';
+    
+    const matchesSearch = !q || name.includes(q) || subject.includes(q);
+    const matchesStatus = !status || cardStatus === status;
+    
+    card.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+  });
+};

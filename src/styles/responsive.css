@@ -381,6 +381,7 @@ img, video, iframe {
 @media (max-width: 1024px) {
   .auth-container {
     grid-template-columns: 1fr !important;
+    min-height: auto !important;
   }
   
   .auth-left {
@@ -389,16 +390,20 @@ img, video, iframe {
   
   .auth-right {
     padding: 24px 20px;
+    max-height: none !important;
+    overflow-y: visible !important;
   }
 }
 
 @media (max-width: 480px) {
   .auth-right {
     padding: 20px 16px;
+    max-height: none !important;
+    overflow-y: visible !important;
   }
   
   .auth-form-container {
-    padding: 0;
+    padding: 0 0 24px 0;
   }
   
   .role-selector {

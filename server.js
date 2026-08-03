@@ -61,8 +61,19 @@ app.post('/api/users/register', (req, res) => {
   const users = readJSON('users.json');
   const data = req.body;
 
+  // Phone is mandatory for all accounts
+  if (!data.phone || !String(data.phone).trim()) {
+    return res.status(400).json({ ok: false, error: 'Phone number is required. All accounts must have a phone number.' });
+  }
+  // Check if phone already exists
+  const normalizePhone = (p) => String(p).replace(/\s+/g, '').replace(/^\+/, '').replace(/^880/, '').replace(/^0/, '');
+  const inputPhoneNorm = normalizePhone(data.phone);
+  if (users.some(u => u.phone && normalizePhone(u.phone) === inputPhoneNorm)) {
+    return res.status(400).json({ ok: false, error: 'An account with this phone number already exists.' });
+  }
+
   // Check if email already exists
-  if (users.some(u => u.email.toLowerCase() === data.email.toLowerCase())) {
+  if (data.email && users.some(u => u.email && u.email.toLowerCase() === data.email.toLowerCase())) {
     return res.status(400).json({ ok: false, error: 'An account with this email already exists.' });
   }
 
@@ -188,6 +199,11 @@ app.post('/api/users/add-student', (req, res) => {
     return res.status(400).json({ ok: false, error: 'A student with this ID already exists.' });
   }
 
+  // Phone is mandatory
+  if (!studentData.phone || !String(studentData.phone).trim()) {
+    return res.status(400).json({ ok: false, error: 'Phone number is required for student records.' });
+  }
+
   // Add student to database
   users.push(studentData);
   writeJSON('users.json', users);
@@ -196,12 +212,81 @@ app.post('/api/users/add-student', (req, res) => {
 });
 
 app.post('/api/users/login', (req, res) => {
-  const { email, password } = req.body;
+  const { phone, email, password } = req.body;
   const users = readJSON('users.json');
-  const user = users.find(u => u.email.toLowerCase() === email.toLowerCase().trim() && u.password === password);
-  if (!user) return res.status(401).json({ ok: false, error: 'Invalid email or password.' });
-  const session = {...user}; delete session.password;
-  res.json({ ok: true, user: session });
+
+  let user = null;
+
+  if (phone && phone.trim()) {
+    // Normalize phone: strip leading 0, spaces; accept 880... or 01...
+    const normalizePhone = (p) => {
+      p = String(p).replace(/\s+/g, '').replace(/^\+/, '');
+      if (p.startsWith('880')) p = p.slice(3);
+      if (p.startsWith('0')) p = p.slice(1);
+      return p; // returns 10-digit local number
+    };
+    const inputNorm = normalizePhone(phone);
+    user = users.find(u => {
+      if (!u.phone) return false;
+      return normalizePhone(u.phone) === inputNorm && u.password === password;
+    });
+  } else if (email && email.trim()) {
+    // Email login
+    user = users.find(u =>
+      u.email && u.email.toLowerCase() === email.toLowerCase().trim() &&
+      u.password === password
+    );
+  }
+
+  if (!user) {
+    return res.status(401).json({ ok: false, error: 'Invalid credentials. Check your phone/email and password.' });
+  }
+
+  // Check if SMS API is configured
+  const settings = readJSON('settings.json');
+  const smsConfigured = !!(settings.smsApiKey && settings.smsApiKey.trim());
+  
+  // Admin always bypasses OTP
+  if (user.role === 'admin') {
+    const session = {...user}; 
+    delete session.password;
+    return res.json({ ok: true, user: session, otpRequired: false });
+  }
+  
+  // Email login bypasses OTP
+  if (email && email.trim()) {
+    const session = {...user}; 
+    delete session.password;
+    return res.json({ ok: true, user: session, otpRequired: false });
+  }
+  
+  // Phone login with SMS configured → require OTP
+  if (smsConfigured && phone && phone.trim() && user.phone) {
+    const session = {...user}; 
+    delete session.password;
+    const maskedPhone = user.phone.replace(/(\d{3})\d+(\d{3})$/, '$1****$2');
+    
+    return res.json({
+      ok: true,
+      otpRequired: true,
+      maskedPhone,
+      phone: user.phone,
+      pendingUser: session,
+    });
+  }
+  
+  // No SMS configured → direct login
+  const session = {...user}; 
+  delete session.password;
+  return res.json({ ok: true, user: session, otpRequired: false });
+});
+
+// Admin-only: get a user's password (for credential display)
+app.get('/api/users/:id/password', (req, res) => {
+  const users = readJSON('users.json');
+  const user = users.find(u => u.id === req.params.id);
+  if (!user) return res.status(404).json({ ok: false, error: 'User not found' });
+  res.json({ ok: true, password: user.password || null });
 });
 
 app.patch('/api/users/:id/approve', (req, res) => {
@@ -481,6 +566,83 @@ app.patch('/api/notifications/mark-all-read', (req, res) => {
   notifications.forEach(n => n.read = true);
   writeJSON('notifications.json', notifications);
   res.json({ ok: true });
+});
+
+// ── SEND SMS ──────────────────────────────────────
+app.post('/api/send-sms', async (req, res) => {
+  const { phone, message } = req.body;
+  if (!phone || !message) return res.status(400).json({ ok: false, error: 'phone and message required' });
+
+  const settings = readJSON('settings.json');
+  const SMS_API_KEY = process.env.SMS_API_KEY || settings.smsApiKey || '';
+  const SMS_PROVIDER = settings.smsProvider || 'sms.net.bd';
+
+  if (!SMS_API_KEY) {
+    return res.status(400).json({ ok: false, error: 'SMS API key not configured. Please contact administrator.' });
+  }
+
+  try {
+    // Normalize phone number
+    let normalized = String(phone).replace(/\s+/g, '').replace(/^\+/, '');
+    if (normalized.startsWith('0')) normalized = '880' + normalized.slice(1);
+    if (!normalized.startsWith('880')) normalized = '880' + normalized;
+
+    // Build URL based on provider
+    let url;
+    
+    if (SMS_PROVIDER === 'bulksmsbd') {
+      const senderId = settings.smsSenderId || '8809617611019';
+      const SMS_API_URL = settings.smsApiUrl || 'https://bulksmsbd.net/api/smsapi';
+      url = `${SMS_API_URL}?api_key=${SMS_API_KEY}&type=text&number=${normalized}&senderid=${senderId}&message=${encodeURIComponent(message)}`;
+    } else if (SMS_PROVIDER === 'sms.net.bd') {
+      const SMS_API_URL = settings.smsApiUrl || 'https://api.sms.net.bd/sendsms';
+      url = `${SMS_API_URL}?api_key=${SMS_API_KEY}&msg=${encodeURIComponent(message)}&to=${normalized}`;
+    } else if (SMS_PROVIDER === 'custom') {
+      const SMS_API_URL = settings.smsApiUrl || '';
+      if (!SMS_API_URL) {
+        return res.status(400).json({ ok: false, error: 'Custom API URL not configured' });
+      }
+      url = SMS_API_URL
+        .replace('{api_key}', SMS_API_KEY)
+        .replace('{phone}', normalized)
+        .replace('{message}', encodeURIComponent(message))
+        .replace('{sender_id}', settings.smsSenderId || '');
+    } else {
+      const SMS_API_URL = settings.smsApiUrl || 'https://api.sms.net.bd/sendsms';
+      url = `${SMS_API_URL}?api_key=${SMS_API_KEY}&msg=${encodeURIComponent(message)}&to=${normalized}`;
+    }
+    
+    const r = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
+    const responseText = await r.text();
+    
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseErr) {
+      return res.status(500).json({ ok: false, error: 'SMS gateway returned invalid response' });
+    }
+    
+    // Universal success detection
+    const isSuccess = 
+      data.msg === 'Request successfully submitted' ||
+      data.status === 'success' || 
+      data.success === true || 
+      data.error === 0 ||
+      data.code === 200 || 
+      data.response_code === 202 ||
+      (data.response_code >= 200 && data.response_code < 300) ||
+      data.success_message ||
+      (r.ok && !data.error && !data.error_message);
+    
+    if (isSuccess) {
+      res.json({ ok: true, data });
+    } else {
+      const errorMsg = data.msg || data.message || data.error || data.error_message || data.response_message || 'SMS sending failed';
+      res.status(400).json({ ok: false, error: errorMsg });
+    }
+  } catch (err) {
+    res.status(500).json({ ok: false, error: 'Failed to connect to SMS gateway: ' + err.message });
+  }
 });
 
 // ── START ─────────────────────────────────────────

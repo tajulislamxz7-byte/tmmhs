@@ -841,3 +841,48 @@ window.changeMyAvatar = async function(userId) {
   
   input.click();
 };
+
+
+// ================================================
+// FILTER FUNCTIONS
+// ================================================
+
+// Filter students function
+window.filterStudents = function() {
+  const searchQuery = document.getElementById('studentSearch')?.value?.toLowerCase() || '';
+  const classFilter = document.getElementById('classFilter')?.value || '';
+  const sectionFilter = document.getElementById('sectionFilter')?.value || '';
+
+  document.querySelectorAll('.student-card').forEach(card => {
+    const name = card.dataset.name || '';
+    const cardClass = card.dataset.class || '';
+    const cardSection = card.dataset.section || '';
+
+    const matchesSearch = !searchQuery || name.includes(searchQuery);
+    const matchesClass = !classFilter || cardClass === classFilter;
+    const matchesSection = !sectionFilter || cardSection === sectionFilter;
+
+    card.style.display = (matchesSearch && matchesClass && matchesSection) ? '' : 'none';
+  });
+};
+
+// View switcher for grid/list view
+window.setView = function(viewType) {
+  const grid = document.getElementById('studentsGrid');
+  const gridBtn = document.getElementById('gridViewBtn');
+  const listBtn = document.getElementById('listViewBtn');
+  
+  if (viewType === 'grid') {
+    grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
+    gridBtn.classList.remove('btn-ghost');
+    gridBtn.classList.add('btn-secondary');
+    listBtn.classList.remove('btn-secondary');
+    listBtn.classList.add('btn-ghost');
+  } else {
+    grid.style.gridTemplateColumns = '1fr';
+    listBtn.classList.remove('btn-ghost');
+    listBtn.classList.add('btn-secondary');
+    gridBtn.classList.remove('btn-secondary');
+    gridBtn.classList.add('btn-ghost');
+  }
+};

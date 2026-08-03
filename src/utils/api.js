@@ -4,8 +4,17 @@
 // ================================================
 
 // Detect environment and set API base URL
+// Production URL can be overridden from Admin → API Keys → Server URL
 const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const BASE = isDevelopment ? '/api' : 'https://school-project-qi8m.onrender.com/api';
+function _getBase() {
+  if (isDevelopment) return '/api';
+  try {
+    const s = JSON.parse(localStorage.getItem('gfa_settings') || '{}');
+    return s.apiBaseUrl || 'https://school-project-qi8m.onrender.com/api';
+  } catch {
+    return 'https://school-project-qi8m.onrender.com/api';
+  }
+}
 
 // ── localStorage fallback helpers ────────────────
 const LS = {
@@ -14,16 +23,26 @@ const LS = {
 };
 
 let _serverOnline = null; // null = unknown, true/false = known
+let _hasShownOfflineWarning = false;
 
 async function req(method, path, body) {
   try {
-    const res = await fetch(BASE + path, {
+    const res = await fetch(_getBase() + path, {
       method,
       headers: { 'Content-Type': 'application/json' },
       body: body ? JSON.stringify(body) : undefined,
       signal: AbortSignal.timeout(30000), // 30s timeout for Render.com cold starts
     });
-    _serverOnline = true;
+    
+    // Server is online
+    if (_serverOnline === false) {
+      console.log('[API] Server reconnected ✓');
+      _serverOnline = true;
+      _hasShownOfflineWarning = false;
+    } else if (_serverOnline === null) {
+      _serverOnline = true;
+      console.log('[API] Server connected ✓');
+    }
     
     // Always parse JSON response, even for error status codes
     const json = await res.json();
@@ -35,6 +54,12 @@ async function req(method, path, body) {
     
     return json;
   } catch (e) {
+    // Server is offline
+    if (_serverOnline !== false && !_hasShownOfflineWarning) {
+      console.warn('[API] Server offline, using localStorage fallback');
+      console.warn('[API] Make sure server is running: npm run server');
+      _hasShownOfflineWarning = true;
+    }
     _serverOnline = false;
     // API offline, using localStorage fallback
     return null;
@@ -135,9 +160,61 @@ function lsRegister(data) {
   return { ok: true, user: session };
 }
 
+// Phone/email login — conditional OTP based on SMS configuration
+function lsLoginByPhoneOrEmail(phone, email, password) {
+  const users = LS.get('gfa_users', []);
+  const norm = (p) => String(p||'').replace(/\s+/g,'').replace(/^\+/,'').replace(/^880/,'').replace(/^0/,'');
+  let user = null;
+  if (phone) {
+    const n = norm(phone);
+    user = users.find(u => u.phone && norm(u.phone) === n && u.password === password);
+  } else if (email) {
+    user = users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase().trim() && u.password === password);
+  }
+  if (!user) return { ok: false, error: 'Invalid credentials. Check your phone/email and password.' };
+  
+  // Check if SMS is configured
+  const settings = LS.get('gfa_settings', {});
+  const smsConfigured = !!(settings.smsApiKey && settings.smsApiKey.trim());
+  
+  // Admin bypasses OTP
+  if (user.role === 'admin') {
+    const session = {...user}; 
+    delete session.password;
+    return { ok: true, user: session, otpRequired: false };
+  }
+  
+  // Email login bypasses OTP
+  if (email && email.trim()) {
+    const session = {...user}; 
+    delete session.password;
+    return { ok: true, user: session, otpRequired: false };
+  }
+  
+  // Phone login with SMS configured → require OTP
+  if (smsConfigured && phone && phone.trim() && user.phone) {
+    const session = {...user}; 
+    delete session.password;
+    const maskedPhone = user.phone.replace(/(\d{3})\d+(\d{3})$/, '$1****$2');
+    
+    return {
+      ok: true,
+      otpRequired: true,
+      maskedPhone,
+      phone: user.phone,
+      pendingUser: session,
+    };
+  }
+  
+  // No SMS configured → direct login
+  const session = {...user}; 
+  delete session.password;
+  return { ok: true, user: session, otpRequired: false };
+}
+
 function lsLogin(email, password) {
   const users = LS.get('gfa_users', []);
-  const user = users.find(u => u.email.toLowerCase() === email.toLowerCase().trim() && u.password === password);
+  const user = users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase().trim() && u.password === password);
   if (!user) return { ok: false, error: 'Invalid email or password.' };
   const session = {...user}; delete session.password;
   return { ok: true, user: session };
@@ -146,6 +223,12 @@ function lsLogin(email, password) {
 // ── Public API ────────────────────────────────────
 export const api = {
   // Auth
+  async loginWithPhoneOrEmail(phone, email, password) {
+    const result = await post('/users/login', { phone, email, password });
+    if (result) return result;
+    return lsLoginByPhoneOrEmail(phone, email, password);
+  },
+
   async register(data) {
     const result = await post('/users/register', data);
     if (result) return result;

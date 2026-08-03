@@ -1,32 +1,32 @@
 [
   {
-    "id": "EV1738569600000",
-    "title": "Science Fair 2026",
-    "description": "Students will showcase innovative science projects. Open to all classes. Judges from local universities will evaluate projects.",
+    "id": "EV1001",
+    "title": "Annual Sports Day 2026",
+    "description": "Annual inter-school sports competition featuring athletics, football, cricket and more. Open to all classes.",
     "date": "2026-09-05",
-    "time": "10:00 AM",
+    "time": "09:00",
+    "location": "School Sports Ground",
+    "category": "Sports",
+    "organizer": "Sports Committee"
+  },
+  {
+    "id": "EV1002",
+    "title": "Science Fair 2026",
+    "description": "Students will showcase innovative science projects. Judges from local universities will evaluate. Winner gets district-level participation.",
+    "date": "2026-09-20",
+    "time": "10:00",
     "location": "School Auditorium",
     "category": "Academic",
     "organizer": "Science Department"
   },
   {
-    "id": "EV1738310400000",
+    "id": "EV1003",
     "title": "Cultural Program - Independence Day",
-    "description": "Cultural performances including songs, dances, drama, and poetry recitation celebrating Independence Day.",
-    "date": "2026-08-14",
-    "time": "4:00 PM",
+    "description": "Cultural performances including songs, dances, drama and poetry recitation celebrating Independence Day.",
+    "date": "2026-12-16",
+    "time": "16:00",
     "location": "School Auditorium",
     "category": "Cultural",
     "organizer": "Cultural Committee"
-  },
-  {
-    "id": "EV1738742400000",
-    "title": "Parent-Teacher Meeting",
-    "description": "Discuss student progress, academic performance, and future plans with teachers. All parents are encouraged to attend.",
-    "date": "2026-08-18",
-    "time": "3:00 PM",
-    "location": "School Hall",
-    "category": "Meeting",
-    "organizer": "Administration"
   }
 ]
