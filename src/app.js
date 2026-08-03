@@ -11,7 +11,6 @@ import { renderHome, renderHomeExtra }   from './pages/home.js';
 import { renderStudents, renderStudentProfile } from './pages/students.js';
 import { renderLogin, renderRegister, renderForgotPassword, renderResetPassword, renderPrincipalLogin } from './pages/auth.js';
 import { renderTeachers, renderTeacherProfile, renderTeacherDashboard } from './pages/teachers.js';
-import { renderAlumni, renderAlumniDashboard }         from './pages/alumni.js';
 import { renderBatches, renderBatchDetail } from './pages/batches.js';
 import { renderResults, renderStudentDashboard } from './pages/results.js';
 import { renderNotices }        from './pages/notices.js';
@@ -82,60 +81,6 @@ async function render() {
   const user       = auth.getCurrentUser();
   const loggedIn   = !!user;
   const role       = user?.role || 'guest';
-  
-  // AUTO-FIX: Sync Google users to backend if they're not there yet
-  if (loggedIn && user && user.googleAuth) {
-    try {
-      // Check if user exists in backend
-      const backendUsers = await api.getUsers();
-      const existsInBackend = backendUsers && backendUsers.some(u => 
-        u.email.toLowerCase() === user.email.toLowerCase()
-      );
-      
-      if (!existsInBackend) {
-        console.log('⚠️ Google user not in backend, auto-syncing now...');
-        const syncResult = await api.register({
-          id: user.id,
-          firstName: user.firstName || user.name.split(' ')[0],
-          lastName: user.lastName || user.name.split(' ').slice(1).join(' '),
-          email: user.email,
-          password: '',
-          role: user.role,
-          avatar: user.avatar,
-          phone: user.phone || '',
-          class: user.class || '',
-          section: user.section || '',
-          batch: user.batch || '',
-          bloodGroup: user.bloodGroup || '',
-          guardian: user.guardian || '',
-          roll: user.roll || '',
-          address: user.address || '',
-          bio: user.bio || '',
-          birthday: user.birthday || '',
-          skills: user.skills || [],
-          achievements: user.achievements || [],
-          googleAuth: true
-        });
-        
-        if (syncResult && syncResult.ok) {
-          console.log('✅ Google user auto-synced to backend!');
-          // Update localStorage with synced user
-          const users = JSON.parse(localStorage.getItem('gfa_users') || '[]');
-          const userIndex = users.findIndex(u => u.email.toLowerCase() === user.email.toLowerCase());
-          if (userIndex >= 0) {
-            users[userIndex] = syncResult.user;
-          } else {
-            users.push(syncResult.user);
-          }
-          localStorage.setItem('gfa_users', JSON.stringify(users));
-          localStorage.setItem('gfa_users_cache', JSON.stringify(users));
-          localStorage.setItem('gfa_session', JSON.stringify(syncResult.user));
-        }
-      }
-    } catch (error) {
-      console.warn('Could not auto-sync Google user:', error);
-    }
-  }
 
   const navRoot    = document.getElementById('navbar-root');
   const pageRoot   = document.getElementById('page-root');
@@ -200,8 +145,6 @@ async function getPageContent(user, role) {
     case 'teachers':          return await renderTeachers();
     case 'teacher-profile':   return await renderTeacherProfile(currentParam);
     case 'teacher-dashboard': return renderTeacherDashboard(user);
-    case 'alumni':            return await renderAlumni();
-    case 'alumni-dashboard':  return renderAlumniDashboard(user);
     case 'staff':             return await renderStaff();
     case 'staff-dashboard':   return await renderStaffDashboard(user);
     case 'batches':           return await renderBatches();
@@ -261,7 +204,6 @@ function bindGlobalActions() {
     if (result.user.role === 'admin') navigate('admin');
     else if (result.user.role === 'principal') navigate('teacher-profile', result.user.id);
     else if (result.user.role === 'teacher') navigate('teacher-dashboard');
-    else if (result.user.role === 'alumni') navigate('alumni-dashboard');
     else if (result.user.role === 'staff') navigate('staff-dashboard');
     else navigate('student-dashboard');
   };
@@ -304,257 +246,6 @@ function bindGlobalActions() {
 
     showToast(`Welcome back, ${result.user.name.split(' ')[0]}!`, 'success');
     navigate('teacher-profile', result.user.id);
-  };
-
-  window.handleGoogleLogin = function() {
-    const CLIENT_ID = '346294500383-gdrfvr4a5rglllsft2prdke7je7i40d5.apps.googleusercontent.com';
-
-    if (typeof google === 'undefined') {
-      showToast('Google Sign-In not loaded. Try again.', 'error');
-      return;
-    }
-
-    // Get selected role from login form (defaults to 'student' if not found)
-    const selectedRole = document.querySelector('.role-btn.active')?.textContent?.toLowerCase() || 'student';
-
-    google.accounts.oauth2.initTokenClient({
-      client_id: CLIENT_ID,
-      scope: 'email profile openid',
-      callback: async (tokenResponse) => {
-        if (tokenResponse.error) {
-          showToast('Google Sign-In failed: ' + tokenResponse.error, 'error');
-          return;
-        }
-        // Fetch user info from Google
-        try {
-          const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-            headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
-          });
-          const gUser = await res.json();
-
-          // Check if user exists in our system (by email - for account linking)
-          const users = JSON.parse(localStorage.getItem('gfa_users') || '[]');
-          let user = users.find(u => u.email.toLowerCase() === gUser.email.toLowerCase());
-
-          if (!user) {
-            // ========== NO EXISTING ACCOUNT WITH THIS EMAIL ==========
-            
-            // SECURITY: Block teacher, staff, and principal registration via Google
-            // Only admin can create these accounts
-            if (selectedRole === 'teacher' || selectedRole === 'staff' || selectedRole === 'principal') {
-              showToast('Teachers and staff accounts must be created by the school administrator. Please contact the admin office.', 'error');
-              return;
-            }
-            
-            // For students, check if they want to link to existing unlinked account BY STUDENT ID
-            if (selectedRole === 'student') {
-              // First, check backend for admin-created accounts without email
-              try {
-                const backendUsers = await api.getUsers();
-                const unmatchedAccounts = backendUsers.filter(u => 
-                  u.role && u.role.toLowerCase() === 'student' &&
-                  (!u.email || u.email === '') &&
-                  u.status === 'unlinked'
-                );
-                
-                if (unmatchedAccounts.length > 0) {
-                  const studentId = prompt(
-                    `The school has ${unmatchedAccounts.length} student record(s) ready for linking.\n\n` +
-                    `If the school created your profile, enter your Student ID to link it:\n` +
-                    `(Leave blank to create a new profile)`
-                  );
-                  
-                  if (studentId && studentId.trim()) {
-                    // Try to find and link to existing unlinked student
-                    const existingStudent = users.find(u => 
-                      u.id === studentId.trim() && 
-                      u.role && u.role.toLowerCase().trim() === 'student' &&
-                      u.status === 'unlinked'
-                    );
-                    
-                    if (existingStudent) {
-                      // Link Google account to existing student - PRESERVE ALL ADMIN DATA
-                      existingStudent.email = gUser.email.toLowerCase();
-                      existingStudent.avatar = gUser.picture; // Update with Google photo
-                      existingStudent.status = 'active'; // Auto-activate linked accounts
-                      existingStudent.googleAuth = true;
-                      existingStudent.linkedAt = new Date().toISOString();
-                      
-                      // Update backend
-                      await api.updateUser(existingStudent.id, {
-                        email: existingStudent.email,
-                        avatar: existingStudent.avatar,
-                        status: existingStudent.status,
-                        googleAuth: true,
-                        linkedAt: existingStudent.linkedAt
-                      });
-                      
-                      localStorage.setItem('gfa_users', JSON.stringify(users));
-                      localStorage.setItem('gfa_users_cache', JSON.stringify(users));
-                      
-                      // Save session
-                      const session = { ...existingStudent };
-                      delete session.password;
-                      localStorage.setItem('gfa_session', JSON.stringify(session));
-                      
-                      showToast(`Welcome, ${existingStudent.name.split(' ')[0]}! Your account has been linked.`, 'success');
-                      navigate('student-dashboard');
-                      return;
-                    } else {
-                      showToast('Student ID not found or already linked. Creating new profile instead.', 'warning');
-                    }
-                  }
-                }
-              } catch (err) {
-                console.warn('Could not check for unlinked accounts:', err);
-              }
-            }
-            
-            // Auto-register new Google user with selected role
-            const rolePrefixes = { student: 'STU', teacher: 'TCH', alumni: 'ALU', staff: 'STF', admin: 'ADM' };
-            const prefix = rolePrefixes[selectedRole] || 'STU';
-            const id = `${prefix}-${new Date().getFullYear()}-G${String(users.length + 1).padStart(4,'0')}`;
-            
-            user = {
-              id,
-              name: gUser.name,
-              firstName: gUser.given_name || gUser.name.split(' ')[0],
-              lastName: gUser.family_name || gUser.name.split(' ').slice(1).join(' '),
-              email: gUser.email.toLowerCase(),
-              phone: '',
-              password: '',
-              role: selectedRole,
-              avatar: gUser.picture,
-              status: 'active',
-              class: '', section: '', batch: '',
-              bloodGroup: '', guardian: '',
-              subject: '', qualification: '', experience: '',
-              position: '', department: '',
-              graduationYear: '', profession: '', company: '', university: '',
-              createdAt: new Date().toISOString(),
-              googleAuth: true,
-              roll: '', address: '', skills: [], achievements: [], gpa: 'N/A', bio: '',
-            };
-            
-            // Save to backend API (for Netlify deployment)
-            try {
-              const apiResult = await api.register({
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                password: '', // No password for Google auth
-                role: user.role,
-                avatar: user.avatar,
-                phone: user.phone,
-                class: user.class,
-                section: user.section,
-                batch: user.batch,
-                bloodGroup: user.bloodGroup,
-                guardian: user.guardian,
-                googleAuth: true
-              });
-              
-              if (apiResult && apiResult.ok && apiResult.user) {
-                // Use the user created by the API (with proper ID)
-                user = apiResult.user;
-                console.log('✅ Google user saved to backend:', user.id);
-              } else {
-                console.warn('⚠️ Backend API returned error, using localStorage only');
-              }
-            } catch (apiError) {
-              console.warn('⚠️ Backend API not available, using localStorage only:', apiError);
-            }
-            
-            users.push(user);
-            localStorage.setItem('gfa_users', JSON.stringify(users));
-            localStorage.setItem('gfa_users_cache', JSON.stringify(users));
-          } else {
-            // ========== EXISTING ACCOUNT FOUND WITH SAME EMAIL ==========
-            // AUTO-LINK: Admin created account with this email, now user is signing in with Google
-            
-            console.log('✅ Account found with matching email - auto-linking:', user.id);
-            
-            // Update account with Google data - PRESERVE ALL ADMIN DATA
-            const userIndex = users.findIndex(u => u.email.toLowerCase() === user.email.toLowerCase());
-            if (userIndex >= 0) {
-              // Update existing entry with latest Google data
-              users[userIndex] = {
-                ...users[userIndex],
-                name: user.name,
-                firstName: user.firstName || user.name.split(' ')[0],
-                lastName: user.lastName || user.name.split(' ').slice(1).join(' '),
-                avatar: user.avatar || users[userIndex].avatar,
-              };
-              user = users[userIndex]; // Use the updated user object
-            }
-            
-            // Try to sync with backend if they don't exist there yet
-            try {
-              const backendUsers = await api.getUsers();
-              const existsInBackend = backendUsers && backendUsers.some(u => u.email.toLowerCase() === user.email.toLowerCase());
-              
-              if (!existsInBackend) {
-                console.log('⚠️ User not in backend, registering now...');
-                const apiResult = await api.register({
-                  id: user.id, // Preserve their existing localStorage ID
-                  firstName: user.firstName,
-                  lastName: user.lastName,
-                  email: user.email,
-                  password: '', // No password for Google auth
-                  role: user.role,
-                  avatar: user.avatar,
-                  phone: user.phone || '',
-                  class: user.class || '',
-                  section: user.section || '',
-                  batch: user.batch || '',
-                  bloodGroup: user.bloodGroup || '',
-                  guardian: user.guardian || '',
-                  roll: user.roll || '',
-                  address: user.address || '',
-                  bio: user.bio || '',
-                  birthday: user.birthday || '',
-                  skills: user.skills || [],
-                  achievements: user.achievements || [],
-                  googleAuth: true
-                });
-                
-                if (apiResult && apiResult.ok && apiResult.user) {
-                  console.log('✅ Existing user synced to backend:', apiResult.user.id);
-                  user = apiResult.user; // Use backend-created user
-                  if (userIndex >= 0) users[userIndex] = user;
-                } else {
-                  console.error('❌ Failed to sync user to backend:', apiResult);
-                }
-              } else {
-                console.log('✅ User already exists in backend');
-              }
-            } catch (syncError) {
-              console.warn('⚠️ Could not sync to backend:', syncError);
-            }
-            
-            // Save back to localStorage
-            localStorage.setItem('gfa_users', JSON.stringify(users));
-            localStorage.setItem('gfa_users_cache', JSON.stringify(users));
-          }
-
-          // Save session
-          const session = { ...user };
-          delete session.password;
-          localStorage.setItem('gfa_session', JSON.stringify(session));
-
-          showToast(`Welcome, ${user.name.split(' ')[0]}!`, 'success');
-          if (user.role === 'admin') navigate('admin');
-          else if (user.role === 'principal') navigate('teacher-profile', user.id);
-          else if (user.role === 'teacher') navigate('teacher-dashboard');
-          else if (user.role === 'alumni') navigate('alumni-dashboard');
-          else if (user.role === 'staff') navigate('staff-dashboard');
-          else navigate('student-dashboard');
-
-        } catch (err) {
-          showToast('Could not fetch Google profile. Try again.', 'error');
-        }
-      },
-    }).requestAccessToken();
   };
 
   window.bcUploadChange = function(input) {
@@ -841,7 +532,6 @@ function bindGlobalActions() {
 
     } catch (err) {
       showToast('Failed to send email. Please try again.', 'error');
-      console.error('EmailJS error:', err);
     } finally {
       if (btn) { btn.disabled = false; btn.textContent = 'Send Reset Link'; }
     }
@@ -1058,7 +748,6 @@ function bindGlobalActions() {
         showToast(result.error || 'Failed to add student', 'error');
       }
     } catch (err) {
-      console.error('Error adding student:', err);
       showToast('Failed to add student. Please try again.', 'error');
     } finally {
       if (btn) {

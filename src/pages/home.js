@@ -23,13 +23,11 @@ export async function renderHome() {
   const users = await api.getUsers() || [];
   const studentsCount = users.filter(u => u.role === 'student').length;
   const teachersCount = users.filter(u => u.role === 'teacher').length;
-  const alumniCount = users.filter(u => u.role === 'alumni').length;
   
   // Update stats with real data
   const liveStats = [
     { label: "Students", value: studentsCount, svg: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>', color: "#2563eb" },
     { label: "Teachers", value: teachersCount, svg: '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>', color: "#7c3aed" },
-    { label: "Alumni", value: alumniCount, svg: '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>', color: "#059669" },
     { label: "Years of Excellence", value: yearsExcel, svg: '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>', color: "#d97706" },
     { label: "Batches", value: batches.length, svg: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>', color: "#dc2626" },
     { label: "Pass Rate", value: passRate, svg: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>', color: "#0891b2" },
@@ -76,64 +74,31 @@ export async function renderHome() {
           </div>
           <div class="hero-visual animate-fadeIn stagger-3">
             <div class="hero-card-stack">
-              <div class="hero-main-image" style="position:relative;z-index:10;padding:20px 0;">
-                <div class="school-illustration">
-                  <div class="school-building">
-                    <div class="building-students" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:480px;margin:0 auto;">
-                      <style>
-                        @media (max-width: 768px) {
-                          .building-students {
-                            grid-template-columns: 1fr !important;
-                            gap: 16px !important;
-                            max-width: 100% !important;
-                            padding: 0 16px;
-                          }
-                        }
-                        @media (min-width: 769px) and (max-width: 1024px) {
-                          .building-students {
-                            grid-template-columns: repeat(3, 1fr) !important;
-                            gap: 16px !important;
-                          }
-                        }
-                      </style>
-                      <div style="background:rgba(37,99,235,0.1);backdrop-filter:blur(10px);border:1.5px solid rgba(37,99,235,0.2);border-radius:20px;padding:32px 24px;text-align:center;">
-                        <div style="width:56px;height:56px;margin:0 auto 16px;background:linear-gradient(135deg,#2563eb,#3b82f6);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 16px rgba(37,99,235,0.3);">
-                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>
-                        </div>
-                        <div style="font-weight:900;font-size:32px;color:var(--text-primary);line-height:1;margin-bottom:8px;">${studentsCount}+</div>
-                        <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">Students</div>
-                      </div>
-                      <div style="background:rgba(124,58,237,0.1);backdrop-filter:blur(10px);border:1.5px solid rgba(124,58,237,0.2);border-radius:20px;padding:32px 24px;text-align:center;">
-                        <div style="width:56px;height:56px;margin:0 auto 16px;background:linear-gradient(135deg,#7c3aed,#a78bfa);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 16px rgba(124,58,237,0.3);">
-                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-                        </div>
-                        <div style="font-weight:900;font-size:32px;color:var(--text-primary);line-height:1;margin-bottom:8px;">${teachersCount}+</div>
-                        <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">Teachers</div>
-                      </div>
-                      <div style="background:rgba(5,150,105,0.1);backdrop-filter:blur(10px);border:1.5px solid rgba(5,150,105,0.2);border-radius:20px;padding:32px 24px;text-align:center;">
-                        <div style="width:56px;height:56px;margin:0 auto 16px;background:linear-gradient(135deg,#059669,#10b981);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 16px rgba(5,150,105,0.3);">
-                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        </div>
-                        <div style="font-weight:900;font-size:32px;color:var(--text-primary);line-height:1;margin-bottom:8px;">${passRate}</div>
-                        <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">Pass Rate</div>
-                      </div>
-                    </div>
-                    
-                    <div style="margin-top:40px;text-align:center;">
-                      <div style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);border-radius:50px;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <span style="font-size:13px;color:rgba(255,255,255,0.7);font-weight:500;">Established 1985 · 39 Years of Excellence</span>
-                      </div>
+              <div class="hero-main-image" style="position:relative;z-index:10;">
+                ${S.schoolPhoto ? `
+                  <div style="border-radius:24px;overflow:hidden;box-shadow:0 32px 64px rgba(0,0,0,0.4);border:2px solid rgba(255,255,255,0.1);max-width:480px;margin:0 auto;">
+                    <img src="${S.schoolPhoto}" alt="${schoolName}" style="width:100%;height:320px;object-fit:cover;display:block;" onerror="this.parentElement.style.display='none'">
+                    <div style="padding:16px 20px;background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);border-top:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;gap:8px;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                      <span style="font-size:13px;color:rgba(255,255,255,0.6);font-weight:500;">Est. ${schoolFounded} · ${yearsExcel} Years of Excellence</span>
                     </div>
                   </div>
-                </div>
+                ` : `
+                  <div style="border-radius:24px;border:2px dashed rgba(255,255,255,0.15);background:rgba(255,255,255,0.04);backdrop-filter:blur(10px);max-width:480px;margin:0 auto;padding:60px 32px;text-align:center;">
+                    <div style="width:64px;height:64px;margin:0 auto 16px;background:rgba(255,255,255,0.08);border-radius:16px;display:flex;align-items:center;justify-content:center;">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    </div>
+                    <div style="font-size:14px;color:rgba(255,255,255,0.4);font-weight:500;">School photo</div>
+                    <div style="font-size:12px;color:rgba(255,255,255,0.25);margin-top:4px;">Upload from Admin → Settings</div>
+                    <div style="margin-top:24px;display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:50px;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                      <span style="font-size:13px;color:rgba(255,255,255,0.5);font-weight:500;">Est. ${schoolFounded} · ${yearsExcel} Years of Excellence</span>
+                    </div>
+                  </div>
+                `}
               </div>
             </div>
           </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <!-- Scroll indicator -->
       <div class="hero-scroll-indicator">
@@ -290,7 +255,6 @@ export async function renderHomeExtra() {
             { svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>', title:'Students',   desc:'Directory & Profiles',  color:'#2563eb', page:'students' },
             { svg:'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>', title:'Teachers',  desc:'Faculty & Experts',     color:'#7c3aed', page:'teachers' },
             { svg:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>', title:'Staff',      desc:'Support Team',          color:'#0891b2', page:'staff' },
-            { svg:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>', title:'Alumni',     desc:'Our Graduates',         color:'#059669', page:'alumni' },
             { svg:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>', title:'Batches',    desc:'Class Groups',          color:'#d97706', page:'batches' },
             { svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>', title:'Results',    desc:'Exam Results',          color:'#dc2626', page:'results' },
             { svg:'<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>', title:'Notices',    desc:'Announcements',         color:'#7c3aed', page:'notices' },
@@ -376,20 +340,16 @@ export async function renderHomeExtra() {
       
       // Render all enabled leadership cards
       return S.leadershipCards.filter(card => card.enabled !== false).map((card, index) => {
-        // Get user data based on role
+        // Get user data from card
         let userAvatar = 'https://i.imgur.com/x9wE0QT.png';
         let userName = card.name || '';
         let userDesignation = card.designation || '';
         let userQualification = card.qualification || '';
         let userMessage = card.message || '';
         
-        // For principal card, use the existing principal data
-        if (card.role === 'principal') {
+        // For principal card, use principal avatar if available
+        if (card.role === 'principal' && principalAvatar) {
           userAvatar = principalAvatar;
-          userName = principalName;
-          userMessage = principalMsg;
-          userDesignation = 'Principal, Tiarkhali M.M High School and College';
-          userQualification = 'PhD Physics, BUET · 18+ Years Experience';
         }
         
         return `

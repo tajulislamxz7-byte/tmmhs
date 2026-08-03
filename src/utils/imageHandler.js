@@ -425,14 +425,11 @@ export async function handleProfilePictureUpload(input, previewElement) {
     const base64 = await convertImageToBase64(file);
     
     // Verify image contains a real human face using AI detection
-    console.log('🔍 Verifying face in image...');
     const verification = await verifyFaceInImage(base64);
     
     if (!verification.valid) {
       throw new Error(verification.reason || 'Image verification failed');
     }
-    
-    console.log('✅ Face verification passed');
     
     // Open cropper
     const croppedImage = await openImageCropper(base64, previewElement);

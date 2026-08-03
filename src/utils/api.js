@@ -36,7 +36,7 @@ async function req(method, path, body) {
     return json;
   } catch (e) {
     _serverOnline = false;
-    console.warn('API offline, using localStorage fallback:', path);
+    // API offline, using localStorage fallback
     return null;
   }
 }
@@ -109,7 +109,7 @@ function lsRegister(data) {
   
   // ======== CREATE NEW ACCOUNT ========
   // Only create new account if NO Student ID provided
-  const prefixMap = { student:'STU', teacher:'TCH', alumni:'ALM', staff:'STF' };
+  const prefixMap = { student:'STU', teacher:'TCH', staff:'STF' };
   const id = `${prefixMap[role]||'STU'}-${new Date().getFullYear()}-${String(users.length+1).padStart(4,'0')}`;
   const name = `${data.firstName} ${data.lastName}`.trim();
   const clean = (v) => (!v || v === 'Select' || v === 'select') ? '' : v;
@@ -183,7 +183,6 @@ export const api = {
     if (result) {
       // If backend returns 404 or error, provide helpful message
       if (result.ok === false) {
-        console.error('❌ User not found in backend database:', id);
         return { 
           ok: false, 
           error: 'Your profile is not synced with the server. Please sign out and sign in again to fix this.' 
@@ -237,6 +236,13 @@ export const api = {
     const notices = LS.get('gfa_notices', []); notices.splice(idx, 1); LS.set('gfa_notices', notices);
     return { ok: true };
   },
+  async updateNotice(idx, data) {
+    const r = await put(`/notices/${idx}`, data);
+    if (r) return r;
+    const notices = LS.get('gfa_notices', []);
+    if (notices[idx]) { notices[idx] = { ...notices[idx], ...data }; LS.set('gfa_notices', notices); }
+    return { ok: true };
+  },
 
   // Events
   async getEvents() {
@@ -258,6 +264,13 @@ export const api = {
     const events = LS.get('gfa_events', []); events.splice(idx, 1); LS.set('gfa_events', events);
     return { ok: true };
   },
+  async updateEvent(idx, data) {
+    const r = await put(`/events/${idx}`, data);
+    if (r) return r;
+    const events = LS.get('gfa_events', []);
+    if (events[idx]) { events[idx] = { ...events[idx], ...data }; LS.set('gfa_events', events); }
+    return { ok: true };
+  },
 
   // Batches
   async getBatches() {
@@ -272,6 +285,16 @@ export const api = {
     const batch = { id:'B'+Date.now(), ...data, createdAt: new Date().toISOString() };
     batches.unshift(batch); LS.set('gfa_batches', batches);
     return { ok: true, batch };
+  },
+  async updateBatch(idx, data) {
+    const r = await put(`/batches/${idx}`, data);
+    if (r) return r;
+    const batches = LS.get('gfa_batches', []);
+    if (batches[idx]) {
+      batches[idx] = data;
+      LS.set('gfa_batches', batches);
+    }
+    return { ok: true };
   },
   async deleteBatch(idx) {
     const r = await del(`/batches/${idx}`);

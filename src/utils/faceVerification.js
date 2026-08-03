@@ -10,8 +10,6 @@
  */
 export async function verifyFaceInImage(base64Image) {
   try {
-    console.log('🔍 Starting AI face detection...');
-    
     // Convert base64 to blob for API
     const blob = await base64ToBlob(base64Image);
     
@@ -21,7 +19,6 @@ export async function verifyFaceInImage(base64Image) {
     return result;
     
   } catch (error) {
-    console.error('⚠️ Face verification error:', error);
     // Return validation with clear message
     return {
       valid: false,

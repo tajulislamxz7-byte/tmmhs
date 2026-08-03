@@ -184,12 +184,11 @@ export function renderLogin() {
           </p>
 
           <!-- Role tabs -->
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:var(--bg-secondary);padding:5px;border-radius:10px;margin-bottom:22px;">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--bg-secondary);padding:5px;border-radius:10px;margin-bottom:22px;">
             ${[
               {label:'Student', role:'student', ico:'users'},
               {label:'Teacher', role:'teacher', ico:'graduationCap'},
               {label:'Staff',   role:'staff',   ico:'briefcase'},
-              {label:'Alumni',  role:'alumni',  ico:'globe'},
             ].map((r,i) => `
               <button
                 class="role-btn ${i===0?'active':''}"
@@ -201,19 +200,6 @@ export function renderLogin() {
               </button>
             `).join('')}
           </div>
-
-          <!-- Google -->
-          <button class="google-btn" onclick="handleGoogleLogin()" type="button">
-            <svg width="18" height="18" viewBox="0 0 24 24" style="flex-shrink:0;">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-            </svg>
-            Continue with Google
-          </button>
-
-          <div class="auth-divider"><span>or sign in with email</span></div>
 
           <!-- Error msg -->
           <div id="loginError" style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 14px;font-size:13px;color:#dc2626;margin-bottom:16px;">
@@ -285,18 +271,6 @@ const ROLE_CONFIGS = {
       {section:'grid', inputs:[
         {type:'text', name:'guardian', label:'Guardian Name', required:false, placeholder:'Father / Mother name'},
         {type:'select', name:'bloodGroup', label:'Blood Group', required:false, opts:['Select','A+','A-','B+','B-','AB+','AB-','O+','O-']},
-      ]},
-    ]
-  },
-  alumni: {
-    label: 'Alumni', icon: 'globe', fields: [
-      {section:'grid', inputs:[
-        {type:'number', name:'graduationYear', label:'Graduation Year *', required:true, placeholder:'e.g. 2024'},
-        {type:'text', name:'university', label:'University *', required:true, placeholder:'e.g. DU'},
-      ]},
-      {section:'grid', inputs:[
-        {type:'text', name:'profession', label:'Profession *', required:true, placeholder:'e.g. Engineer'},
-        {type:'text', name:'company', label:'Company', required:false, placeholder:'e.g. Google'},
       ]},
     ]
   },
@@ -387,7 +361,7 @@ export function renderRegister() {
             Select your role and fill in the details. Your registration will be reviewed by the admissions office.
           </p>
           <div style="display:flex;flex-direction:column;gap:16px;">
-            ${[{n:'1',t:'Choose your role',d:'Student or Alumni'},{n:'2',t:'Fill in your details',d:'Role-specific information'},{n:'3',t:'Upload documents',d:'Birth certificate for verification'},{n:'4',t:'Admin approval',d:'Usually within 1-2 business days'}].map(s=>`
+            ${[{n:'1',t:'Choose your role',d:'Student'},{n:'2',t:'Fill in your details',d:'Role-specific information'},{n:'3',t:'Upload documents',d:'Birth certificate for verification'},{n:'4',t:'Admin approval',d:'Usually within 1-2 business days'}].map(s=>`
               <div style="display:flex;align-items:flex-start;gap:12px;">
                 <div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.2);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;">${s.n}</div>
                 <div>
@@ -420,7 +394,7 @@ export function renderRegister() {
           <div id="regError" style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px;font-size:13px;color:#dc2626;margin-bottom:16px;"></div>
 
           <!-- Role Tabs -->
-          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;background:var(--bg-secondary);padding:5px;border-radius:10px;margin-bottom:20px;" id="regRoleTabs">
+          <div style="display:grid;grid-template-columns:1fr;gap:6px;background:var(--bg-secondary);padding:5px;border-radius:10px;margin-bottom:20px;" id="regRoleTabs">
             ${roleTabs}
           </div>
 
@@ -457,7 +431,7 @@ export function renderRegister() {
                 <img id="profilePicPreview" src="https://i.imgur.com/x9wE0QT.png" alt="Preview" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--border);background:var(--bg-secondary);" onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
                 <div style="flex:1;">
                   <div style="border:2px dashed var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;background:var(--bg-secondary);" onclick="document.getElementById('profilePicInput').click()">
-                    <div style="font-size:32px;margin-bottom:4px;">📸</div>
+                    <div style="margin-bottom:4px;display:flex;justify-content:center;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
                     <div style="font-size:13px;font-weight:600;color:var(--text-primary);">Upload your photo</div>
                     <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">JPG, PNG (max 15MB)</div>
                   </div>

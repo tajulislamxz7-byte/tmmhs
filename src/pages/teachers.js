@@ -20,7 +20,9 @@ async function fetchTeachers() {
     qualification: t.qualification || 'B.Ed.',
     position: t.position || 'Teacher',
     department: t.department || 'General',
-    experience: '5+ years',
+    experience: t.experience || '5+ years',
+    joiningDate: t.joiningDate || t.createdAt ? new Date(t.joiningDate || t.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }) : '—',
+    role: t.role ? (t.role.charAt(0).toUpperCase() + t.role.slice(1)) : 'Teacher',
     status: 'Working',
     bio: t.bio || 'Dedicated educator committed to student success.',
     skills: t.skills || [],
@@ -113,10 +115,10 @@ export async function renderTeacherProfile(teacherId) {
               </div>
               <div style="color:rgba(255,255,255,0.7);margin-bottom:16px;">${teacher.id}</div>
               <div class="profile-detail-chips">
-                <span class="profile-chip"><span>📚</span> ${teacher.subject}</span>
-                <span class="profile-chip"><span>🎓</span> ${teacher.qualification}</span>
-                <span class="profile-chip"><span>⏱️</span> ${teacher.experience}</span>
-                <span class="profile-chip"><span>📅</span> Joined ${teacher.joiningDate}</span>
+                <span class="profile-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg> ${teacher.subject}</span>
+                <span class="profile-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> ${teacher.qualification}</span>
+                <span class="profile-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${teacher.experience}</span>
+                <span class="profile-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Joined ${teacher.joiningDate}</span>
               </div>
               <p style="color:rgba(255,255,255,0.8);margin-top:16px;max-width:560px;line-height:1.7;">${teacher.bio}</p>
               <div class="flex gap-3 mt-6 flex-wrap">
@@ -134,10 +136,10 @@ export async function renderTeacherProfile(teacherId) {
           <div class="card">
             <div class="card-header"><div class="font-semibold">Contact Information</div></div>
             <div class="card-body">
-              <div class="info-row"><span class="info-icon">📧</span><div><div class="text-xs text-muted">Email</div><div class="font-medium text-sm">${teacher.email}</div></div></div>
-              <div class="info-row"><span class="info-icon">📞</span><div><div class="text-xs text-muted">Phone</div><div class="font-medium text-sm">${teacher.phone}</div></div></div>
-              <div class="info-row"><span class="info-icon">📅</span><div><div class="text-xs text-muted">Joining Date</div><div class="font-medium text-sm">${teacher.joiningDate}</div></div></div>
-              <div class="info-row"><span class="info-icon">🏫</span><div><div class="text-xs text-muted">Role</div><div class="font-medium text-sm">${teacher.role}</div></div></div>
+              <div class="info-row"><span class="info-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span><div><div class="text-xs text-muted">Email</div><div class="font-medium text-sm">${teacher.email}</div></div></div>
+              <div class="info-row"><span class="info-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.1 1.18 2 2 0 012.11 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg></span><div><div class="text-xs text-muted">Phone</div><div class="font-medium text-sm">${teacher.phone}</div></div></div>
+              <div class="info-row"><span class="info-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><div><div class="text-xs text-muted">Joining Date</div><div class="font-medium text-sm">${teacher.joiningDate}</div></div></div>
+              <div class="info-row"><span class="info-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></span><div><div class="text-xs text-muted">Role</div><div class="font-medium text-sm">${teacher.role}</div></div></div>
             </div>
           </div>
           <div class="card">
@@ -185,9 +187,9 @@ function buildTeacherProfile(user) {
     bio: user.bio || 'Teacher',
     email: user.email,
     phone: user.phone || 'N/A',
-    joiningDate: user.joiningDate || 'N/A',
+    joiningDate: user.joiningDate || user.createdAt ? new Date(user.joiningDate || user.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }) : '—',
     status: 'Working',
-    role: user.role || 'Teacher',
+    role: user.role ? (user.role.charAt(0).toUpperCase() + user.role.slice(1)) : 'Teacher',
   };
 }
 
@@ -242,16 +244,27 @@ export function renderTeacherDashboard(loggedInUser) {
     </div>
   `).join('');
 
-  const noticeItems = notices.slice(0, 3).map(n => `
+  const noticeItems = notices.slice(0, 3).map(n => {
+    const categoryIcon = {
+      'Exam':        '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+      'Holiday':     '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+      'Emergency':   '<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+      'Scholarship': '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+      'Admission':   '<path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>',
+      'Results':     '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+    }[n.category] || '<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>';
+    return `
     <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg-secondary);border-radius:8px;">
-      <span style="font-size:18px;">${n.category === 'Exam' ? '📝' : n.category === 'Holiday' ? '🎉' : n.category === 'Emergency' ? '🚨' : n.category === 'Scholarship' ? '🎓' : n.category === 'Admission' ? '📋' : n.category === 'Results' ? '📊' : '📢'}</span>
+      <span style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:var(--primary-50);color:var(--primary);border-radius:8px;flex-shrink:0;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${categoryIcon}</svg>
+      </span>
       <div style="flex:1;">
         <div style="font-weight:600;font-size:13px;">${n.title}</div>
         <div style="font-size:11px;color:var(--text-muted);">${n.date}</div>
       </div>
       <span class="badge badge-${n.priority === 'urgent' ? 'danger' : n.priority === 'high' ? 'warning' : 'info'}">${n.priority}</span>
     </div>
-  `).join('');
+  `}).join('');
 
   return `
     <div class="page-container">
@@ -325,9 +338,9 @@ export function renderTeacherDashboard(loggedInUser) {
               <div class="card">
                 <div class="card-header"><div class="font-semibold">My Class — ${myClass.name}</div></div>
                 <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
-                  <div class="info-row"><span style="font-size:20px;">📊</span><div><div class="text-xs text-muted">Total Students</div><div class="font-medium text-sm">${totalStudents}</div></div></div>
-                  <div class="info-row"><span style="font-size:20px;">🏆</span><div><div class="text-xs text-muted">Achievements</div><div class="font-medium text-sm">${(myClass.achievements || []).slice(0, 2).join(', ')}</div></div></div>
-                  <div class="info-row"><span style="font-size:20px;">📅</span><div><div class="text-xs text-muted">Passing Year</div><div class="font-medium text-sm">${myClass.passingYear}</div></div></div>
+                  <div class="info-row"><span style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:var(--primary-50);color:var(--primary);border-radius:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></span><div><div class="text-xs text-muted">Total Students</div><div class="font-medium text-sm">${totalStudents}</div></div></div>
+                  <div class="info-row"><span style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:var(--warning-50,#fef3c7);color:var(--warning,#d97706);border-radius:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"/></svg></span><div><div class="text-xs text-muted">Achievements</div><div class="font-medium text-sm">${(myClass.achievements || []).slice(0, 2).join(', ')}</div></div></div>
+                  <div class="info-row"><span style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:var(--success-50,#d1fae5);color:var(--success,#059669);border-radius:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><div><div class="text-xs text-muted">Passing Year</div><div class="font-medium text-sm">${myClass.passingYear}</div></div></div>
                   <button class="btn btn-ghost w-full" onclick="navigate('batch-detail','${myClass.id}')" style="margin-top:4px;">View Batch Details →</button>
                 </div>
               </div>

@@ -122,24 +122,21 @@ app.post('/api/users/register', (req, res) => {
 
   // ======== CREATE NEW ACCOUNT ========
   // Only create new account if NO Student ID provided
-  const prefixMap = { student:'STU', teacher:'TCH', alumni:'ALM', staff:'STF', principal:'PRI' };
+  const prefixMap = { student:'STU', teacher:'TCH', staff:'STF', principal:'PRI' };
   const prefix = prefixMap[role] || 'STU';
   
-  // For Google Auth users with existing ID from localStorage, preserve their ID
-  // Otherwise generate new ID
-  const id = (data.googleAuth && data.id) 
-    ? data.id 
-    : `${prefix}-${new Date().getFullYear()}-${String(users.length + 1).padStart(4, '0')}`;
+  // Generate new ID
+  const id = `${prefix}-${new Date().getFullYear()}-${String(users.length + 1).padStart(4, '0')}`;
   
   const name = `${data.firstName} ${data.lastName}`.trim();
 
   // Strip "Select" placeholder values
   const clean = (v) => (!v || v === 'Select' || v === 'select') ? '' : v;
 
-  // Admin-created accounts (teacher, staff, principal) and Google Auth are auto-activated
-  // Student/alumni accounts need approval (unless Google Auth)
+  // Admin-created accounts (teacher, staff, principal) are auto-activated
+  // Student accounts need approval
   const autoActivateRoles = ['teacher', 'staff', 'principal'];
-  const initialStatus = (autoActivateRoles.includes(role) || data.googleAuth) ? 'active' : 'pending';
+  const initialStatus = autoActivateRoles.includes(role) ? 'active' : 'pending';
 
   const user = {
     id, name,
@@ -220,7 +217,6 @@ app.patch('/api/users/:id', (req, res) => {
   const users = readJSON('users.json');
   const idx = users.findIndex(u => u.id === req.params.id);
   if (idx === -1) {
-    console.log(`❌ User not found: ${req.params.id}`);
     return res.status(404).json({ 
       ok: false, 
       error: 'User not found in database. Please sign out and sign in again to sync your account.' 
@@ -229,7 +225,6 @@ app.patch('/api/users/:id', (req, res) => {
   Object.assign(users[idx], req.body);
   writeJSON('users.json', users);
   const updated = {...users[idx]}; delete updated.password;
-  console.log(`✅ User updated: ${req.params.id}`);
   res.json({ ok: true, user: updated });
 });
 
@@ -251,6 +246,15 @@ app.post('/api/notices', (req, res) => {
   res.json({ ok: true, notice });
 });
 
+app.put('/api/notices/:idx', (req, res) => {
+  const notices = readJSON('notices.json');
+  const idx = parseInt(req.params.idx);
+  if (idx < 0 || idx >= notices.length) return res.status(404).json({ ok: false, error: 'Not found' });
+  notices[idx] = { ...notices[idx], ...req.body };
+  writeJSON('notices.json', notices);
+  res.json({ ok: true, notice: notices[idx] });
+});
+
 app.delete('/api/notices/:idx', (req, res) => {
   const notices = readJSON('notices.json');
   notices.splice(parseInt(req.params.idx), 1);
@@ -269,6 +273,15 @@ app.post('/api/events', (req, res) => {
   res.json({ ok: true, event });
 });
 
+app.put('/api/events/:idx', (req, res) => {
+  const events = readJSON('events.json');
+  const idx = parseInt(req.params.idx);
+  if (idx < 0 || idx >= events.length) return res.status(404).json({ ok: false, error: 'Not found' });
+  events[idx] = { ...events[idx], ...req.body };
+  writeJSON('events.json', events);
+  res.json({ ok: true, event: events[idx] });
+});
+
 app.delete('/api/events/:idx', (req, res) => {
   const events = readJSON('events.json');
   events.splice(parseInt(req.params.idx), 1);
@@ -285,6 +298,18 @@ app.post('/api/batches', (req, res) => {
   batches.unshift(batch);
   writeJSON('batches.json', batches);
   res.json({ ok: true, batch });
+});
+
+app.put('/api/batches/:idx', (req, res) => {
+  const batches = readJSON('batches.json');
+  const idx = parseInt(req.params.idx);
+  if (batches[idx]) {
+    batches[idx] = req.body;
+    writeJSON('batches.json', batches);
+    res.json({ ok: true, batch: batches[idx] });
+  } else {
+    res.status(404).json({ ok: false, error: 'Batch not found' });
+  }
 });
 
 app.delete('/api/batches/:idx', (req, res) => {

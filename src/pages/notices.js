@@ -52,7 +52,7 @@ export async function renderNotices() {
 
         <!-- Empty State (hidden) -->
         <div id="noticeEmpty" class="hidden text-center" style="padding:60px 0;">
-          <div style="font-size:48px;margin-bottom:12px;">📋</div>
+          <div style="margin-bottom:12px;display:flex;justify-content:center;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
           <div class="font-semibold" style="font-size:18px;">No notices found</div>
           <div class="text-muted text-sm">Try a different filter</div>
         </div>

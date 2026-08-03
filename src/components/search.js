@@ -2,7 +2,7 @@
 // GLOBAL SEARCH COMPONENT
 // ================================================
 
-import { students, teachers, alumni, batches, notices, events, supportStaff } from '../data/schoolConfig.js';
+import { students, teachers, batches, notices, events, supportStaff } from '../data/schoolConfig.js';
 
 export function renderSearchModal() {
   return `
@@ -10,7 +10,7 @@ export function renderSearchModal() {
       <div class="search-modal" onclick="event.stopPropagation()">
         <div class="search-input-wrap">
           <svg class="search-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-          <input type="text" class="search-input" id="globalSearchInput" placeholder="Search students, teachers, alumni, notices..." oninput="handleSearch(this.value)">
+          <input type="text" class="search-input" id="globalSearchInput" placeholder="Search students, teachers, notices..." oninput="handleSearch(this.value)">
           <button class="search-clear hidden" id="searchClear" onclick="clearSearch()">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -20,7 +20,6 @@ export function renderSearchModal() {
           <button class="search-filter active" onclick="setSearchFilter('all', this)">All</button>
           <button class="search-filter" onclick="setSearchFilter('students', this)">Students</button>
           <button class="search-filter" onclick="setSearchFilter('teachers', this)">Teachers</button>
-          <button class="search-filter" onclick="setSearchFilter('alumni', this)">Alumni</button>
           <button class="search-filter" onclick="setSearchFilter('notices', this)">Notices</button>
           <button class="search-filter" onclick="setSearchFilter('events', this)">Events</button>
         </div>
@@ -28,7 +27,7 @@ export function renderSearchModal() {
           <div class="search-empty">
             <div style="margin-bottom:12px;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>
             <div class="font-semibold" style="font-size:16px;margin-bottom:6px;">Search anything</div>
-            <div class="text-muted text-sm">Find students, teachers, alumni, notices, events and more</div>
+            <div class="text-muted text-sm">Find students, teachers, notices, events and more</div>
           </div>
         </div>
       </div>
@@ -65,7 +64,7 @@ export function initSearch() {
       <div class="search-empty">
         <div style="margin-bottom:12px;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>
         <div class="font-semibold" style="font-size:16px;margin-bottom:6px;">Search anything</div>
-        <div class="text-muted text-sm">Find students, teachers, alumni, notices, events and more</div>
+        <div class="text-muted text-sm">Find students, teachers, notices, events and more</div>
       </div>`;
   };
 
@@ -94,10 +93,8 @@ export function initSearch() {
     const allUsers = serverUsers.length > 0 ? serverUsers : lsUsers;
     const lsStudents = allUsers.filter(u => u.role === 'student');
     const lsTeachers = allUsers.filter(u => u.role === 'teacher');
-    const lsAlumni   = allUsers.filter(u => u.role === 'alumni');
     const allStudents = [...students, ...lsStudents.filter(u => !students.find(s => s.id === u.id))];
     const allTeachers = [...teachers, ...lsTeachers.filter(u => !teachers.find(t => t.id === u.id))];
-    const allAlumni   = [...alumni,   ...lsAlumni.filter(u =>   !alumni.find(a => a.id === u.id))];
     const allNotices  = JSON.parse(localStorage.getItem('gfa_notices') || JSON.stringify(notices));
     const allEvents   = JSON.parse(localStorage.getItem('gfa_events')  || JSON.stringify(events));
 
@@ -116,15 +113,6 @@ export function initSearch() {
         (t.name||'').toLowerCase().includes(q) || (t.subject||'').toLowerCase().includes(q) ||
         (t.id||'').toLowerCase().includes(q) || (t.email||'').toLowerCase().includes(q)
       ).map(t => ({ ...t, type: 'teacher' }));
-      results = [...results, ...matched];
-    }
-
-    if (currentFilter === 'all' || currentFilter === 'alumni') {
-      const matched = allAlumni.filter(a =>
-        (a.name||'').toLowerCase().includes(q) || (a.profession||'').toLowerCase().includes(q) ||
-        (a.university||'').toLowerCase().includes(q) || (a.company||'').toLowerCase().includes(q) ||
-        (a.email||'').toLowerCase().includes(q)
-      ).map(a => ({ ...a, type: 'alumni' }));
       results = [...results, ...matched];
     }
 
@@ -177,15 +165,6 @@ export function initSearch() {
             <div class="text-xs text-muted">${[r.subject, r.qualification].filter(Boolean).join(' · ')}</div>
           </div>
           <span class="badge badge-purple">Teacher</span>
-        </div>`;
-      if (r.type === 'alumni') return `
-        <div class="search-result-item" onclick="closeSearch();navigate('alumni')">
-          <img src="${r.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed='+encodeURIComponent(r.name)}" class="avatar avatar-md" alt="${r.name}" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=default'">
-          <div class="search-result-info">
-            <div class="font-semibold text-sm">${highlight(r.name, query)}</div>
-            <div class="text-xs text-muted">${[r.profession, r.company, r.graduationYear?'Batch '+r.graduationYear:''].filter(Boolean).join(' · ')}</div>
-          </div>
-          <span class="badge badge-success">Alumni</span>
         </div>`;
       if (r.type === 'notice') return `
         <div class="search-result-item" onclick="closeSearch();navigate('notices')">

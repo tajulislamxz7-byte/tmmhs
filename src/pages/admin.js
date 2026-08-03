@@ -2,7 +2,7 @@
 // ADMIN DASHBOARD
 // ================================================
 
-import { students, teachers, supportStaff, alumni, batches, notices, events, results } from '../data/schoolConfig.js';
+import { students, teachers, supportStaff, batches, notices, events, results } from '../data/schoolConfig.js';
 import * as auth from '../utils/auth.js';
 import { api } from '../utils/api.js';
 import { handleProfilePictureUpload, getDefaultAvatar } from '../utils/imageHandler.js';
@@ -15,18 +15,19 @@ const ICONS = {
   students:  `<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`,
   teachers:  `<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>`,
   staff:     `<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>`,
-  alumni:    `<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>`,
   batches:   `<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>`,
   results:   `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>`,
   gallery:   `<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>`,
   notices:   `<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>`,
   events:    `<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>`,
   messages:  `<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>`,
+  info:      `<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>`,
   admissions:`<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>`,
   roles:     `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>`,
   settings:  `<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>`,
   home:      `<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>`,
   users2:    `<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>`,
+  image:     `<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>`,
 };
 
 // ── Notification Helper ──
@@ -44,13 +45,13 @@ const ADMIN_NAV = [
   {key:'students',    label:'Students',     icon:'students'},
   {key:'teachers',    label:'Teachers',     icon:'teachers'},
   {key:'staff',       label:'Staff',        icon:'staff'},
-  {key:'alumni',      label:'Alumni',       icon:'alumni'},
   {key:'batches',     label:'Batches',      icon:'batches'},
   {key:'results',     label:'Results',      icon:'results'},
   {key:'notices',     label:'Notices',      icon:'notices'},
   {key:'events',      label:'Events',       icon:'events'},
   {key:'gallery',     label:'Gallery',      icon:'image'},
   {key:'messages',    label:'Messages',     icon:'messages'},
+  {key:'aboutpage',   label:'About Page',   icon:'info'},
   {key:'principal',   label:'Principal',    icon:'users2'},
   {key:'roles',       label:'Users',        icon:'roles'},
   {key:'settings',    label:'Settings',     icon:'settings'},
@@ -71,7 +72,7 @@ const _cache = {
 };
 
 async function _loadCache() {
-  const [users, notices, events, batches, exams, results, settings, notifications, gallery] = await Promise.all([
+  const [users, notices, events, batches, exams, results, settings, notifications, gallery, conversations] = await Promise.all([
     api.getUsers(),
     api.getNotices(),
     api.getEvents(),
@@ -81,8 +82,10 @@ async function _loadCache() {
     api.getSettings(),
     api.getNotifications(),
     api.getGallery(),
+    api.getConversations(),
   ]);
   _cache.users          = users          || [];
+  _cache.allUsers       = users          || [];
   _cache.notices        = notices        || [];
   _cache.events         = events         || [];
   _cache.batches        = batches        || [];
@@ -91,9 +94,12 @@ async function _loadCache() {
   _cache.settings       = settings       || {};
   _cache.notifications  = notifications  || [];
   _cache.gallery        = gallery        || [];
+  _cache.conversations  = conversations  || [];
 }
 
 export async function renderAdminDashboard() {
+  // Reset to dashboard on initial load
+  adminTab = 'dashboard';
   await _loadCache();
 
   const user = auth.getCurrentUser();
@@ -125,19 +131,19 @@ export async function renderAdminDashboard() {
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:220px 1fr;flex:1;min-height:calc(100vh - 56px);">
+      <div style="display:grid;grid-template-columns:220px 1fr;flex:1;min-height:calc(100vh - 56px);max-height:calc(100vh - 56px);overflow:hidden;">
         <!-- Admin Sidebar -->
-        <div style="background:#1e293b;padding:12px 8px;overflow-y:auto;">
+        <div style="background:#1e293b;padding:20px 12px;overflow-y:auto;position:sticky;top:56px;height:calc(100vh - 56px);">
           ${ADMIN_NAV.map(item=>`
-            <div class="${item.key===adminTab?'admin-nav-item active':'admin-nav-item'}" onclick="switchAdminTab('${item.key}',this)" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;margin-bottom:2px;color:${item.key===adminTab?'white':'rgba(255,255,255,0.65)'};">
-              <span style="display:flex;align-items:center;flex-shrink:0;">${SVG(ICONS[item.icon]||ICONS.dashboard, 16, item.key===adminTab?'white':'rgba(255,255,255,0.65)')}</span>
+            <div class="${item.key===adminTab?'admin-nav-item active':'admin-nav-item'}" onclick="switchAdminTab('${item.key}',this)" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;margin-bottom:6px;color:${item.key===adminTab?'white':'rgba(255,255,255,0.65)'};">
+              <span style="display:flex;align-items:center;flex-shrink:0;">${SVG(ICONS[item.icon]||ICONS.dashboard, 18, item.key===adminTab?'white':'rgba(255,255,255,0.65)')}</span>
               ${item.label}
             </div>
           `).join('')}
         </div>
 
         <!-- Admin Content -->
-        <div style="padding:28px;background:var(--bg-secondary);overflow-y:auto;" id="adminContent">
+        <div style="padding:40px 28px 28px 28px;background:var(--bg-secondary);overflow-y:auto;height:calc(100vh - 56px);" id="adminContent">
           ${renderAdminTab('dashboard')}
         </div>
       </div>
@@ -151,12 +157,13 @@ function renderAdminTab(tab) {
     case 'students':     return renderAdminStudents();
     case 'teachers':     return renderAdminTeachers();
     case 'staff':        return renderAdminStaff();
-    case 'alumni':       return renderAdminAlumni();
     case 'batches':      return renderAdminBatches();
     case 'notices':      return renderAdminNoticesManager();
     case 'events':       return renderAdminEventsManager();
     case 'gallery':      return renderAdminGallery();
     case 'results':      return renderAdminResults();
+    case 'messages':     return renderAdminMessages();
+    case 'aboutpage':    return renderAdminAboutPage();
     case 'principal':    return renderAdminPrincipal();
     case 'settings':     return renderAdminSettings();
     case 'roles':        return renderAdminUsers();
@@ -168,6 +175,14 @@ async function _refreshTab(tab) {
   await _loadCache();
   const content = document.getElementById('adminContent');
   if (content) content.innerHTML = renderAdminTab(tab || adminTab);
+  
+  // Update sidebar active state to match current tab
+  document.querySelectorAll('.admin-nav-item').forEach(el => {
+    el.classList.remove('active');
+    if (el.getAttribute('onclick') && el.getAttribute('onclick').includes(`'${tab || adminTab}'`)) {
+      el.classList.add('active');
+    }
+  });
 }
 
 function renderAdminMain() {
@@ -224,7 +239,6 @@ function renderAdminMain() {
               {l:'Total Registered Users', v: allUsers.length,                                               c:'var(--primary)'},
               {l:'Active Students',        v: studentCount,                                                   c:'var(--success)'},
               {l:'Active Teachers',        v: teacherCount,                                                   c:'var(--secondary)'},
-              {l:'Alumni',                 v: allUsers.filter(u=>u.role==='alumni').length,                   c:'var(--accent)'},
               {l:'Pending Approval',       v: pendingCount,                                                   c:pendingCount>0?'var(--warning)':'var(--text-muted)'},
             ].map(s=>`
               <div class="flex items-center justify-between mb-3 pb-3 border-b" style="border-color:var(--border);">
@@ -303,7 +317,7 @@ function renderAdminStudents() {
       <div class="card">
         ${studentUsers.length === 0
           ? `<div class="card-body text-center text-muted" style="padding:60px;">
-              <div style="font-size:48px;margin-bottom:12px;">👨‍🎓</div>
+              <div style="margin-bottom:12px;display:flex;justify-content:center;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
               <div class="font-semibold" style="font-size:18px;">No students yet</div>
               <div class="text-sm mt-2 mb-4">Start by adding student records to your database</div>
               <button class="btn btn-primary" onclick="openAddStudentModal()">
@@ -320,23 +334,11 @@ function renderAdminStudents() {
   `;
 }
 
-function _alumniRow(a) {
-  const statusBadge = a.status==='active'?'success':a.status==='pending'?'warning':'danger';
-  return '<tr>'
-    + '<td><div class="flex items-center gap-3"><img src="'+a.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://i.imgur.com/x9wE0QT.png\'"><div><div class="font-semibold text-sm">'+a.name+'</div><div class="text-xs text-muted">'+a.email+'</div></div></div></td>'
-    + '<td style="font-family:monospace;font-size:12px;">'+a.id+'</td>'
-    + '<td>'+(a.graduationYear||'—')+'</td>'
-    + '<td>'+(a.profession||'—')+'</td>'
-    + '<td><span class="badge badge-'+statusBadge+'">'+a.status+'</span></td>'
-    + '<td><div style="display:flex;gap:4px;">'+_approveBtn(a.id,a.status)+_userActions(a.id,a.name,a.status)+'</div></td>'
-    + '</tr>';
-}
-
 
 
 function _pendingUserRow(u) {
   const approveIcon = SVG('<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>', 13, 'white');
-  const roleBadge = u.role==='principal'?'warning':u.role==='teacher'?'purple':u.role==='alumni'?'success':u.role==='staff'?'gray':'primary';
+  const roleBadge = u.role==='principal'?'warning':u.role==='teacher'?'purple':u.role==='staff'?'gray':'primary';
   return '<tr>'
     + '<td><div style="display:flex;align-items:center;gap:10px;"><img src="'+u.avatar+'" class="avatar avatar-sm" onerror="this.src=\'https://i.imgur.com/x9wE0QT.png\'"><div><div class="font-semibold text-sm">'+u.name+'</div><div class="text-xs text-muted">'+u.id+'</div></div></div></td>'
     + '<td><span class="badge badge-'+roleBadge+'" style="text-transform:capitalize;">'+u.role+'</span></td>'
@@ -388,7 +390,10 @@ function _noticeRow(n, i) {
     + '<td><span class="badge badge-primary">'+n.category+'</span></td>'
     + '<td><span class="badge badge-'+priorityBadge+'">'+n.priority+'</span></td>'
     + '<td>'+n.date+'</td>'
-    + '<td><button class="btn btn-danger btn-sm" onclick="deleteNotice('+i+')">Delete</button></td>'
+    + '<td><div style="display:flex;gap:6px;">'
+    + '<button class="btn btn-secondary btn-sm" onclick="editNotice('+i+')">Edit</button>'
+    + '<button class="btn btn-danger btn-sm" onclick="deleteNotice('+i+')">Delete</button>'
+    + '</div></td>'
     + '</tr>';
 }
 
@@ -398,7 +403,10 @@ function _eventRow(e, i) {
     + '<td>'+e.date+'</td>'
     + '<td><span class="badge badge-primary">'+e.category+'</span></td>'
     + '<td>'+e.location+'</td>'
-    + '<td><button class="btn btn-danger btn-sm" onclick="deleteEvent('+i+')">Delete</button></td>'
+    + '<td><div style="display:flex;gap:6px;">'
+    + '<button class="btn btn-secondary btn-sm" onclick="editEvent('+i+')">Edit</button>'
+    + '<button class="btn btn-danger btn-sm" onclick="deleteEvent('+i+')">Delete</button>'
+    + '</div></td>'
     + '</tr>';
 }
 
@@ -418,15 +426,24 @@ function _examCard(e, i) {
 }
 
 function _batchCard(b, i) {
-  return '<div class="card">'
+  const achievementsHTML = (b.achievements && b.achievements.length > 0)
+    ? '<div class="mb-3"><div class="text-xs font-semibold text-muted mb-2">Achievements:</div>'
+      + '<ul style="list-style:disc;padding-left:20px;margin:0;">'
+      + b.achievements.map(ach => '<li class="text-xs text-secondary" style="margin-bottom:4px;">'+ach+'</li>').join('')
+      + '</ul></div>'
+    : '';
+  
+  return '<div class="card" style="border:none;">'
     + '<div class="card-body">'
     + '<div class="flex items-center justify-between mb-3">'
     + '<div><div class="font-bold" style="font-size:18px;">'+b.name+'</div><div class="text-xs text-muted">Passing Year: '+b.passingYear+'</div></div>'
     + '<span class="badge badge-primary">'+(b.totalStudents||0)+' students</span>'
     + '</div>'
     + '<p class="text-sm text-secondary mb-3">'+(b.description||'')+'</p>'
+    + achievementsHTML
     + '<div class="text-xs text-muted mb-4">Class Teacher: '+(b.classTeacher||'—')+'</div>'
-    + '<div class="flex gap-2 border-t border" style="padding-top:12px;">'
+    + '<div class="flex gap-2" style="padding-top:12px;border-top:1px solid var(--border);">'
+    + '<button class="btn btn-secondary btn-sm" onclick="editBatch('+i+')">Edit</button>'
     + '<button class="btn btn-danger btn-sm" onclick="deleteBatch('+i+')">Delete</button>'
     + '</div></div></div>';
 }
@@ -477,7 +494,7 @@ function renderAdminTeachers() {
                   <div style="flex:1;">
                     <div style="border:2px dashed var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;background:var(--bg-secondary);" 
                          onclick="document.getElementById('teacherPicInput').click()">
-                      <div style="font-size:28px;margin-bottom:4px;">📸</div>
+                      <div style="margin-bottom:4px;display:flex;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
                       <div style="font-size:13px;font-weight:600;color:var(--text-primary);">Upload photo</div>
                       <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">JPG, PNG (max 15MB)</div>
                     </div>
@@ -586,7 +603,7 @@ function renderAdminStaff() {
                   <div style="flex:1;">
                     <div style="border:2px dashed var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;background:var(--bg-secondary);" 
                          onclick="document.getElementById('staffPicInput').click()">
-                      <div style="font-size:28px;margin-bottom:4px;">📸</div>
+                      <div style="margin-bottom:4px;display:flex;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
                       <div style="font-size:13px;font-weight:600;color:var(--text-primary);">Upload photo</div>
                       <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">JPG, PNG (max 15MB)</div>
                     </div>
@@ -693,30 +710,134 @@ function renderAdminPrincipal() {
           </div>
           <div class="card-body">
             <div class="flex items-center gap-4 mb-4">
-              <img src="${currentPrincipal.avatar}" class="avatar avatar-lg" onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
+              <img src="${currentPrincipal.avatar}" class="avatar avatar-lg" id="principalDisplayAvatar" onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
               <div>
                 <div style="font-size:18px;font-weight:700;">${currentPrincipal.name}</div>
                 <div style="font-size:13px;color:var(--text-muted);">${currentPrincipal.email}</div>
                 <div style="font-size:12px;color:var(--text-muted);font-family:monospace;">${currentPrincipal.id}</div>
               </div>
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px;">
               <div>
                 <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">PHONE</div>
                 <div style="font-size:13px;font-weight:600;">${currentPrincipal.phone || '—'}</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">QUALIFICATION</div>
+                <div style="font-size:13px;font-weight:600;">${currentPrincipal.qualification || '—'}</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">BLOOD GROUP</div>
+                <div style="font-size:13px;font-weight:600;">${currentPrincipal.bloodGroup || '—'}</div>
               </div>
               <div>
                 <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">CREATED</div>
                 <div style="font-size:13px;font-weight:600;">${new Date(currentPrincipal.createdAt).toLocaleDateString()}</div>
               </div>
             </div>
-            <div style="display:flex;gap:8px;">
+            ${currentPrincipal.bio ? `<div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;padding:10px;background:var(--bg-secondary);border-radius:8px;">${currentPrincipal.bio}</div>` : ''}
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="showEditPrincipalForm('${currentPrincipal.id}')">
+                ${SVG('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',14,'white')} Edit Principal
+              </button>
               <button class="btn btn-warning" onclick="demotePrincipal('${currentPrincipal.id}', '${currentPrincipal.name}')">
                 ${SVG('<path d="M7 10l5 5 5-5"/>',14,'white')} Demote to Teacher
               </button>
-              <button class="btn btn-secondary" onclick="adminEditUser('${currentPrincipal.id}')">
-                ${SVG('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',14)} Edit Details
-              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit Principal Form (hidden by default) -->
+        <div id="editPrincipalForm" style="display:none;margin-bottom:20px;">
+          <div class="card" style="border-left:4px solid var(--primary);">
+            <div class="card-header">
+              <div class="flex items-center justify-between">
+                <div class="font-semibold">${SVG('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',16)} Edit Principal Details</div>
+                <button class="btn btn-ghost btn-sm" onclick="cancelPrincipalEdit()">Cancel</button>
+              </div>
+            </div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:16px;">
+              <!-- Profile Picture -->
+              <div>
+                <label class="form-label">Profile Picture</label>
+                <div style="display:flex;align-items:center;gap:16px;">
+                  <img id="ep_avatarPreview" src="${currentPrincipal.avatar}" 
+                       style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--border);"
+                       onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
+                  <div style="flex:1;">
+                    <div style="border:2px dashed var(--border);border-radius:12px;padding:14px;text-align:center;cursor:pointer;background:var(--bg-secondary);"
+                         onclick="document.getElementById('ep_avatarInput').click()">
+                      <div style="margin-bottom:2px;display:flex;justify-content:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+                      <div style="font-size:13px;font-weight:600;">Change Photo</div>
+                      <div style="font-size:11px;color:var(--text-muted);">JPG, PNG (max 15MB)</div>
+                    </div>
+                    <input type="file" id="ep_avatarInput" accept="image/*" style="display:none;"
+                           onchange="previewPrincipalAvatar(this)">
+                  </div>
+                </div>
+              </div>
+              <!-- Name -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                  <label class="form-label">First Name *</label>
+                  <input class="form-input" id="ep_first" value="${currentPrincipal.firstName || currentPrincipal.name?.split(' ')[0] || ''}">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Last Name *</label>
+                  <input class="form-input" id="ep_last" value="${currentPrincipal.lastName || currentPrincipal.name?.split(' ').slice(1).join(' ') || ''}">
+                </div>
+              </div>
+              <!-- Contact -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                  <label class="form-label">Email *</label>
+                  <input class="form-input" id="ep_email" type="email" value="${currentPrincipal.email || ''}">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Phone</label>
+                  <input class="form-input" id="ep_phone" type="tel" value="${currentPrincipal.phone || ''}">
+                </div>
+              </div>
+              <!-- Academic -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <!-- Qualification + Blood Group -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                  <label class="form-label">Qualification</label>
+                  <input class="form-input" id="ep_qualification" placeholder="e.g. M.Ed, Ph.D" value="${currentPrincipal.qualification || ''}">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Blood Group</label>
+                  <select class="form-input form-select" id="ep_blood">
+                    <option value="">Select</option>
+                    ${['A+','A-','B+','B-','AB+','AB-','O+','O-'].map(bg => `<option value="${bg}" ${(currentPrincipal.bloodGroup||'')=== bg ? 'selected' : ''}>${bg}</option>`).join('')}
+                  </select>
+                </div>
+              </div>
+              <!-- Joining Date + Experience -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                  <label class="form-label">Joining Date</label>
+                  <input class="form-input" id="ep_joiningDate" type="date" value="${currentPrincipal.joiningDate || ''}">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Experience</label>
+                  <input class="form-input" id="ep_experience" placeholder="e.g. 10+ years" value="${currentPrincipal.experience || ''}">
+                </div>
+              </div>
+              <!-- Bio -->
+              <div class="form-group">
+                <label class="form-label">Bio / Message</label>
+                <textarea class="form-input" id="ep_bio" rows="3" placeholder="Principal's message or bio shown on the website...">${currentPrincipal.bio || ''}</textarea>
+              </div>
+              <input type="hidden" id="ep_id" value="${currentPrincipal.id}">
+              <!-- Actions -->
+              <div class="flex gap-3">
+                <button class="btn btn-primary" onclick="savePrincipalEdit()">
+                  ${SVG('<polyline points="20 6 9 17 4 12"/>',14,'white')} Save Changes
+                </button>
+                <button class="btn btn-secondary" onclick="cancelPrincipalEdit()">Cancel</button>
+              </div>
             </div>
           </div>
         </div>
@@ -724,7 +845,7 @@ function renderAdminPrincipal() {
         <!-- No Principal -->
         <div class="card" style="margin-bottom:20px;border-left:4px solid var(--warning);">
           <div class="card-body" style="text-align:center;padding:40px;">
-            <div style="font-size:48px;margin-bottom:16px;">👤</div>
+            <div style="margin-bottom:16px;display:flex;justify-content:center;"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
             <div style="font-size:18px;font-weight:700;margin-bottom:8px;">No Principal Assigned</div>
             <div style="font-size:13px;color:var(--text-muted);margin-bottom:24px;">
               Create a new principal account or promote an existing teacher to principal role.
@@ -769,7 +890,7 @@ function renderAdminPrincipal() {
                   <div style="flex:1;">
                     <div style="border:2px dashed var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;background:var(--bg-secondary);" 
                          onclick="document.getElementById('principalPicInput').click()">
-                      <div style="font-size:28px;margin-bottom:4px;">📸</div>
+                      <div style="margin-bottom:4px;display:flex;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
                       <div style="font-size:13px;font-weight:600;color:var(--text-primary);">Upload photo</div>
                       <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">JPG, PNG (max 15MB)</div>
                     </div>
@@ -858,40 +979,17 @@ function renderAdminPrincipal() {
     </div>
   `;
 }
-function renderAdminAlumni() {
-  const allUsers = _cache.users;
-  // Case-insensitive role filtering for Google Sign-In compatibility
-  const alumniUsers = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'alumni');
-  return `
-    <div>
-      <div class="flex items-center justify-between mb-6">
-        <h1 style="font-size:22px;font-weight:800;">Manage Alumni</h1>
-      </div>
-      <div class="card">
-        ${alumniUsers.length === 0
-          ? `<div class="card-body text-center text-muted" style="padding:60px;">No alumni registered yet.</div>`
-          : `<div class="table-container"><table>
-            <thead><tr><th>Name</th><th>ID</th><th>Graduation Year</th><th>Profession</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody>${alumniUsers.map(a => _alumniRow(a)).join('')}</tbody>
-          </table></div>`
-        }
-      </div>
-    </div>
-  `;
-}
-
 function renderAdminBatches() {
   const batches = _cache.batches;
   return `
     <div>
       <div class="flex items-center justify-between mb-6">
         <h1 style="font-size:22px;font-weight:800;">Manage Batches</h1>
-        <button class="btn btn-primary" onclick="document.getElementById('addBatchForm').style.display=document.getElementById('addBatchForm').style.display==='none'?'block':'none'">+ Create Batch</button>
+        <button class="btn btn-primary" onclick="showNewBatchForm()">+ Create Batch</button>
       </div>
 
-      <!-- Create Batch Form -->
       <div class="card mb-6" id="addBatchForm" style="display:none;">
-        <div class="card-header"><div class="font-semibold">New Batch</div></div>
+        <div class="card-header"><div class="font-semibold" id="batchFormTitle">New Batch</div></div>
         <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div class="form-group"><label class="form-label">Batch Name *</label>
@@ -907,9 +1005,21 @@ function renderAdminBatches() {
           </div>
           <div class="form-group"><label class="form-label">Description</label>
             <textarea class="form-input" id="b_desc" rows="2" placeholder="Batch description..."></textarea></div>
+          
+          <!-- Achievements Section -->
+          <div class="form-group">
+            <label class="form-label">Achievements</label>
+            <div id="b_achievements_list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;"></div>
+            <div style="display:flex;gap:8px;">
+              <input class="form-input" id="b_achievement_input" placeholder="Add an achievement..." style="flex:1;">
+              <button type="button" class="btn btn-secondary" onclick="addBatchAchievement()">+ Add</button>
+            </div>
+          </div>
+          
+          <input type="hidden" id="b_editIndex" value="">
           <div class="flex gap-3">
-            <button class="btn btn-primary" onclick="saveBatch()">Create Batch</button>
-            <button class="btn btn-secondary" onclick="document.getElementById('addBatchForm').style.display='none'">Cancel</button>
+            <button class="btn btn-primary" onclick="saveBatch()">Save Batch</button>
+            <button class="btn btn-secondary" onclick="cancelBatchForm()">Cancel</button>
           </div>
         </div>
       </div>
@@ -1293,13 +1403,298 @@ window.saveMarks = async function() {
   showToast('Marks saved! Use "Publish" to make results visible to students.','success');
 };
 
+// ═══════════════════════════════════════════════════════════
+// MESSAGES
+// ═══════════════════════════════════════════════════════════
+function renderAdminMessages() {
+  const conversations = _cache.conversations || [];
+  const users = _cache.allUsers || [];
+
+  return `
+    <div>
+      <div style="margin-bottom:var(--space-8);">
+        <h2 style="font-size:var(--text-2xl);font-weight:700;margin-bottom:4px;">Messages</h2>
+        <p style="color:var(--text-secondary);font-size:var(--text-sm);">View and manage all conversations</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid-3 gap-4 mb-6">
+        <div class="card">
+          <div class="card-body">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:44px;height:44px;border-radius:12px;background:var(--primary-50);display:flex;align-items:center;justify-content:center;">
+                ${SVG(ICONS.messages, 22, 'var(--primary)')}
+              </div>
+              <div>
+                <div style="font-size:var(--text-2xl);font-weight:900;color:var(--text-primary);">${conversations.length}</div>
+                <div style="font-size:var(--text-xs);color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Total Conversations</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:44px;height:44px;border-radius:12px;background:#eff6ff;display:flex;align-items:center;justify-content:center;">
+                ${SVG(ICONS.users2, 22, '#2563eb')}
+              </div>
+              <div>
+                <div style="font-size:var(--text-2xl);font-weight:900;color:var(--text-primary);">${users.filter(u => u.role === 'student').length}</div>
+                <div style="font-size:var(--text-xs);color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Students</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:44px;height:44px;border-radius:12px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;">
+                ${SVG(ICONS.teachers, 22, '#059669')}
+              </div>
+              <div>
+                <div style="font-size:var(--text-2xl);font-weight:900;color:var(--text-primary);">${users.filter(u => u.role === 'teacher').length}</div>
+                <div style="font-size:var(--text-xs);color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Teachers</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conversations List -->
+      <div class="card">
+        <div class="card-header">
+          <div class="font-semibold">All Conversations</div>
+        </div>
+        <div class="card-body" style="padding:0;">
+          ${conversations.length === 0 ? `
+            <div style="text-align:center;padding:var(--space-12);color:var(--text-muted);">
+              <div style="margin-bottom:var(--space-4);display:flex;justify-content:center;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+              <div style="font-weight:600;margin-bottom:var(--space-2);">No conversations yet</div>
+              <div style="font-size:var(--text-sm);">Messages between users will appear here</div>
+            </div>
+          ` : `
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Participants</th>
+                    <th>Last Message</th>
+                    <th>Messages</th>
+                    <th>Last Activity</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${conversations.map(conv => {
+                    const participant1 = users.find(u => u.id === conv.user1) || {};
+                    const participant2 = users.find(u => u.id === conv.user2) || {};
+                    const lastMsg = conv.messages && conv.messages.length > 0 ? conv.messages[conv.messages.length - 1] : null;
+                    
+                    return `
+                      <tr>
+                        <td>
+                          <div style="display:flex;flex-direction:column;gap:4px;">
+                            <div style="font-weight:600;font-size:13px;">${participant1.name || 'Unknown'} ↔ ${participant2.name || 'Unknown'}</div>
+                            <div style="font-size:11px;color:var(--text-muted);">${participant1.role || ''} & ${participant2.role || ''}</div>
+                          </div>
+                        </td>
+                        <td>
+                          <div style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;">
+                            ${lastMsg ? lastMsg.text : 'No messages'}
+                          </div>
+                        </td>
+                        <td><span class="badge badge-primary">${conv.messages ? conv.messages.length : 0}</span></td>
+                        <td style="font-size:12px;color:var(--text-secondary);">
+                          ${lastMsg ? new Date(lastMsg.timestamp).toLocaleDateString() : '-'}
+                        </td>
+                        <td>
+                          <button class="btn btn-sm btn-secondary" onclick="viewConversation('${conv.id}')">View</button>
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          `}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+window.viewConversation = function(convId) {
+  window.navigate('messages');
+  showToast('Opening conversation...', 'info');
+};
+
+// ═══════════════════════════════════════════════════════════
+// ABOUT PAGE EDITOR
+// ═══════════════════════════════════════════════════════════
+function renderAdminAboutPage() {
+  const s = _cache.settings;
+  const aboutPage = s.aboutPage || {};
+  const faqs = aboutPage.faqs || [];
+
+  return `
+    <div>
+      <div style="margin-bottom:var(--space-8);">
+        <h2 style="font-size:var(--text-2xl);font-weight:700;margin-bottom:4px;">About Page Content</h2>
+        <p style="color:var(--text-secondary);font-size:var(--text-sm);">Edit all sections displayed on the About page</p>
+      </div>
+
+      <!-- Mission, Vision, Values, History -->
+      <div class="card" style="margin-bottom:var(--space-6);">
+        <div class="card-header"><div class="font-semibold">Core Sections</div></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">Our History</label>
+            <textarea id="aboutHistory" class="form-input form-textarea" rows="4" placeholder="School history text...">${aboutPage.history || ''}</textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mission Statement</label>
+            <textarea id="aboutMission" class="form-input form-textarea" rows="3" placeholder="Mission statement...">${aboutPage.mission || ''}</textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Vision Statement</label>
+            <textarea id="aboutVision" class="form-input form-textarea" rows="3" placeholder="Vision statement...">${aboutPage.vision || ''}</textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Core Values</label>
+            <textarea id="aboutValues" class="form-input form-textarea" rows="3" placeholder="Core values...">${aboutPage.coreValues || ''}</textarea>
+          </div>
+          <button class="btn btn-primary" onclick="saveAboutSections()">Save Core Sections</button>
+        </div>
+      </div>
+
+      <!-- FAQs -->
+      <div class="card">
+        <div class="card-header">
+          <div class="font-semibold">Frequently Asked Questions</div>
+        </div>
+        <div class="card-body">
+          <div id="faqsContainer" style="display:flex;flex-direction:column;gap:var(--space-4);margin-bottom:var(--space-4);">
+            ${faqs.map((faq, i) => `
+              <div class="card" style="background:var(--bg-secondary);">
+                <div class="card-body" style="padding:var(--space-4);">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-3);">
+                    <div class="font-semibold text-sm">FAQ ${i + 1}</div>
+                    <button class="btn btn-sm" style="background:var(--danger);color:white;" onclick="deleteFAQ(${i})">Delete</button>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Question</label>
+                    <input type="text" id="faqQ${i}" class="form-input" value="${faq.question || ''}" placeholder="Enter question...">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Answer</label>
+                    <textarea id="faqA${i}" class="form-input form-textarea" rows="3" placeholder="Enter answer...">${faq.answer || ''}</textarea>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          <button class="btn btn-secondary" onclick="addFAQ()">+ Add FAQ</button>
+          <button class="btn btn-primary" onclick="saveFAQs()">Save All FAQs</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+window.saveAboutSections = async function() {
+  const history = document.getElementById('aboutHistory').value;
+  const mission = document.getElementById('aboutMission').value;
+  const vision = document.getElementById('aboutVision').value;
+  const coreValues = document.getElementById('aboutValues').value;
+
+  const settings = await api.getSettings();
+  settings.aboutPage = settings.aboutPage || {};
+  settings.aboutPage.history = history;
+  settings.aboutPage.mission = mission;
+  settings.aboutPage.vision = vision;
+  settings.aboutPage.coreValues = coreValues;
+
+  const res = await api.saveSettings(settings);
+  if (res) {
+    _cache.settings = settings;
+    showToast('About sections saved successfully!', 'success');
+  }
+};
+
+window.saveFAQs = async function() {
+  const settings = await api.getSettings();
+  settings.aboutPage = settings.aboutPage || {};
+  const existingFAQs = settings.aboutPage.faqs || [];
+  
+  const faqs = [];
+  for (let i = 0; i < existingFAQs.length; i++) {
+    const qEl = document.getElementById(`faqQ${i}`);
+    const aEl = document.getElementById(`faqA${i}`);
+    if (qEl && aEl) {
+      faqs.push({
+        question: qEl.value,
+        answer: aEl.value
+      });
+    }
+  }
+
+  settings.aboutPage.faqs = faqs;
+  const res = await api.saveSettings(settings);
+  if (res) {
+    _cache.settings = settings;
+    showToast('FAQs saved successfully!', 'success');
+    switchAdminTab('aboutpage');
+  }
+};
+
+window.addFAQ = async function() {
+  const settings = await api.getSettings();
+  settings.aboutPage = settings.aboutPage || {};
+  settings.aboutPage.faqs = settings.aboutPage.faqs || [];
+  settings.aboutPage.faqs.push({ question: '', answer: '' });
+  
+  const res = await api.saveSettings(settings);
+  if (res) {
+    _cache.settings = settings;
+    switchAdminTab('aboutpage');
+    showToast('New FAQ added!', 'success');
+  }
+};
+
+window.deleteFAQ = async function(index) {
+  if (!confirm('Delete this FAQ?')) return;
+  
+  const settings = await api.getSettings();
+  settings.aboutPage = settings.aboutPage || {};
+  settings.aboutPage.faqs = settings.aboutPage.faqs || [];
+  settings.aboutPage.faqs.splice(index, 1);
+  
+  const res = await api.saveSettings(settings);
+  if (res) {
+    _cache.settings = settings;
+    switchAdminTab('aboutpage');
+    showToast('FAQ deleted!', 'success');
+  }
+};
+
 
 function renderAdminSettings() {
   const s = _cache.settings;
+  const photoPreviewHtml = s.schoolPhoto
+    ? `<div style="position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--border);margin-bottom:8px;">
+         <img id="schoolPhotoPreview" src="${s.schoolPhoto}" alt="School Photo" style="width:100%;height:180px;object-fit:cover;display:block;">
+         <div style="position:absolute;top:8px;right:8px;">
+           <button class="btn btn-danger btn-sm" onclick="removeSchoolPhoto()">Remove</button>
+         </div>
+       </div>`
+    : `<img id="schoolPhotoPreview" src="" alt="" style="display:none;width:100%;height:180px;object-fit:cover;border-radius:12px;border:1px solid var(--border);margin-bottom:8px;">`;
+
   return `
     <div>
       <h1 style="font-size:22px;font-weight:800;margin-bottom:24px;">School Settings</h1>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+
+      <!-- Row 1: School Info + School Photo side by side -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
 
         <div class="card">
           <div class="card-header"><div class="font-semibold">School Information</div></div>
@@ -1318,15 +1713,30 @@ function renderAdminSettings() {
               <input class="form-input" id="s_website" value="${s.website || 'www.tiarkhali-mmhs.edu.bd'}"></div>
             <div class="form-group"><label class="form-label">Founded Year</label>
               <input class="form-input" id="s_founded" value="${s.founded || '1985'}"></div>
-            <div class="form-group"><label class="form-label">Principal Name</label>
-              <input class="form-input" id="s_principalName" value="${s.principalName || ''}"></div>
-            <div class="form-group"><label class="form-label">Principal's Message</label>
-              <textarea class="form-input" id="s_principalMessage" rows="4" style="resize:vertical;">${s.principalMessage || ''}</textarea></div>
             <button class="btn btn-primary" onclick="saveSettings()">Save School Info</button>
           </div>
         </div>
 
         <div style="display:flex;flex-direction:column;gap:20px;">
+          <!-- School Photo -->
+          <div class="card">
+            <div class="card-header"><div class="font-semibold">School Photo (Hero Section)</div></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+              ${photoPreviewHtml}
+              <div style="border:2px dashed var(--border);border-radius:12px;padding:20px;text-align:center;cursor:pointer;background:var(--bg-secondary);"
+                   onclick="document.getElementById('schoolPhotoInput').click()">
+                <div style="margin-bottom:6px;display:flex;justify-content:center;">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </div>
+                <div style="font-size:13px;font-weight:600;color:var(--text-primary);">${s.schoolPhoto ? 'Replace Photo' : 'Upload School Photo'}</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">JPG, PNG — shown in the hero section</div>
+              </div>
+              <input type="file" id="schoolPhotoInput" accept="image/*" style="display:none;" onchange="previewSchoolPhoto(this)">
+              <button class="btn btn-primary" onclick="saveSchoolPhoto()" id="saveSchoolPhotoBtn" style="display:none;">Save Photo</button>
+            </div>
+          </div>
+
+          <!-- Academic Year -->
           <div class="card">
             <div class="card-header"><div class="font-semibold">Academic Year</div></div>
             <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
@@ -1341,46 +1751,47 @@ function renderAdminSettings() {
               <button class="btn btn-primary" onclick="saveSettings()">Update</button>
             </div>
           </div>
+        </div>
+      </div>
 
-          <div class="card">
-            <div class="card-header"><div class="font-semibold">Hero Stats</div></div>
-            <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
-              <div class="form-group"><label class="form-label">Total Students</label>
-                <input class="form-input" id="s_students" type="number" value="${s.totalStudents || 0}"></div>
-              <div class="form-group"><label class="form-label">Total Teachers</label>
-                <input class="form-input" id="s_teachers" type="number" value="${s.totalTeachers || 0}"></div>
-              <div class="form-group"><label class="form-label">Total Alumni</label>
-                <input class="form-input" id="s_alumni" type="number" value="${s.totalAlumni || 0}"></div>
-              <div class="form-group"><label class="form-label">Pass Rate</label>
-                <input class="form-input" id="s_passrate" value="${s.passRate || '—'}"></div>
-              <button class="btn btn-primary" onclick="saveSettings()">Update Stats</button>
-            </div>
+      <!-- Row 2: Hero Stats + Facilities + Achievements in 3 columns -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header"><div class="font-semibold">Hero Stats</div></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+            <div class="form-group"><label class="form-label">Total Students</label>
+              <input class="form-input" id="s_students" type="number" value="${s.totalStudents || 0}"></div>
+            <div class="form-group"><label class="form-label">Total Teachers</label>
+              <input class="form-input" id="s_teachers" type="number" value="${s.totalTeachers || 0}"></div>
+            <div class="form-group"><label class="form-label">Pass Rate</label>
+              <input class="form-input" id="s_passrate" value="${s.passRate || '—'}"></div>
+            <button class="btn btn-primary" onclick="saveSettings()">Update Stats</button>
           </div>
+        </div>
 
-          <div class="card">
-            <div class="card-header"><div class="font-semibold">Facilities</div></div>
-            <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
-              <div class="form-group"><label class="form-label">School Facilities (comma-separated)</label>
-                <textarea class="form-input" id="s_facilities" rows="3" style="resize:vertical;">${(s.facilities || []).join(', ')}</textarea></div>
-              <button class="btn btn-primary" onclick="saveSettings()">Update Facilities</button>
-            </div>
+        <div class="card">
+          <div class="card-header"><div class="font-semibold">Facilities</div></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+            <div class="form-group"><label class="form-label">School Facilities (comma-separated)</label>
+              <textarea class="form-input" id="s_facilities" rows="5" style="resize:vertical;">${(s.facilities || []).join(', ')}</textarea></div>
+            <button class="btn btn-primary" onclick="saveSettings()">Update Facilities</button>
           </div>
+        </div>
 
-          <div class="card">
-            <div class="card-header"><div class="font-semibold">Achievements</div></div>
-            <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
-              <div class="form-group"><label class="form-label">School Achievements (comma-separated)</label>
-                <textarea class="form-input" id="s_achievements" rows="3" style="resize:vertical;">${(s.achievements || []).join(', ')}</textarea></div>
-              <button class="btn btn-primary" onclick="saveSettings()">Update Achievements</button>
-            </div>
+        <div class="card">
+          <div class="card-header"><div class="font-semibold">Achievements</div></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+            <div class="form-group"><label class="form-label">School Achievements (comma-separated)</label>
+              <textarea class="form-input" id="s_achievements" rows="5" style="resize:vertical;">${(s.achievements || []).join(', ')}</textarea></div>
+            <button class="btn btn-primary" onclick="saveSettings()">Update Achievements</button>
           </div>
         </div>
       </div>
-      
+  
       <!-- Leadership Cards Management -->
       <div style="margin-top:32px;">
-        <h2 style="font-size:20px;font-weight:800;margin-bottom:16px;">Leadership Message Cards</h2>
-        <p style="color:var(--text-muted);margin-bottom:20px;">Manage the leadership message cards displayed on the home page</p>
+        <h2 style="font-size:20px;font-weight:800;margin-bottom:16px;">Leadership & Profile Cards</h2>
+        <p style="color:var(--text-muted);margin-bottom:20px;">Manage the profile cards displayed on the home page: Principal's Message, President's Message, and Company Profile</p>
         
         <div style="display:flex;flex-direction:column;gap:20px;">
           ${(s.leadershipCards && Array.isArray(s.leadershipCards) && s.leadershipCards.length > 0) ? s.leadershipCards.map((card, index) => `
@@ -1408,21 +1819,21 @@ function renderAdminSettings() {
                   </div>
                   <div class="form-group">
                     <label class="form-label">Person Name</label>
-                    <input class="form-input" id="lc_${index}_name" value="${card.name || ''}" ${card.role === 'principal' ? 'readonly style="background:var(--bg-secondary);cursor:not-allowed;" placeholder="Use Principal Name from School Info above"' : ''}>
+                    <input class="form-input" id="lc_${index}_name" value="${card.name || ''}" placeholder="Enter name">
                   </div>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:12px;">
                   <div class="form-group">
                     <label class="form-label">Designation</label>
-                    <input class="form-input" id="lc_${index}_designation" value="${card.designation || ''}" ${card.role === 'principal' ? 'readonly style="background:var(--bg-secondary);cursor:not-allowed;"' : ''}>
+                    <input class="form-input" id="lc_${index}_designation" value="${card.designation || ''}" placeholder="Enter designation">
                   </div>
                   <div class="form-group">
                     <label class="form-label">Qualification</label>
-                    <input class="form-input" id="lc_${index}_qualification" value="${card.qualification || ''}" ${card.role === 'principal' ? 'readonly style="background:var(--bg-secondary);cursor:not-allowed;"' : ''}>
+                    <input class="form-input" id="lc_${index}_qualification" value="${card.qualification || ''}" placeholder="Enter qualification">
                   </div>
                   <div class="form-group">
                     <label class="form-label">Message</label>
-                    <textarea class="form-input" id="lc_${index}_message" rows="4" style="resize:vertical;" ${card.role === 'principal' ? 'readonly style="background:var(--bg-secondary);cursor:not-allowed;" placeholder="Use Principal\'s Message from School Info above"' : ''}>${card.message || ''}</textarea>
+                    <textarea class="form-input" id="lc_${index}_message" rows="4" style="resize:vertical;" placeholder="Enter message">${card.message || ''}</textarea>
                   </div>
                 </div>
                 <div style="grid-column:1/-1;">
@@ -1453,9 +1864,11 @@ function renderAdminNoticesManager() {
         <button class="btn btn-primary" onclick="showAddNoticeModal()">+ Publish Notice</button>
       </div>
 
-      <!-- Add Notice Form -->
+      <!-- Add/Edit Notice Form -->
       <div class="card mb-6" id="addNoticeForm" style="display:none;">
-        <div class="card-header"><div class="font-semibold">New Notice</div></div>
+        <div class="card-header">
+          <div class="font-semibold" id="noticeFormTitle">New Notice</div>
+        </div>
         <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
           <div class="form-group"><label class="form-label">Title *</label>
             <input class="form-input" id="n_title" placeholder="Notice title"></div>
@@ -1472,9 +1885,10 @@ function renderAdminNoticesManager() {
           </div>
           <div class="form-group"><label class="form-label">Content *</label>
             <textarea class="form-input" id="n_content" rows="4" placeholder="Notice content..."></textarea></div>
+          <input type="hidden" id="n_editIndex" value="">
           <div class="flex gap-3">
-            <button class="btn btn-primary" onclick="saveNotice()">Publish Notice</button>
-            <button class="btn btn-secondary" onclick="document.getElementById('addNoticeForm').style.display='none'">Cancel</button>
+            <button class="btn btn-primary" onclick="saveNotice()" id="saveNoticeBtn">Publish Notice</button>
+            <button class="btn btn-secondary" onclick="cancelNoticeForm()">Cancel</button>
           </div>
         </div>
       </div>
@@ -1499,8 +1913,11 @@ function renderAdminEventsManager() {
         <button class="btn btn-primary" onclick="showAddEventForm()">+ Add Event</button>
       </div>
 
+      <!-- Add/Edit Event Form -->
       <div class="card mb-6" id="addEventForm" style="display:none;">
-        <div class="card-header"><div class="font-semibold">New Event</div></div>
+        <div class="card-header">
+          <div class="font-semibold" id="eventFormTitle">New Event</div>
+        </div>
         <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
           <div class="form-group"><label class="form-label">Title *</label>
             <input class="form-input" id="ev_title" placeholder="Event title"></div>
@@ -1519,9 +1936,10 @@ function renderAdminEventsManager() {
             <input class="form-input" id="ev_location" placeholder="e.g. School Auditorium"></div>
           <div class="form-group"><label class="form-label">Description</label>
             <textarea class="form-input" id="ev_desc" rows="3" placeholder="Event description..."></textarea></div>
+          <input type="hidden" id="ev_editIndex" value="">
           <div class="flex gap-3">
-            <button class="btn btn-primary" onclick="saveEvent()">Save Event</button>
-            <button class="btn btn-secondary" onclick="document.getElementById('addEventForm').style.display='none'">Cancel</button>
+            <button class="btn btn-primary" onclick="saveEvent()" id="saveEventBtn">Save Event</button>
+            <button class="btn btn-secondary" onclick="cancelEventForm()">Cancel</button>
           </div>
         </div>
       </div>
@@ -1567,7 +1985,7 @@ function renderAdminGallery() {
       ${photos.length === 0
         ? `<div class="card">
             <div class="card-body text-center text-muted" style="padding:60px;">
-              <div style="font-size:48px;margin-bottom:12px;">📸</div>
+              <div style="margin-bottom:12px;display:flex;justify-content:center;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
               <div class="font-semibold" style="font-size:18px;">No photos yet</div>
               <div class="text-sm mt-2 mb-4">Upload photos to showcase school events and activities</div>
               <button class="btn btn-primary" onclick="openUploadPhotoModal()">
@@ -1676,8 +2094,23 @@ window.approveUser = async function(id) {
 
 window.switchAdminTab = async function(tab, btn) {
   adminTab = tab;
+  
+  // Remove active class from all nav items
   document.querySelectorAll('.admin-nav-item').forEach(el => el.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+  
+  // Add active class to the clicked button OR find and activate the matching nav item
+  if (btn) {
+    btn.classList.add('active');
+  } else {
+    // Find the nav item that matches the tab and activate it
+    const navItems = document.querySelectorAll('.admin-nav-item');
+    navItems.forEach(el => {
+      if (el.getAttribute('onclick') && el.getAttribute('onclick').includes(`'${tab}'`)) {
+        el.classList.add('active');
+      }
+    });
+  }
+  
   await _refreshTab(tab);
 };
 
@@ -1686,7 +2119,9 @@ window.saveSettings = async function() {
   const facilitiesText = document.getElementById('s_facilities')?.value || '';
   const achievementsText = document.getElementById('s_achievements')?.value || '';
   
+  const existing = await api.getSettings() || {};
   const s = {
+    ...existing,
     name:           document.getElementById('s_name')?.value,
     tagline:        document.getElementById('s_tagline')?.value,
     address:        document.getElementById('s_address')?.value,
@@ -1694,20 +2129,55 @@ window.saveSettings = async function() {
     email:          document.getElementById('s_email')?.value,
     website:        document.getElementById('s_website')?.value,
     founded:        document.getElementById('s_founded')?.value,
-    principalName:  document.getElementById('s_principalName')?.value,
-    principalMessage: document.getElementById('s_principalMessage')?.value,
     year:           document.getElementById('s_year')?.value,
     term:           document.getElementById('s_term')?.value,
     totalStudents:  parseInt(document.getElementById('s_students')?.value) || 0,
     totalTeachers:  parseInt(document.getElementById('s_teachers')?.value) || 0,
-    totalAlumni:    parseInt(document.getElementById('s_alumni')?.value) || 0,
     passRate:       document.getElementById('s_passrate')?.value,
     facilities:     facilitiesText.split(',').map(f => f.trim()).filter(f => f),
     achievements:   achievementsText.split(',').map(a => a.trim()).filter(a => a),
   };
   Object.keys(s).forEach(k => s[k] === undefined && delete s[k]);
   await api.saveSettings(s);
+  _cache.settings = s;
   showToast('Settings saved successfully!', 'success');
+  await _refreshTab('settings');
+};
+
+// ── School Photo ──
+window.previewSchoolPhoto = function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    window._newSchoolPhoto = e.target.result;
+    const preview = document.getElementById('schoolPhotoPreview');
+    if (preview) { preview.src = e.target.result; preview.style.display = 'block'; }
+    const btn = document.getElementById('saveSchoolPhotoBtn');
+    if (btn) btn.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+};
+
+window.saveSchoolPhoto = async function() {
+  if (!window._newSchoolPhoto) return;
+  const settings = await api.getSettings() || {};
+  settings.schoolPhoto = window._newSchoolPhoto;
+  await api.saveSettings(settings);
+  _cache.settings = settings;
+  window._newSchoolPhoto = null;
+  showToast('School photo saved!', 'success');
+  await _refreshTab('settings');
+};
+
+window.removeSchoolPhoto = async function() {
+  const confirmed = await confirmDialog('Remove the school photo from the home page?', 'Remove Photo');
+  if (!confirmed) return;
+  const settings = await api.getSettings() || {};
+  delete settings.schoolPhoto;
+  await api.saveSettings(settings);
+  _cache.settings = settings;
+  showToast('School photo removed.', 'success');
   await _refreshTab('settings');
 };
 
@@ -1746,7 +2216,6 @@ window.saveLeadershipCard = async function(index) {
     showToast(`Card ${index + 1} saved successfully!`, 'success');
     await _refreshTab('settings');
   } catch (error) {
-    console.error('Error saving leadership card:', error);
     showToast('Failed to save leadership card', 'error');
   }
 };
@@ -1771,7 +2240,6 @@ window.toggleLeadershipCard = async function(index, enabled) {
     showToast(`Card ${index + 1} ${enabled ? 'enabled' : 'disabled'}`, 'success');
     // Don't refresh to avoid losing form state
   } catch (error) {
-    console.error('Error toggling leadership card:', error);
     showToast('Failed to toggle leadership card', 'error');
   }
 };
@@ -1779,24 +2247,61 @@ window.toggleLeadershipCard = async function(index, enabled) {
 // ── Admin Notices ──
 window.showAddNoticeModal = function() {
   const form = document.getElementById('addNoticeForm');
-  if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  if (!form) return;
+  // Reset to "add" mode
+  document.getElementById('n_title').value = '';
+  document.getElementById('n_content').value = '';
+  document.getElementById('n_category').value = 'General';
+  document.getElementById('n_priority').value = 'medium';
+  document.getElementById('n_editIndex').value = '';
+  document.getElementById('noticeFormTitle').textContent = 'New Notice';
+  document.getElementById('saveNoticeBtn').textContent = 'Publish Notice';
+  form.style.display = 'block';
+  form.scrollIntoView({ behavior: 'smooth' });
+};
+
+window.editNotice = function(idx) {
+  const notice = _cache.notices[idx];
+  if (!notice) return;
+  const form = document.getElementById('addNoticeForm');
+  if (!form) return;
+  document.getElementById('n_title').value = notice.title || '';
+  document.getElementById('n_content').value = notice.content || '';
+  document.getElementById('n_category').value = notice.category || 'General';
+  document.getElementById('n_priority').value = notice.priority || 'medium';
+  document.getElementById('n_editIndex').value = idx;
+  document.getElementById('noticeFormTitle').textContent = 'Edit Notice';
+  document.getElementById('saveNoticeBtn').textContent = 'Update Notice';
+  form.style.display = 'block';
+  form.scrollIntoView({ behavior: 'smooth' });
+};
+
+window.cancelNoticeForm = function() {
+  const form = document.getElementById('addNoticeForm');
+  if (form) form.style.display = 'none';
 };
 
 window.saveNotice = async function() {
   const title   = document.getElementById('n_title')?.value?.trim();
   const content = document.getElementById('n_content')?.value?.trim();
   if (!title || !content) { showToast('Title and content are required.', 'error'); return; }
-  await api.addNotice({
+  const editIndex = document.getElementById('n_editIndex')?.value;
+  const data = {
     title,
     category: document.getElementById('n_category')?.value || 'General',
     priority: document.getElementById('n_priority')?.value || 'medium',
     content,
-  });
-  
-  // Create notification
-  await createNotification('notice', 'New Notice Published', title, 'notices');
-  
-  showToast('Notice published!', 'success');
+  };
+
+  if (editIndex !== '') {
+    await api.updateNotice(parseInt(editIndex), data);
+    showToast('Notice updated!', 'success');
+  } else {
+    await api.addNotice(data);
+    await createNotification('notice', 'New Notice Published', title, 'notices');
+    showToast('Notice published!', 'success');
+  }
+
   await _refreshTab('notices');
 };
 
@@ -1812,26 +2317,66 @@ window.deleteNotice = async function(idx) {
 // ── Admin Events ──
 window.showAddEventForm = function() {
   const form = document.getElementById('addEventForm');
-  if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  if (!form) return;
+  // Reset to "add" mode
+  document.getElementById('ev_title').value = '';
+  document.getElementById('ev_date').value = '';
+  document.getElementById('ev_time').value = '';
+  document.getElementById('ev_category').value = 'Academic';
+  document.getElementById('ev_location').value = '';
+  document.getElementById('ev_desc').value = '';
+  document.getElementById('ev_editIndex').value = '';
+  document.getElementById('eventFormTitle').textContent = 'New Event';
+  document.getElementById('saveEventBtn').textContent = 'Save Event';
+  form.style.display = 'block';
+  form.scrollIntoView({ behavior: 'smooth' });
+};
+
+window.editEvent = function(idx) {
+  const event = _cache.events[idx];
+  if (!event) return;
+  const form = document.getElementById('addEventForm');
+  if (!form) return;
+  document.getElementById('ev_title').value = event.title || '';
+  document.getElementById('ev_date').value = event.date || '';
+  document.getElementById('ev_time').value = event.time || '';
+  document.getElementById('ev_category').value = event.category || 'Academic';
+  document.getElementById('ev_location').value = event.location || '';
+  document.getElementById('ev_desc').value = event.description || '';
+  document.getElementById('ev_editIndex').value = idx;
+  document.getElementById('eventFormTitle').textContent = 'Edit Event';
+  document.getElementById('saveEventBtn').textContent = 'Update Event';
+  form.style.display = 'block';
+  form.scrollIntoView({ behavior: 'smooth' });
+};
+
+window.cancelEventForm = function() {
+  const form = document.getElementById('addEventForm');
+  if (form) form.style.display = 'none';
 };
 
 window.saveEvent = async function() {
   const title = document.getElementById('ev_title')?.value?.trim();
   if (!title) { showToast('Event title is required.', 'error'); return; }
-  await api.addEvent({
+  const editIndex = document.getElementById('ev_editIndex')?.value;
+  const data = {
     title,
-    date:     document.getElementById('ev_date')?.value,
-    time:     document.getElementById('ev_time')?.value,
-    category: document.getElementById('ev_category')?.value || 'Other',
-    location: document.getElementById('ev_location')?.value || '',
+    date:        document.getElementById('ev_date')?.value,
+    time:        document.getElementById('ev_time')?.value,
+    category:    document.getElementById('ev_category')?.value || 'Other',
+    location:    document.getElementById('ev_location')?.value || '',
     description: document.getElementById('ev_desc')?.value || '',
-  });
-  
-  // Create notification
-  const eventDate = document.getElementById('ev_date')?.value;
-  await createNotification('event', 'New Event Scheduled', `${title} - ${eventDate}`, 'events');
-  
-  showToast('Event added!', 'success');
+  };
+
+  if (editIndex !== '') {
+    await api.updateEvent(parseInt(editIndex), data);
+    showToast('Event updated!', 'success');
+  } else {
+    await api.addEvent(data);
+    await createNotification('event', 'New Event Scheduled', `${title} - ${data.date}`, 'events');
+    showToast('Event added!', 'success');
+  }
+
   await _refreshTab('events');
 };
 
@@ -1853,67 +2398,80 @@ window.adminEditUser = function(id) {
   modal.className = 'modal-overlay';
   modal.onclick = e => { if (e.target === modal) modal.remove(); };
   modal.innerHTML = `
-    <div class="modal">
-      <div class="modal-header">
-        <div class="font-semibold">Edit User — ${u.name}</div>
+    <div class="modal" style="max-width:520px;">
+      <div class="modal-header" style="padding:14px 20px;">
+        <div class="font-semibold" style="font-size:14px;">Edit User — ${u.name}</div>
         <button class="btn btn-ghost btn-icon" onclick="this.closest('.modal-overlay').remove()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-      <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;">
-        <!-- Profile Picture Section -->
-        <div style="text-align:center;padding:20px;background:var(--bg-secondary);border-radius:12px;">
-          <img id="editUserAvatar" src="${u.avatar}" class="avatar" style="width:100px;height:100px;margin:0 auto 12px;" onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
-          <div><button class="btn btn-secondary btn-sm" onclick="changeUserAvatar('${id}')">
-            ${SVG('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',14)} Change Photo
-          </button></div>
-        </div>
-        
-        <div class="flex items-center gap-3 mb-2">
-          <div><div class="font-bold">${u.name}</div><div class="text-xs text-muted">${u.id}</div></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div class="form-group"><label class="form-label">First Name</label>
-            <input id="eu_first" class="form-input" value="${u.firstName||''}"></div>
-          <div class="form-group"><label class="form-label">Last Name</label>
-            <input id="eu_last" class="form-input" value="${u.lastName||''}"></div>
-        </div>
-        <div class="form-group"><label class="form-label">Email</label>
-          <input id="eu_email" class="form-input" value="${u.email}" type="email"></div>
-        <div class="form-group"><label class="form-label">Phone</label>
-          <input id="eu_phone" class="form-input" value="${u.phone||''}"></div>
-        ${u.role === 'student' ? `
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-            <div class="form-group"><label class="form-label">Class</label>
-              <input id="eu_class" class="form-input" value="${u.class||''}"></div>
-            <div class="form-group"><label class="form-label">Section</label>
-              <input id="eu_section" class="form-input" value="${u.section||''}"></div>
-            <div class="form-group"><label class="form-label">Roll</label>
-              <input id="eu_roll" class="form-input" value="${u.roll||''}"></div>
+      <div class="modal-body" style="display:flex;flex-direction:column;gap:12px;padding:16px 20px;">
+
+        <!-- Avatar + identity row -->
+        <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--bg-secondary);border-radius:10px;">
+          <div style="position:relative;flex-shrink:0;">
+            <img id="editUserAvatar" src="${u.avatar}" class="avatar" style="width:60px;height:60px;" onerror="this.src='https://i.imgur.com/x9wE0QT.png'">
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div class="form-group"><label class="form-label">Guardian</label>
-              <input id="eu_guardian" class="form-input" value="${u.guardian||''}"></div>
-            <div class="form-group"><label class="form-label">Blood Group</label>
-              <input id="eu_blood" class="form-input" value="${u.bloodGroup||''}"></div>
-          </div>` : ''}
+          <div style="flex:1;min-width:0;">
+            <div class="font-semibold" style="font-size:14px;">${u.name}</div>
+            <div class="text-xs text-muted">${u.id} · ${u.role}</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="changeUserAvatar('${id}')" style="flex-shrink:0;font-size:11px;padding:5px 10px;">
+            ${SVG('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',13)} Photo
+          </button>
+        </div>
+
+        <!-- Name row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">First Name</label>
+            <input id="eu_first" class="form-input" style="height:34px;font-size:13px;" value="${u.firstName||''}"></div>
+          <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Last Name</label>
+            <input id="eu_last" class="form-input" style="height:34px;font-size:13px;" value="${u.lastName||''}"></div>
+        </div>
+
+        <!-- Email + Phone row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Email</label>
+            <input id="eu_email" class="form-input" style="height:34px;font-size:13px;" value="${u.email}" type="email"></div>
+          <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Phone</label>
+            <input id="eu_phone" class="form-input" style="height:34px;font-size:13px;" value="${u.phone||''}"></div>
+        </div>
+
+        ${u.role === 'student' ? `
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+          <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Class</label>
+            <input id="eu_class" class="form-input" style="height:34px;font-size:13px;" value="${u.class||''}"></div>
+          <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Section</label>
+            <input id="eu_section" class="form-input" style="height:34px;font-size:13px;" value="${u.section||''}"></div>
+          <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Roll</label>
+            <input id="eu_roll" class="form-input" style="height:34px;font-size:13px;" value="${u.roll||''}"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Guardian</label>
+            <input id="eu_guardian" class="form-input" style="height:34px;font-size:13px;" value="${u.guardian||''}"></div>
+          <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Blood Group</label>
+            <input id="eu_blood" class="form-input" style="height:34px;font-size:13px;" value="${u.bloodGroup||''}"></div>
+        </div>` : ''}
+
         ${u.role === 'teacher' || u.role === 'principal' ? `
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div class="form-group"><label class="form-label">Subject</label>
-              <input id="eu_subject" class="form-input" value="${u.subject||''}"></div>
-            <div class="form-group"><label class="form-label">Qualification</label>
-              <input id="eu_qualification" class="form-input" value="${u.qualification||''}"></div>
-          </div>` : ''}
-        <div class="form-group"><label class="form-label">Status</label>
-          <select id="eu_status" class="form-input form-select">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Subject</label>
+            <input id="eu_subject" class="form-input" style="height:34px;font-size:13px;" value="${u.subject||''}"></div>
+          <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Qualification</label>
+            <input id="eu_qualification" class="form-input" style="height:34px;font-size:13px;" value="${u.qualification||''}"></div>
+        </div>` : ''}
+
+        <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Status</label>
+          <select id="eu_status" class="form-input form-select" style="height:34px;font-size:13px;">
             <option value="active" ${u.status==='active'?'selected':''}>Active</option>
             <option value="pending" ${u.status==='pending'?'selected':''}>Pending</option>
             <option value="inactive" ${u.status==='inactive'?'selected':''}>Inactive</option>
           </select></div>
+
         <input type="file" id="editUserAvatarInput" accept="image/*" style="display:none;">
-        <div class="flex gap-3 justify-end">
-          <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
-          <button class="btn btn-primary" onclick="adminSaveUser('${id}')">Save Changes</button>
+        <div class="flex gap-2 justify-end" style="padding-top:4px;">
+          <button class="btn btn-secondary btn-sm" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="adminSaveUser('${id}')">Save Changes</button>
         </div>
       </div>
     </div>`;
@@ -2193,6 +2751,75 @@ window.handleAddStaff = async function(e) {
 };
 
 // ── Manage Principal Functions ──
+window.showEditPrincipalForm = function(id) {
+  const form = document.getElementById('editPrincipalForm');
+  if (form) {
+    form.style.display = 'block';
+    form.scrollIntoView({ behavior: 'smooth' });
+  }
+};
+
+window.cancelPrincipalEdit = function() {
+  const form = document.getElementById('editPrincipalForm');
+  if (form) form.style.display = 'none';
+  window._principalNewAvatar = null;
+};
+
+window.previewPrincipalAvatar = function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const src = e.target.result;
+    const preview = document.getElementById('ep_avatarPreview');
+    if (preview) preview.src = src;
+    window._principalNewAvatar = src;
+  };
+  reader.readAsDataURL(file);
+};
+
+window.savePrincipalEdit = async function() {
+  const id        = document.getElementById('ep_id')?.value;
+  const firstName = document.getElementById('ep_first')?.value?.trim();
+  const lastName  = document.getElementById('ep_last')?.value?.trim();
+  const email     = document.getElementById('ep_email')?.value?.trim();
+
+  if (!firstName || !lastName) { showToast('First and last name are required.', 'error'); return; }
+  if (!email)                  { showToast('Email is required.', 'error'); return; }
+
+  const updates = {
+    firstName,
+    lastName,
+    name:          `${firstName} ${lastName}`.trim(),
+    email,
+    phone:         document.getElementById('ep_phone')?.value?.trim() || '',
+    qualification: document.getElementById('ep_qualification')?.value?.trim() || '',
+    bloodGroup:    document.getElementById('ep_blood')?.value || '',
+    joiningDate:   document.getElementById('ep_joiningDate')?.value || '',
+    experience:    document.getElementById('ep_experience')?.value?.trim() || '',
+    bio:           document.getElementById('ep_bio')?.value?.trim() || '',
+  };
+
+  if (window._principalNewAvatar) {
+    updates.avatar = window._principalNewAvatar;
+    window._principalNewAvatar = null;
+  }
+
+  // Remove empty fields so we don't overwrite with blanks
+  Object.keys(updates).forEach(k => { if (updates[k] === '') delete updates[k]; });
+
+  await api.updateUser(id, updates);
+
+  // Update session if admin is editing their own account (unlikely but safe)
+  const session = auth.getCurrentUser();
+  if (session && session.id === id) {
+    localStorage.setItem('gfa_session', JSON.stringify({ ...session, ...updates }));
+  }
+
+  showToast('Principal details updated!', 'success');
+  await _refreshTab('principal');
+};
+
 window.showCreatePrincipalForm = function() {
   document.getElementById('createPrincipalForm').style.display = 'block';
   document.getElementById('principalForm').reset();
@@ -2328,19 +2955,145 @@ window.demotePrincipal = async function(principalId, principalName) {
 };
 
 // ── Batch Management ──
+let _batchAchievements = [];
+
+window.addBatchAchievement = function() {
+  const input = document.getElementById('b_achievement_input');
+  const text = input.value.trim();
+  if (!text) return;
+  
+  _batchAchievements.push(text);
+  input.value = '';
+  renderBatchAchievements();
+};
+
+window.removeBatchAchievement = function(idx) {
+  _batchAchievements.splice(idx, 1);
+  renderBatchAchievements();
+};
+
+function renderBatchAchievements() {
+  const container = document.getElementById('b_achievements_list');
+  if (!container) return;
+  
+  if (_batchAchievements.length === 0) {
+    container.innerHTML = '<div class="text-sm text-muted" style="padding:8px;background:var(--bg-secondary);border-radius:6px;">No achievements added yet</div>';
+    return;
+  }
+  
+  container.innerHTML = _batchAchievements.map((ach, i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg-secondary);border-radius:6px;border:1px solid var(--border);">
+      <span style="flex:1;font-size:13px;">${ach}</span>
+      <button type="button" class="btn btn-ghost btn-icon btn-sm" onclick="removeBatchAchievement(${i})" style="color:var(--danger);">
+        ${SVG('<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',14,'var(--danger)')}
+      </button>
+    </div>
+  `).join('');
+}
+
+window.showNewBatchForm = function() {
+  // Clear form
+  document.getElementById('b_name').value = '';
+  document.getElementById('b_year').value = '';
+  document.getElementById('b_teacher').value = '';
+  document.getElementById('b_students').value = '';
+  document.getElementById('b_desc').value = '';
+  document.getElementById('b_editIndex').value = '';
+  document.getElementById('b_achievement_input').value = '';
+  
+  // Clear achievements
+  _batchAchievements = [];
+  renderBatchAchievements();
+  
+  // Update title
+  const titleEl = document.getElementById('batchFormTitle');
+  if (titleEl) titleEl.textContent = 'New Batch';
+  
+  // Show form
+  document.getElementById('addBatchForm').style.display = 'block';
+  document.getElementById('addBatchForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+window.cancelBatchForm = function() {
+  // Clear form
+  document.getElementById('b_name').value = '';
+  document.getElementById('b_year').value = '';
+  document.getElementById('b_teacher').value = '';
+  document.getElementById('b_students').value = '';
+  document.getElementById('b_desc').value = '';
+  document.getElementById('b_editIndex').value = '';
+  document.getElementById('b_achievement_input').value = '';
+  
+  // Clear achievements
+  _batchAchievements = [];
+  
+  // Hide form
+  document.getElementById('addBatchForm').style.display = 'none';
+};
+
 window.saveBatch = async function() {
   const name = document.getElementById('b_name')?.value?.trim();
   const year = document.getElementById('b_year')?.value?.trim();
+  const editingIndex = document.getElementById('b_editIndex')?.value;
+  
   if (!name || !year) { showToast('Batch name and year are required.', 'error'); return; }
-  await api.addBatch({
-    name, passingYear: parseInt(year),
+  
+  const batchData = {
+    name,
+    passingYear: parseInt(year),
     classTeacher: document.getElementById('b_teacher')?.value?.trim() || '',
     totalStudents: parseInt(document.getElementById('b_students')?.value) || 0,
     description: document.getElementById('b_desc')?.value?.trim() || '',
-    achievements: [],
-  });
-  showToast('Batch created!', 'success');
+    achievements: [..._batchAchievements],
+  };
+  
+  if (editingIndex !== undefined && editingIndex !== '') {
+    // Update existing batch
+    const idx = parseInt(editingIndex);
+    const batches = _cache.batches;
+    batches[idx] = {
+      ...batches[idx],
+      ...batchData,
+    };
+    await api.updateBatch(idx, batches[idx]);
+    showToast('Batch updated!', 'success');
+  } else {
+    // Create new batch
+    await api.addBatch(batchData);
+    showToast('Batch created!', 'success');
+  }
+  
   await _refreshTab('batches');
+};
+
+window.editBatch = function(idx) {
+  const batch = _cache.batches[idx];
+  if (!batch) return;
+  
+  // Populate form
+  document.getElementById('b_name').value = batch.name || '';
+  document.getElementById('b_year').value = batch.passingYear || '';
+  document.getElementById('b_teacher').value = batch.classTeacher || '';
+  document.getElementById('b_students').value = batch.totalStudents || 0;
+  document.getElementById('b_desc').value = batch.description || '';
+  document.getElementById('b_achievement_input').value = '';
+  
+  // Load achievements
+  _batchAchievements = batch.achievements ? [...batch.achievements] : [];
+  renderBatchAchievements();
+  
+  // Store editing index
+  document.getElementById('b_editIndex').value = idx;
+  
+  // Update title
+  const titleEl = document.getElementById('batchFormTitle');
+  if (titleEl) titleEl.textContent = 'Edit Batch';
+  
+  // Show form
+  document.getElementById('addBatchForm').style.display = 'block';
+  
+  // Scroll to form
+  document.getElementById('addBatchForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
 window.deleteBatch = async function(idx) {
@@ -2546,7 +3299,6 @@ window.handleUploadPhoto = async function(e) {
     document.querySelector('.modal-overlay').remove();
     await _refreshTab('gallery');
   } catch (error) {
-    console.error('Upload failed:', error);
     showToast('Failed to upload photos', 'error');
     btn.disabled = false;
     btn.innerHTML = `${SVG('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',14,'white')} Upload`;

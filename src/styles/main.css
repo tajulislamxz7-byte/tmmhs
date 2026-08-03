@@ -281,11 +281,11 @@ ul, ol { list-style: none; }
 .form-group { display: flex; flex-direction: column; gap: var(--space-2); }
 .form-label { font-size: var(--text-sm); font-weight: 500; color: var(--text-secondary); }
 .form-input {
-  width: 100%; padding: 11px 16px; border-radius: var(--radius-lg); border: 1.5px solid var(--border);
+  width: 100%; padding: 11px 16px; border-radius: var(--radius-lg); border: none;
   background: var(--bg-primary); color: var(--text-primary); font-size: var(--text-sm);
   transition: all var(--transition); outline: none;
 }
-.form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+.form-input:focus { border: none; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
 .form-input::placeholder { color: var(--text-muted); }
 .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 40px; }
 .form-textarea { resize: vertical; min-height: 100px; }

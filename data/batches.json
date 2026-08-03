@@ -29,20 +29,5 @@
       "Best Cultural Performance 2025"
     ],
     "createdAt": "2024-01-01T00:00:00.000Z"
-  },
-  {
-    "id": "2028",
-    "name": "Batch 2028",
-    "year": "2028",
-    "class": "Class 8",
-    "description": "Energetic learners with strong academic foundation and curiosity.",
-    "totalStudents": 48,
-    "classTeacher": "Md. Kamal Uddin",
-    "passingYear": "2028",
-    "achievements": [
-      "Inter-School Quiz Winners",
-      "Best Attendance Record"
-    ],
-    "createdAt": "2024-01-01T00:00:00.000Z"
   }
 ]

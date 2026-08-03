@@ -293,7 +293,7 @@ export async function renderResults(role, loggedInUser) {
         ${exams.length === 0 ? `
           <div class="card">
             <div class="card-body text-center" style="padding:60px;">
-              <div style="font-size:48px;margin-bottom:12px;">📋</div>
+              <div style="margin-bottom:12px;display:flex;justify-content:center;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg></div>
               <div class="font-semibold" style="font-size:18px;">No exams created yet</div>
               <div class="text-muted text-sm mt-2 mb-4">Create exams and publish results from the Admin panel</div>
               <button class="btn btn-primary" onclick="navigate('admin')">Open Admin Panel →</button>

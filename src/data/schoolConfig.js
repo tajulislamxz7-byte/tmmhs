@@ -18,7 +18,6 @@ export const schoolInfo = {
   website: "www.tiarkhali-mmhs.edu.bd",
   totalStudents: 0,
   totalTeachers: 0,
-  totalAlumni: 0,
   totalBatches: 0,
   principalName: "",
   principalMessage: "",
@@ -29,7 +28,6 @@ export const schoolInfo = {
 export const stats = [
   { label: "Students", value: 0, svg: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>', color: "#2563eb" },
   { label: "Teachers", value: 0, svg: '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>', color: "#7c3aed" },
-  { label: "Alumni", value: 0, svg: '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>', color: "#059669" },
   { label: "Years of Excellence", value: 39, svg: '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>', color: "#d97706" },
   { label: "Batches", value: 0, svg: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>', color: "#dc2626" },
   { label: "Pass Rate", value: "—", svg: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>', color: "#0891b2" },
@@ -57,8 +55,6 @@ export const teachers = [];
 
 export const supportStaff = [];
 
-export const alumni = [];
-
 export const notices = [];
 
 export const events = [];
@@ -76,6 +72,5 @@ export const roles = {
   principal:   { label: "Principal",     permissions: ["view_home", "view_notices", "view_events", "view_gallery", "view_all_students", "view_all_teachers", "view_all_staff", "publish_notices", "publish_events", "view_reports", "view_analytics", "approve_content"] },
   admin:       { label: "Admin",         permissions: ["all"] },
   superAdmin:  { label: "Super Admin",   permissions: ["all", "manage_settings", "manage_roles"] },
-  alumni:      { label: "Alumni",        permissions: ["view_home", "view_notices", "view_events", "view_gallery", "view_alumni_profile", "edit_alumni_profile"] },
   supportStaff:{ label: "Support Staff", permissions: ["view_home", "view_notices"] },
 };

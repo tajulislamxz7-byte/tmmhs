@@ -162,7 +162,7 @@ export function renderMessages(loggedInUser) {
     const me = loggedInUser || auth.getCurrentUser();
     if (!me) return `
       <div class="container section-sm text-center" style="padding:80px 0;">
-        <div style="font-size:48px;margin-bottom:16px;">💬</div>
+        <div style="margin-bottom:16px;display:flex;justify-content:center;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
         <div class="font-semibold" style="font-size:20px;margin-bottom:8px;">Sign in to use Messages</div>
         <button class="btn btn-primary" onclick="navigate('login')">Sign In</button>
       </div>`;
@@ -251,10 +251,9 @@ export function renderMessages(loggedInUser) {
     </div>
   `;
   } catch (error) {
-    console.error('Error rendering messages:', error);
     return `
       <div class="container section-sm text-center" style="padding:80px 0;">
-        <div style="font-size:48px;margin-bottom:16px;">⚠️</div>
+        <div style="margin-bottom:16px;display:flex;justify-content:center;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--warning,#d97706)" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
         <div class="font-semibold" style="font-size:20px;margin-bottom:8px;">Error loading messages</div>
         <p class="text-muted">Please refresh the page or contact support.</p>
       </div>`;

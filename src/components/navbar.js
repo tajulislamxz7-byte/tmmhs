@@ -57,9 +57,6 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
             <div class="dropdown-item" onclick="navigate('staff')" style="cursor:pointer;">
               ${icon('briefcase', 15)} <span>Support Staff</span>
             </div>
-            <div class="dropdown-item" onclick="navigate('alumni')" style="cursor:pointer;">
-              ${icon('globe', 15)} <span>Alumni</span>
-            </div>
           </div>
         </div>
 
@@ -131,9 +128,6 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
             ` : normalizedRole === 'principal' ? `
             <div class="dropdown-item" onclick="navigate('teacher-profile','${user.id}')" style="cursor:pointer;">${icon('user', 14)} <span>My Profile</span></div>
             <div class="dropdown-item" onclick="navigate('about')" style="cursor:pointer;">${icon('info', 14)} <span>School Overview</span></div>
-            ` : normalizedRole === 'alumni' ? `
-            <div class="dropdown-item" onclick="navigate('alumni-dashboard')" style="cursor:pointer;">${icon('layout', 14)} <span>Dashboard</span></div>
-            <div class="dropdown-item" onclick="navigate('alumni')" style="cursor:pointer;">${icon('users', 14)} <span>Alumni Network</span></div>
             ` : normalizedRole === 'staff' ? `
             <div class="dropdown-item" onclick="navigate('staff-dashboard')" style="cursor:pointer;">${icon('layout', 14)} <span>Dashboard</span></div>
             <div class="dropdown-item" onclick="navigate('staff')" style="cursor:pointer;">${icon('users', 14)} <span>Staff Team</span></div>
@@ -190,7 +184,6 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
       <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('students')">${icon('users', 18)} Students</div>
       <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('teachers')">${icon('graduationCap', 18)} Teachers</div>
       <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('staff')">${icon('briefcase', 18)} Support Staff</div>
-      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('alumni')">${icon('award', 18)} Alumni</div>
       
       <div class="mobile-menu-section-title">Academic</div>
       <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('batches')">${icon('bookOpen', 18)} Batches</div>
@@ -207,7 +200,6 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
       <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('messages')">${icon('messageSquare', 18)} Messages</div>
       ${role==='student'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('student-dashboard')">${icon('layout', 18)} My Dashboard</div>`:''}
       ${role==='teacher'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('teacher-dashboard')">${icon('layout', 18)} My Dashboard</div>`:''}
-      ${role==='alumni'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('alumni-dashboard')">${icon('layout', 18)} My Dashboard</div>`:''}
       ${role==='staff'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('staff-dashboard')">${icon('layout', 18)} My Dashboard</div>`:''}
       ${role==='admin'?`<div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('admin')">${icon('settings', 18)} Admin Panel</div>`:''}
       <div class="buttons-container">

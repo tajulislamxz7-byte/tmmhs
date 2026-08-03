@@ -37,7 +37,7 @@ export async function renderStaffDashboard(user) {
       user = freshUser;
     }
   } catch(e) {
-    console.warn('Could not fetch fresh user data:', e);
+    // Could not fetch fresh user data
   }
 
   return `
