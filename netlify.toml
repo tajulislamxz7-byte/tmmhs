@@ -7,7 +7,14 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# Redirect all requests to index.html for SPA routing
+# Proxy API requests to Render backend
+[[redirects]]
+  from = "/api/*"
+  to = "https://school-project-qi8m.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+# Redirect all other requests to index.html for SPA routing
 [[redirects]]
   from = "/*"
   to = "/app.html"
