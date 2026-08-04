@@ -79,7 +79,7 @@
   border-radius: 10px;
   width: 48px;
   height: 48px;
-  z-index: 1001;
+  z-index: 10001 !important;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
   cursor: pointer;
   flex-shrink: 0;
@@ -87,6 +87,7 @@
   justify-content: center;
   position: relative;
   overflow: hidden;
+  order: 999;
 }
 
 .hamburger-inner {
@@ -173,14 +174,23 @@
   .navbar-links { display: none !important; } 
   .hamburger { 
     display: flex !important;
+    z-index: 10001 !important;
+    position: relative !important;
   } 
   
   .navbar-actions {
     gap: 8px;
+    position: relative;
+    z-index: 10000;
   }
   
   .navbar-inner {
     gap: 12px;
+  }
+  
+  /* Ensure hamburger is always visible */
+  .user-avatar-btn {
+    z-index: 9999;
   }
 }
 
@@ -424,6 +434,11 @@
   }
   
   /* Reduce button sizes on mobile */
+  .navbar-actions {
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+  }
+  
   .navbar-actions .btn-icon {
     min-width: 36px;
     min-height: 36px;
@@ -433,6 +448,15 @@
   /* User avatar on mobile */
   .user-avatar-btn {
     padding: 4px 8px;
+  }
+  
+  /* Ensure hamburger is ALWAYS visible on mobile */
+  .hamburger {
+    display: flex !important;
+    z-index: 10001 !important;
+    position: relative !important;
+    flex-shrink: 0 !important;
+    margin-left: 6px !important;
   }
   
   /* Mobile dropdown positioning - center it */

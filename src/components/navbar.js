@@ -165,7 +165,7 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
         `}
 
         <!-- Animated Hamburger -->
-        <button class="hamburger" onclick="event.stopPropagation();toggleMobileMenu()" id="hamburgerBtn">
+        <button class="hamburger" onclick="event.stopPropagation();toggleMobileMenu()" id="hamburgerBtn" style="flex-shrink:0;margin-left:auto;">
           <div class="hamburger-inner">
             <span class="hamburger-line hamburger-line-1"></span>
             <span class="hamburger-line hamburger-line-2"></span>
