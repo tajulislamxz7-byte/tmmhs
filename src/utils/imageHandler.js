@@ -425,11 +425,21 @@ export async function handleProfilePictureUpload(input, previewElement) {
     const base64 = await convertImageToBase64(file);
     
     // Verify image contains a real human face using AI detection
+    console.log('🔍 Verifying face in image...');
     const verification = await verifyFaceInImage(base64);
     
-    if (!verification.valid) {
-      throw new Error(verification.reason || 'Image verification failed');
+    console.log('Verification result:', verification);
+    
+    // STRICT CHECK: Reject if not valid
+    if (!verification || !verification.valid) {
+      const reason = verification?.reason || 'Image verification failed. Please upload a clear photo of your face.';
+      console.error('❌ Face verification failed:', reason);
+      // Clear the file input
+      input.value = '';
+      throw new Error(reason);
     }
+    
+    console.log('✅ Face verification passed!');
     
     // Open cropper
     const croppedImage = await openImageCropper(base64, previewElement);
@@ -437,6 +447,8 @@ export async function handleProfilePictureUpload(input, previewElement) {
     return croppedImage;
   } catch (error) {
     console.error('❌ Image upload error:', error);
+    // Clear the file input so user can try again
+    input.value = '';
     throw error;
   }
 }

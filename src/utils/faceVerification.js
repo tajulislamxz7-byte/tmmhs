@@ -16,9 +16,18 @@ export async function verifyFaceInImage(base64Image) {
     // Try multiple face detection methods
     const result = await detectFaceWithBrowserAPI(base64Image);
     
+    // STRICT: If result is undefined or doesn't have valid property, reject
+    if (!result || typeof result.valid !== 'boolean') {
+      return {
+        valid: false,
+        reason: 'Unable to verify image. Please try uploading a clear, well-lit photo of your face.'
+      };
+    }
+    
     return result;
     
   } catch (error) {
+    console.error('Face verification error:', error);
     // Return validation with clear message
     return {
       valid: false,
@@ -162,47 +171,47 @@ async function analyzeImageForFace(img) {
   
   // Validation Rules - STRICT for real face detection
   
-  // 1. Must have skin tones (at least 15% for partial face/angled shots)
-  if (skinRatio < 0.15) {
+  // 1. Must have skin tones (at least 20% for realistic face detection)
+  if (skinRatio < 0.20) {
     return {
       valid: false,
-      reason: 'Please upload a clear photo of your own face. Make sure your face is visible and well-lit.'
+      reason: 'No face detected. Please upload a clear photo of your own face. Make sure your face is visible and well-lit.'
     };
   }
   
   // 2. Too many unnatural colors = anime/cartoon
-  if (unnaturalRatio > 0.08) {
+  if (unnaturalRatio > 0.06) {
     return {
       valid: false,
-      reason: 'Please upload a real photo. Cartoons, anime, and digital art are not allowed.'
+      reason: 'Please upload a real photo of yourself. Cartoons, anime, and digital art are not allowed.'
     };
   }
   
   // 3. Too much saturation = anime/cartoon
-  if (saturationRatio > 0.30) {
+  if (saturationRatio > 0.25) {
     return {
       valid: false,
-      reason: 'Please upload a real photo. Cartoons and anime images are not allowed.'
+      reason: 'Please upload a real photo of yourself. Cartoons and anime images are not allowed.'
     };
   }
   
   // 4. Too few colors = logo/simple graphic
-  if (colorVariety < 100) {
+  if (colorVariety < 120) {
     return {
       valid: false,
-      reason: 'Please upload a photo, not a logo or simple graphic.'
+      reason: 'Please upload a real photo, not a logo or simple graphic.'
     };
   }
   
   // 5. Check brightness extremes
-  if (avgBrightness < 25) {
+  if (avgBrightness < 30) {
     return {
       valid: false,
       reason: 'Image is too dark. Please upload a well-lit photo of your face.'
     };
   }
   
-  if (avgBrightness > 235) {
+  if (avgBrightness > 230) {
     return {
       valid: false,
       reason: 'Image is overexposed. Please upload a clearer photo.'
@@ -210,10 +219,10 @@ async function analyzeImageForFace(img) {
   }
   
   // 6. Check brightness variance (real photos have natural variance)
-  if (brightnessStdDev < 20) {
+  if (brightnessStdDev < 25) {
     return {
       valid: false,
-      reason: 'Image appears to be a flat graphic. Please upload a real photo of your face.'
+      reason: 'Image appears to be a flat graphic or illustration. Please upload a real photo of your face.'
     };
   }
   
@@ -221,10 +230,18 @@ async function analyzeImageForFace(img) {
   const edgeCount = detectSharpEdges(imageData, size);
   const edgeRatio = edgeCount / (stats.totalPixels / 4); // normalized
   
-  if (edgeRatio > 0.35) {
+  if (edgeRatio > 0.30) {
     return {
       valid: false,
-      reason: 'Please upload a photo, not a screenshot or document.'
+      reason: 'Please upload a photo of yourself, not a screenshot, document, or text image.'
+    };
+  }
+  
+  // 8. Additional check: Minimum skin tone requirement
+  if (skinRatio < 0.25 && colorVariety < 150) {
+    return {
+      valid: false,
+      reason: 'Unable to detect a human face. Please upload a clear photo showing your face.'
     };
   }
   
