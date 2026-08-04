@@ -1,5 +1,22 @@
 [
   {
+    "id": "ADMIN-2026-0001",
+    "name": "Admin",
+    "firstName": "Admin",
+    "lastName": "User",
+    "email": "admin@tmmhs.edu.bd",
+    "phone": "01700000000",
+    "password": "admin123",
+    "role": "admin",
+    "status": "active",
+    "avatar": "https://i.imgur.com/x9wE0QT.png",
+    "createdAt": "2026-08-04T00:00:00.000Z",
+    "address": "",
+    "skills": [],
+    "achievements": [],
+    "bio": "School Administrator"
+  },
+  {
     "id": "STU-2026-0001",
     "name": "Tajul Islam",
     "firstName": "Tajul",
