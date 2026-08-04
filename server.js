@@ -612,8 +612,15 @@ app.post('/api/send-sms', async (req, res) => {
       url = `${SMS_API_URL}?api_key=${SMS_API_KEY}&msg=${encodeURIComponent(message)}&to=${normalized}`;
     }
     
+    console.log('📱 Sending SMS to:', normalized);
+    console.log('📡 SMS Provider:', SMS_PROVIDER);
+    console.log('🔗 SMS URL:', url.replace(SMS_API_KEY, '***KEY***')); // Hide API key in logs
+    
     const r = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
     const responseText = await r.text();
+    
+    console.log('📨 SMS Response Status:', r.status);
+    console.log('📨 SMS Response:', responseText);
     
     let data;
     try {
