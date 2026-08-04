@@ -164,6 +164,7 @@ function lsRegister(data) {
 // Phone/email login — conditional OTP based on SMS configuration
 function lsLoginByPhoneOrEmail(phone, email, password) {
   const users = LS.get('gfa_users', []);
+  // Normalize: strip spaces, +, country code (880), and leading 0 → 10-digit local number
   const norm = (p) => String(p||'').replace(/\s+/g,'').replace(/^\+/,'').replace(/^880/,'').replace(/^0/,'');
   let user = null;
   if (phone) {

@@ -218,12 +218,14 @@ app.post('/api/users/login', (req, res) => {
   let user = null;
 
   if (phone && phone.trim()) {
-    // Normalize phone: strip leading 0, spaces; accept 880... or 01...
+    // Normalize phone: strip spaces, leading +; standardize to 10-digit local number
     const normalizePhone = (p) => {
       p = String(p).replace(/\s+/g, '').replace(/^\+/, '');
+      // Remove country code 880 if present
       if (p.startsWith('880')) p = p.slice(3);
+      // Remove leading 0 if present
       if (p.startsWith('0')) p = p.slice(1);
-      return p; // returns 10-digit local number
+      return p; // returns 10-digit local number (e.g., 1727517598)
     };
     const inputNorm = normalizePhone(phone);
     user = users.find(u => {
