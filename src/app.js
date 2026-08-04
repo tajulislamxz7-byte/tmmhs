@@ -83,6 +83,19 @@ async function render() {
   const loggedIn   = !!user;
   const role       = user?.role || 'guest';
 
+  // Load school settings for navbar branding
+  if (!window._schoolSettings) {
+    try {
+      const response = await api.get('/settings');
+      if (response.ok) {
+        window._schoolSettings = response.data;
+      }
+    } catch (err) {
+      console.error('Failed to load school settings:', err);
+      window._schoolSettings = {};
+    }
+  }
+
   const navRoot    = document.getElementById('navbar-root');
   const pageRoot   = document.getElementById('page-root');
   const footerRoot = document.getElementById('footer-root');
@@ -95,6 +108,61 @@ async function render() {
   } else {
     navRoot.innerHTML  = renderNavbar(currentPage, loggedIn, role, user);
     navRoot.style.display = '';
+    
+    // Force hamburger visibility on mobile - aggressive debugging
+    setTimeout(() => {
+      const hamburger = document.getElementById('hamburgerBtn');
+      console.log('🔍 Hamburger element:', hamburger);
+      console.log('🔍 Window width:', window.innerWidth);
+      
+      if (hamburger) {
+        const computed = window.getComputedStyle(hamburger);
+        console.log('🔍 Hamburger BEFORE fix:', {
+          display: computed.display,
+          visibility: computed.visibility,
+          opacity: computed.opacity,
+          position: computed.position,
+          right: computed.right,
+          top: computed.top,
+          transform: computed.transform,
+          width: computed.width,
+          height: computed.height,
+          zIndex: computed.zIndex
+        });
+        
+        if (window.innerWidth <= 1024) {
+          // Force all critical styles
+          hamburger.style.setProperty('display', 'flex', 'important');
+          hamburger.style.setProperty('visibility', 'visible', 'important');
+          hamburger.style.setProperty('opacity', '1', 'important');
+          hamburger.style.setProperty('position', 'absolute', 'important');
+          hamburger.style.setProperty('right', '8px', 'important');
+          hamburger.style.setProperty('top', '50%', 'important');
+          hamburger.style.setProperty('transform', 'translateY(-50%)', 'important');
+          hamburger.style.setProperty('z-index', '10002', 'important');
+          hamburger.style.setProperty('pointer-events', 'auto', 'important');
+          
+          const computedAfter = window.getComputedStyle(hamburger);
+          console.log('🔍 Hamburger AFTER fix:', {
+            display: computedAfter.display,
+            visibility: computedAfter.visibility,
+            opacity: computedAfter.opacity,
+            position: computedAfter.position,
+            right: computedAfter.right,
+            top: computedAfter.top,
+            transform: computedAfter.transform,
+            width: computedAfter.width,
+            height: computedAfter.height,
+            zIndex: computedAfter.zIndex,
+            rect: hamburger.getBoundingClientRect()
+          });
+          
+          console.log('✅ Hamburger visibility enforced');
+        }
+      } else {
+        console.error('❌ Hamburger element NOT FOUND!');
+      }
+    }, 100);
   }
 
   // Search

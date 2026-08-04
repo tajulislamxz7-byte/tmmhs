@@ -38,6 +38,7 @@
   width: 100%;
   box-sizing: border-box;
   justify-content: space-between;
+  position: relative;
 }
 .navbar-logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 17px; color: var(--text-primary); flex-shrink: 0; }
 .logo-icon { display: flex; align-items: center; justify-content: center; }
@@ -90,15 +91,17 @@
   border-radius: 10px;
   width: 48px;
   height: 48px;
-  z-index: 10001 !important;
+  z-index: 10002 !important;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
   cursor: pointer;
   flex-shrink: 0 !important;
   align-items: center;
   justify-content: center;
-  position: relative;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
   overflow: hidden;
-  order: 999;
   min-width: 48px !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -188,21 +191,26 @@
   .navbar-links { display: none !important; } 
   .hamburger { 
     display: flex !important;
-    z-index: 10001 !important;
-    position: relative !important;
+    z-index: 10002 !important;
+    position: absolute !important;
+    right: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
     visibility: visible !important;
     opacity: 1 !important;
-    flex-shrink: 0 !important;
+    pointer-events: auto !important;
   } 
   
   .navbar-actions {
     gap: 8px;
     position: relative;
     z-index: 10000;
+    overflow: visible !important;
   }
   
   .navbar-inner {
     gap: 12px;
+    overflow: visible !important;
   }
   
   /* Ensure hamburger is always visible */
@@ -444,10 +452,11 @@
     max-width: 100%;
   }
   
-  /* Mobile navbar spacing */
+  /* Mobile navbar spacing - add right padding for hamburger */
   .navbar-inner { 
     gap: 6px;
     padding: 0;
+    padding-right: 56px !important;
     width: 100%;
     max-width: 100%;
   }
@@ -478,8 +487,10 @@
   .navbar-actions {
     gap: 4px !important;
     flex-wrap: nowrap !important;
-    flex-shrink: 0 !important;
+    flex-shrink: 1 !important;
     min-width: 0;
+    overflow: visible !important;
+    position: relative;
   }
   
   .navbar-actions .btn-icon {
@@ -487,6 +498,12 @@
     min-height: 34px;
     padding: 7px;
     flex-shrink: 0;
+  }
+  
+  /* Hide notification bell on small mobile to save space for hamburger */
+  .navbar-actions .btn-icon[title*="Notifications"],
+  .hide-on-small-mobile {
+    display: none !important;
   }
   
   /* User avatar on mobile */
@@ -504,17 +521,23 @@
   /* Ensure hamburger is ALWAYS visible and fully shown on mobile */
   .hamburger {
     display: flex !important;
-    z-index: 10001 !important;
-    position: relative !important;
+    z-index: 10002 !important;
+    position: absolute !important;
+    right: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
     flex-shrink: 0 !important;
-    margin-left: 4px !important;
+    flex-grow: 0 !important;
+    margin-left: auto !important;
     width: 42px !important;
     height: 42px !important;
     padding: 10px !important;
     min-width: 42px !important;
+    max-width: 42px !important;
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
+    order: 9999 !important;
   }
   
   /* Mobile dropdown positioning - center it */
@@ -583,12 +606,20 @@
     height: 40px !important;
     padding: 9px !important;
     min-width: 40px !important;
-    margin-left: 3px !important;
+    max-width: 40px !important;
+    margin-left: auto !important;
     display: flex !important;
+    position: absolute !important;
+    right: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
-    z-index: 10001 !important;
+    z-index: 10002 !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    order: 9999 !important;
   }
   
   .hamburger-inner {

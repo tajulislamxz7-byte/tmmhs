@@ -2,6 +2,7 @@
 // NAVBAR — Clean SVG icons, auth-aware
 // ================================================
 import { icon } from '../utils/icons.js';
+import { api } from '../utils/api.js';
 
 export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'guest', user = null) {
   const active = (page) => activePage === page ? 'active' : '';
@@ -20,6 +21,12 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
     });
   }
 
+  // Get school branding from settings (cached in window object)
+  const settings = window._schoolSettings || {};
+  const logoUrl = settings.schoolLogoUrl || '';
+  const schoolName = settings.schoolShortName || 'Tiarkhali M.M';
+  const schoolTagline = settings.schoolTagline || 'High School & College';
+
   return `
   <nav class="navbar" id="navbar">
     <div class="navbar-container">
@@ -27,14 +34,23 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
 
       <!-- Logo -->
       <a class="navbar-logo" onclick="navigate('home')" style="cursor:pointer;text-decoration:none;">
+        ${logoUrl ? `
+        <img src="${logoUrl}" alt="${schoolName}" style="width:34px;height:34px;border-radius:10px;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none" style="display:none;">
+          <rect width="34" height="34" rx="10" fill="#2563eb"/>
+          <path d="M7 26L17 9L27 26H7Z" fill="white" opacity="0.92"/>
+          <circle cx="17" cy="19" r="4.5" fill="#93c5fd"/>
+        </svg>
+        ` : `
         <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
           <rect width="34" height="34" rx="10" fill="#2563eb"/>
           <path d="M7 26L17 9L27 26H7Z" fill="white" opacity="0.92"/>
           <circle cx="17" cy="19" r="4.5" fill="#93c5fd"/>
         </svg>
+        `}
         <div>
-          <div class="logo-name">Tiarkhali M.M</div>
-          <div class="logo-tagline">High School & College</div>
+          <div class="logo-name">${schoolName}</div>
+          <div class="logo-tagline">${schoolTagline}</div>
         </div>
       </a>
 
@@ -111,7 +127,7 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
 
         ${isLoggedIn ? `
         <!-- Notifications -->
-        <button class="btn btn-ghost btn-icon" onclick="navigate('notifications')" title="Notifications" style="position:relative;">
+        <button class="btn btn-ghost btn-icon hide-on-small-mobile" onclick="navigate('notifications')" title="Notifications" style="position:relative;">
           ${icon('bell', 18)}
           <span style="position:absolute;top:6px;right:6px;width:8px;height:8px;background:#ef4444;border-radius:50%;border:2px solid var(--bg-primary);"></span>
         </button>
@@ -163,17 +179,17 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
           </button>
         </div>
         `}
-
-        <!-- Animated Hamburger -->
-        <button class="hamburger" onclick="event.stopPropagation();toggleMobileMenu()" id="hamburgerBtn" style="flex-shrink:0 !important;margin-left:auto;display:flex !important;visibility:visible !important;opacity:1 !important;">
-          <div class="hamburger-inner">
-            <span class="hamburger-line hamburger-line-1"></span>
-            <span class="hamburger-line hamburger-line-2"></span>
-            <span class="hamburger-line hamburger-line-3"></span>
-            <span class="hamburger-arrow"></span>
-          </div>
-        </button>
       </div>
+
+      <!-- Animated Hamburger - OUTSIDE navbar-actions for iOS compatibility -->
+      <button class="hamburger" onclick="event.stopPropagation();toggleMobileMenu()" id="hamburgerBtn">
+        <div class="hamburger-inner">
+          <span class="hamburger-line hamburger-line-1"></span>
+          <span class="hamburger-line hamburger-line-2"></span>
+          <span class="hamburger-line hamburger-line-3"></span>
+          <span class="hamburger-arrow"></span>
+        </div>
+      </button>
     </div>
   </nav>
   

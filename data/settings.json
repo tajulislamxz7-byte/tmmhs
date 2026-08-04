@@ -1,5 +1,8 @@
 {
   "name": "Tiarkhali M.M High School and College",
+  "schoolShortName": "Tiarkhali M.M",
+  "schoolTagline": "High School & College",
+  "schoolLogoUrl": "",
   "smsApiKey": "",
   "smsProvider": "sms.net.bd",
   "smsApiUrl": "https://api.sms.net.bd/sendsms",

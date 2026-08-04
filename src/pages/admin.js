@@ -1989,6 +1989,58 @@ function renderAdminSettings() {
     <div>
       <h1 style="font-size:22px;font-weight:800;margin-bottom:24px;">School Settings</h1>
 
+      <!-- Row 0: Logo & Branding (NEW) -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-header"><div class="font-semibold">Logo & Branding (Navbar)</div></div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:200px 1fr;gap:24px;">
+            <!-- Logo Preview -->
+            <div>
+              <div style="margin-bottom:8px;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;">Logo Preview</div>
+              <div style="border:2px dashed var(--border);border-radius:12px;padding:16px;background:var(--bg-secondary);text-align:center;">
+                ${s.schoolLogoUrl ? `
+                  <img src="${s.schoolLogoUrl}" alt="School Logo" id="logoPreview" style="width:80px;height:80px;border-radius:10px;object-fit:cover;margin:0 auto;display:block;">
+                ` : `
+                  <div id="logoPreview" style="width:80px;height:80px;border-radius:10px;background:var(--primary);margin:0 auto;display:flex;align-items:center;justify-content:center;">
+                    <svg width="40" height="40" viewBox="0 0 34 34" fill="none">
+                      <path d="M7 26L17 9L27 26H7Z" fill="white" opacity="0.92"/>
+                      <circle cx="17" cy="19" r="4.5" fill="#93c5fd"/>
+                    </svg>
+                  </div>
+                `}
+                <div style="margin-top:12px;font-size:10px;color:var(--text-muted);">Recommended: 512x512px</div>
+              </div>
+            </div>
+
+            <!-- Branding Fields -->
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div class="form-group">
+                <label class="form-label">Logo URL (Direct Image Link)</label>
+                <input class="form-input" id="s_logo_url" value="${s.schoolLogoUrl || ''}" placeholder="https://example.com/logo.png" 
+                       onchange="updateLogoPreview(this.value)">
+                <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Upload your logo to an image host (like Imgur) and paste the direct link here</div>
+              </div>
+              
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                  <label class="form-label">School Short Name (Navbar)</label>
+                  <input class="form-input" id="s_short_name" value="${s.schoolShortName || 'Tiarkhali M.M'}" placeholder="Tiarkhali M.M">
+                  <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Main name in navbar</div>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Tagline (Navbar)</label>
+                  <input class="form-input" id="s_navbar_tagline" value="${s.schoolTagline || 'High School & College'}" placeholder="High School & College">
+                  <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Subtitle in navbar</div>
+                </div>
+              </div>
+
+              <button class="btn btn-primary" onclick="saveBranding()">Save Logo & Branding</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Row 1: School Info + School Photo side by side -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
 
@@ -2809,6 +2861,48 @@ window.saveSettings = async function() {
   _cache.settings = s;
   showToast('Settings saved successfully!', 'success');
   await _refreshTab('settings');
+};
+
+// "" Branding & Logo ""
+window.saveBranding = async function() {
+  const existing = await api.getSettings() || {};
+  const s = {
+    ...existing,
+    schoolLogoUrl:   document.getElementById('s_logo_url')?.value?.trim() || '',
+    schoolShortName: document.getElementById('s_short_name')?.value?.trim() || 'Tiarkhali M.M',
+    schoolTagline:   document.getElementById('s_navbar_tagline')?.value?.trim() || 'High School & College',
+  };
+  
+  await api.saveSettings(s);
+  _cache.settings = s;
+  window._schoolSettings = s; // Update cached settings for navbar
+  showToast('Logo & branding saved! Refresh page to see changes in navbar.', 'success');
+  await _refreshTab('settings');
+  
+  // Force navbar refresh
+  setTimeout(() => {
+    if (typeof render === 'function') render();
+  }, 500);
+};
+
+window.updateLogoPreview = function(url) {
+  const preview = document.getElementById('logoPreview');
+  if (!preview) return;
+  
+  if (!url || !url.trim()) {
+    // Show default SVG logo
+    preview.innerHTML = `
+      <div style="width:80px;height:80px;border-radius:10px;background:var(--primary);margin:0 auto;display:flex;align-items:center;justify-content:center;">
+        <svg width="40" height="40" viewBox="0 0 34 34" fill="none">
+          <path d="M7 26L17 9L27 26H7Z" fill="white" opacity="0.92"/>
+          <circle cx="17" cy="19" r="4.5" fill="#93c5fd"/>
+        </svg>
+      </div>
+    `;
+  } else {
+    // Show image
+    preview.innerHTML = `<img src="${url}" alt="Logo Preview" style="width:80px;height:80px;border-radius:10px;object-fit:cover;margin:0 auto;display:block;" onerror="this.src='';this.style.display='none';this.parentElement.innerHTML='<div style=\\'color:var(--danger);font-size:11px;\\'>Invalid URL</div>';">`;
+  }
 };
 
 // "" School Photo ""
