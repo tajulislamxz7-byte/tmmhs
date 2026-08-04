@@ -22,12 +22,17 @@ export function isSmsConfigured() {
  */
 export async function sendOtp(phone) {
   try {
-    // Normalize phone number
-    let normalized = String(phone).replace(/\s+/g, '');
-    if (!normalized.startsWith('+')) {
-      if (normalized.startsWith('0')) normalized = '+880' + normalized.slice(1);
-      else if (normalized.startsWith('880')) normalized = '+' + normalized;
-      else normalized = '+880' + normalized;
+    // Normalize phone number for SMS API (must be in 880XXXXXXXXXX format)
+    let normalized = String(phone).replace(/\s+/g, '').replace(/^\+/, '');
+    
+    // Handle different input formats:
+    // 8801727517598 → 8801727517598 (already correct)
+    // 01727517598 → 8801727517598
+    // 1727517598 → 8801727517598
+    if (normalized.startsWith('0')) {
+      normalized = '880' + normalized.slice(1);
+    } else if (!normalized.startsWith('880')) {
+      normalized = '880' + normalized;
     }
     
     // Check if SMS API is configured
