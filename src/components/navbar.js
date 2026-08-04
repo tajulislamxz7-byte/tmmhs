@@ -24,15 +24,18 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
   // Get school branding from settings (cached in window object)
   const settings = window._schoolSettings || {};
   const logoUrl = settings.schoolLogoUrl || '';
-  const schoolName = settings.schoolShortName || 'Tiarkhali M.M';
-  const schoolTagline = settings.schoolTagline || 'High School & College';
+  const schoolName = settings.schoolShortName || settings.name || 'Tiarkhali M.M';
+  const schoolTagline = settings.schoolTagline || settings.tagline || 'High School & College';
   
   console.log('🎨 Navbar branding:', {
     hasSettings: !!settings,
-    logoUrl: logoUrl ? (logoUrl.startsWith('data:') ? 'base64 image' : logoUrl) : 'none',
+    settingsKeys: Object.keys(settings),
+    logoUrl: logoUrl ? (logoUrl.startsWith('data:') ? `base64 image (${logoUrl.substring(0, 50)}...)` : logoUrl) : 'none',
     logoLength: logoUrl?.length,
     schoolName,
-    schoolTagline
+    schoolTagline,
+    rawShortName: settings.schoolShortName,
+    rawTagline: settings.schoolTagline
   });
 
   return `
