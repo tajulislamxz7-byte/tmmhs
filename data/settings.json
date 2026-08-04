@@ -1,6 +1,6 @@
 {
   "name": "Tiarkhali M.M High School and College",
-  "smsApiKey": "xAmmAlUB3a7C4gXO4yKrK0rW5q57aE10JaL0TpzX",
+  "smsApiKey": "",
   "smsProvider": "sms.net.bd",
   "smsApiUrl": "https://api.sms.net.bd/sendsms",
   "tagline": "Nurturing Excellence, Inspiring Futures",

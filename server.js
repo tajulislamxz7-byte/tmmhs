@@ -246,7 +246,14 @@ app.post('/api/users/login', (req, res) => {
 
   // Check if SMS API is configured
   const settings = readJSON('settings.json');
-  const smsConfigured = !!(settings.smsApiKey && settings.smsApiKey.trim());
+  const smsConfigured = !!(settings.smsApiKey && settings.smsApiKey.trim() && settings.smsApiKey !== '');
+  
+  console.log('🔐 Login attempt:', { 
+    phone: phone ? 'provided' : 'none',
+    email: email ? 'provided' : 'none', 
+    role: user.role,
+    smsConfigured 
+  });
   
   // Admin always bypasses OTP
   if (user.role === 'admin') {
@@ -262,22 +269,30 @@ app.post('/api/users/login', (req, res) => {
     return res.json({ ok: true, user: session, otpRequired: false });
   }
   
-  // Phone login with SMS configured → require OTP
-  if (smsConfigured && phone && phone.trim() && user.phone) {
-    const session = {...user}; 
-    delete session.password;
-    const maskedPhone = user.phone.replace(/(\d{3})\d+(\d{3})$/, '$1****$2');
-    
-    return res.json({
-      ok: true,
-      otpRequired: true,
-      maskedPhone,
-      phone: user.phone,
-      pendingUser: session,
-    });
+  // Phone login - only require OTP if SMS is configured
+  if (phone && phone.trim()) {
+    if (smsConfigured && user.phone) {
+      // SMS configured → require OTP
+      const session = {...user}; 
+      delete session.password;
+      const maskedPhone = user.phone.replace(/(\d{3})\d+(\d{3})$/, '$1****$2');
+      
+      return res.json({
+        ok: true,
+        otpRequired: true,
+        maskedPhone,
+        phone: user.phone,
+        pendingUser: session,
+      });
+    } else {
+      // No SMS configured → direct login
+      const session = {...user}; 
+      delete session.password;
+      return res.json({ ok: true, user: session, otpRequired: false });
+    }
   }
   
-  // No SMS configured → direct login
+  // Fallback: direct login
   const session = {...user}; 
   delete session.password;
   return res.json({ ok: true, user: session, otpRequired: false });

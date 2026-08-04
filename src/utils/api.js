@@ -175,9 +175,16 @@ function lsLoginByPhoneOrEmail(phone, email, password) {
   }
   if (!user) return { ok: false, error: 'Invalid credentials. Check your phone/email and password.' };
   
-  // Check if SMS is configured
+  // Check if SMS is configured (must have non-empty API key)
   const settings = LS.get('gfa_settings', {});
-  const smsConfigured = !!(settings.smsApiKey && settings.smsApiKey.trim());
+  const smsConfigured = !!(settings.smsApiKey && settings.smsApiKey.trim() && settings.smsApiKey !== '');
+  
+  console.log('🔐 Client login check:', { 
+    phone: phone ? 'provided' : 'none', 
+    email: email ? 'provided' : 'none',
+    role: user.role,
+    smsConfigured 
+  });
   
   // Admin bypasses OTP
   if (user.role === 'admin') {
@@ -193,22 +200,30 @@ function lsLoginByPhoneOrEmail(phone, email, password) {
     return { ok: true, user: session, otpRequired: false };
   }
   
-  // Phone login with SMS configured → require OTP
-  if (smsConfigured && phone && phone.trim() && user.phone) {
-    const session = {...user}; 
-    delete session.password;
-    const maskedPhone = user.phone.replace(/(\d{3})\d+(\d{3})$/, '$1****$2');
-    
-    return {
-      ok: true,
-      otpRequired: true,
-      maskedPhone,
-      phone: user.phone,
-      pendingUser: session,
-    };
+  // Phone login - only require OTP if SMS is configured
+  if (phone && phone.trim()) {
+    if (smsConfigured && user.phone) {
+      // SMS configured → require OTP
+      const session = {...user}; 
+      delete session.password;
+      const maskedPhone = user.phone.replace(/(\d{3})\d+(\d{3})$/, '$1****$2');
+      
+      return {
+        ok: true,
+        otpRequired: true,
+        maskedPhone,
+        phone: user.phone,
+        pendingUser: session,
+      };
+    } else {
+      // No SMS configured → direct login
+      const session = {...user}; 
+      delete session.password;
+      return { ok: true, user: session, otpRequired: false };
+    }
   }
   
-  // No SMS configured → direct login
+  // Fallback: direct login
   const session = {...user}; 
   delete session.password;
   return { ok: true, user: session, otpRequired: false };
