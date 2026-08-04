@@ -2945,7 +2945,7 @@ window.saveBranding = async function() {
       schoolTagline:   document.getElementById('s_navbar_tagline')?.value?.trim() || 'High School & College',
     };
     
-    console.log('Saving branding:', {
+    console.log('💾 Saving branding:', {
       logoLength: s.schoolLogoUrl?.length,
       shortName: s.schoolShortName,
       tagline: s.schoolTagline
@@ -2956,29 +2956,15 @@ window.saveBranding = async function() {
     window._schoolSettings = s; // Update cached settings for navbar
     window._uploadedLogoData = null; // Clear uploaded data
     
-    showToast('Logo & branding saved successfully!', 'success');
+    showToast('✅ Logo & branding saved! Page will reload in 2 seconds...', 'success');
     
-    // Re-enable URL field
-    const urlField = document.getElementById('s_logo_url');
-    if (urlField) {
-      urlField.disabled = false;
-      if (s.schoolLogoUrl && s.schoolLogoUrl.startsWith('data:')) {
-        urlField.value = '[Base64 Image Saved]';
-      } else {
-        urlField.value = s.schoolLogoUrl;
-      }
-    }
-    
-    await _refreshTab('settings');
-    
-    // Force navbar refresh
+    // Force full page reload to show changes
     setTimeout(() => {
-      location.reload();
-    }, 1000);
+      window.location.reload();
+    }, 2000);
   } catch (error) {
-    console.error('Error saving branding:', error);
+    console.error('❌ Error saving branding:', error);
     showToast('Failed to save branding: ' + error.message, 'error');
-  } finally {
     if (btn) {
       btn.disabled = false;
       btn.textContent = 'Save Logo & Branding';
