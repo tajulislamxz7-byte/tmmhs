@@ -83,27 +83,6 @@ async function render() {
   const loggedIn   = !!user;
   const role       = user?.role || 'guest';
 
-  // Load school settings for navbar branding
-  if (!window._schoolSettings) {
-    try {
-      const response = await api.get('/settings');
-      if (response.ok) {
-        window._schoolSettings = response.data;
-        console.log('✅ School settings loaded:', {
-          hasLogo: !!response.data?.schoolLogoUrl,
-          logoLength: response.data?.schoolLogoUrl?.length,
-          shortName: response.data?.schoolShortName,
-          tagline: response.data?.schoolTagline
-        });
-      } else {
-        console.error('❌ Failed to load settings:', response);
-      }
-    } catch (err) {
-      console.error('❌ Error loading school settings:', err);
-      window._schoolSettings = {};
-    }
-  }
-
   const navRoot    = document.getElementById('navbar-root');
   const pageRoot   = document.getElementById('page-root');
   const footerRoot = document.getElementById('footer-root');

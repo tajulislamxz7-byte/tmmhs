@@ -2,7 +2,6 @@
 // NAVBAR — Clean SVG icons, auth-aware
 // ================================================
 import { icon } from '../utils/icons.js';
-import { api } from '../utils/api.js';
 
 export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'guest', user = null) {
   const active = (page) => activePage === page ? 'active' : '';
@@ -21,23 +20,6 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
     });
   }
 
-  // Get school branding from settings (cached in window object)
-  const settings = window._schoolSettings || {};
-  const logoUrl = settings.schoolLogoUrl || '';
-  const schoolName = settings.schoolShortName || settings.name || 'Tiarkhali M.M';
-  const schoolTagline = settings.schoolTagline || settings.tagline || 'High School & College';
-  
-  console.log('🎨 Navbar branding:', {
-    hasSettings: !!settings,
-    settingsKeys: Object.keys(settings),
-    logoUrl: logoUrl ? (logoUrl.startsWith('data:') ? `base64 image (${logoUrl.substring(0, 50)}...)` : logoUrl) : 'none',
-    logoLength: logoUrl?.length,
-    schoolName,
-    schoolTagline,
-    rawShortName: settings.schoolShortName,
-    rawTagline: settings.schoolTagline
-  });
-
   return `
   <nav class="navbar" id="navbar">
     <div class="navbar-container">
@@ -45,23 +27,14 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
 
       <!-- Logo -->
       <a class="navbar-logo" onclick="navigate('home')" style="cursor:pointer;text-decoration:none;">
-        ${logoUrl ? `
-        <img src="${logoUrl}" alt="${schoolName}" style="width:34px;height:34px;border-radius:10px;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
-        <svg width="34" height="34" viewBox="0 0 34 34" fill="none" style="display:none;">
-          <rect width="34" height="34" rx="10" fill="#2563eb"/>
-          <path d="M7 26L17 9L27 26H7Z" fill="white" opacity="0.92"/>
-          <circle cx="17" cy="19" r="4.5" fill="#93c5fd"/>
-        </svg>
-        ` : `
         <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
           <rect width="34" height="34" rx="10" fill="#2563eb"/>
           <path d="M7 26L17 9L27 26H7Z" fill="white" opacity="0.92"/>
           <circle cx="17" cy="19" r="4.5" fill="#93c5fd"/>
         </svg>
-        `}
         <div>
-          <div class="logo-name">${schoolName}</div>
-          <div class="logo-tagline">${schoolTagline}</div>
+          <div class="logo-name">Tiarkhali M.M</div>
+          <div class="logo-tagline">High School & College</div>
         </div>
       </a>
 
