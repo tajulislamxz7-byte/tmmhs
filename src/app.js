@@ -89,9 +89,17 @@ async function render() {
       const response = await api.get('/settings');
       if (response.ok) {
         window._schoolSettings = response.data;
+        console.log('✅ School settings loaded:', {
+          hasLogo: !!response.data?.schoolLogoUrl,
+          logoLength: response.data?.schoolLogoUrl?.length,
+          shortName: response.data?.schoolShortName,
+          tagline: response.data?.schoolTagline
+        });
+      } else {
+        console.error('❌ Failed to load settings:', response);
       }
     } catch (err) {
-      console.error('Failed to load school settings:', err);
+      console.error('❌ Error loading school settings:', err);
       window._schoolSettings = {};
     }
   }

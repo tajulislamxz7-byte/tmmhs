@@ -26,6 +26,14 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
   const logoUrl = settings.schoolLogoUrl || '';
   const schoolName = settings.schoolShortName || 'Tiarkhali M.M';
   const schoolTagline = settings.schoolTagline || 'High School & College';
+  
+  console.log('🎨 Navbar branding:', {
+    hasSettings: !!settings,
+    logoUrl: logoUrl ? (logoUrl.startsWith('data:') ? 'base64 image' : logoUrl) : 'none',
+    logoLength: logoUrl?.length,
+    schoolName,
+    schoolTagline
+  });
 
   return `
   <nav class="navbar" id="navbar">
