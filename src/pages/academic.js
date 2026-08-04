@@ -29,9 +29,9 @@ export function renderAcademicCalendar() {
         </div>
 
         <!-- Events Grid -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px;max-width:1200px;margin:0 auto;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;width:100%;">
           ${events.map((event, idx) => `
-            <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:20px;padding:28px;box-shadow:0 4px 16px rgba(0,0,0,0.1);transition:all 0.3s ease;animation:fadeInUp 0.6s ease ${idx * 0.1}s backwards;cursor:pointer;" 
+            <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:20px;padding:24px;box-shadow:0 4px 16px rgba(0,0,0,0.1);transition:all 0.3s ease;animation:fadeInUp 0.6s ease ${idx * 0.1}s backwards;cursor:pointer;box-sizing:border-box;" 
                  onmouseover="this.style.transform='translateY(-8px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.15)';this.style.borderColor='var(--primary)'" 
                  onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 16px rgba(0,0,0,0.1)';this.style.borderColor='var(--border-color)'">
               
@@ -84,19 +84,19 @@ export function renderHolidayCalendar() {
   ];
 
   return `
-    <div style="min-height:100vh;background:var(--bg-primary);padding:80px 20px 80px;">
-      <div class="container" style="max-width:1000px;">
+    <div style="min-height:100vh;background:var(--bg-primary);padding:80px 20px 80px;overflow-x:hidden;">
+      <div class="container" style="max-width:1000px;overflow-x:hidden;">
         <div style="text-align:center;margin-bottom:50px;">
           <div style="display:inline-flex;align-items:center;justify-content:center;width:70px;height:70px;background:var(--primary);border-radius:20px;margin-bottom:20px;box-shadow:0 8px 24px var(--primary-shadow);">
             ${icon('calendar', 36, 'white')}
           </div>
-          <h1 style="font-size:42px;font-weight:900;color:var(--text-primary);margin-bottom:12px;letter-spacing:-1px;">Holiday Calendar 2026</h1>
+          <h1 style="font-size:clamp(28px, 5vw, 42px);font-weight:900;color:var(--text-primary);margin-bottom:12px;letter-spacing:-1px;">Holiday Calendar 2026</h1>
           <p style="font-size:16px;color:var(--text-muted);">Public holidays and school breaks throughout the year</p>
         </div>
 
-        <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);width:100%;box-sizing:border-box;">
           ${holidays.map((h, idx) => `
-            <div style="padding:28px 32px;border-bottom:1px solid var(--border-color);transition:all 0.3s ease;cursor:pointer;animation:fadeInUp 0.5s ease ${idx * 0.05}s backwards;" 
+            <div style="padding:24px 28px;border-bottom:1px solid var(--border-color);transition:all 0.3s ease;cursor:pointer;animation:fadeInUp 0.5s ease ${idx * 0.05}s backwards;box-sizing:border-box;" 
                  onmouseover="this.style.background='var(--bg-primary)';this.style.transform='translateX(8px)'" 
                  onmouseout="this.style.background='var(--bg-secondary)';this.style.transform='translateX(0)'">
               <div style="display:flex;align-items:center;gap:24px;">
@@ -134,30 +134,30 @@ export function renderClassRoutine() {
   ];
 
   return `
-    <div style="min-height:100vh;background:var(--bg-primary);padding:80px 20px 80px;">
-      <div class="container" style="max-width:900px;">
+    <div style="min-height:100vh;background:var(--bg-primary);padding:80px 20px 80px;overflow-x:hidden;">
+      <div class="container" style="max-width:900px;overflow-x:hidden;">
         <div style="text-align:center;margin-bottom:50px;">
           <div style="display:inline-flex;align-items:center;justify-content:center;width:70px;height:70px;background:var(--primary);border-radius:20px;margin-bottom:20px;box-shadow:0 8px 24px var(--primary-shadow);">
             ${icon('clock', 36, 'white')}
           </div>
-          <h1 style="font-size:42px;font-weight:900;color:var(--text-primary);margin-bottom:12px;letter-spacing:-1px;">Class Routine</h1>
+          <h1 style="font-size:clamp(28px, 5vw, 42px);font-weight:900;color:var(--text-primary);margin-bottom:12px;letter-spacing:-1px;">Class Routine</h1>
           <p style="font-size:16px;color:var(--text-muted);">Class 10 - Section A • Daily Schedule</p>
         </div>
 
-        <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);width:100%;box-sizing:border-box;">
           ${routine.map((period, idx) => `
-            <div style="padding:24px 28px;border-bottom:1px solid var(--border-color);transition:all 0.3s ease;${period.isBreak ? 'background:linear-gradient(90deg, rgba(254, 225, 64, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);' : ''}animation:fadeInUp 0.5s ease ${idx * 0.05}s backwards;" 
+            <div style="padding:20px 24px;border-bottom:1px solid var(--border-color);transition:all 0.3s ease;${period.isBreak ? 'background:linear-gradient(90deg, rgba(254, 225, 64, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);' : ''}animation:fadeInUp 0.5s ease ${idx * 0.05}s backwards;box-sizing:border-box;" 
                  ${!period.isBreak ? `onmouseover="this.style.background='var(--bg-primary)'" onmouseout="this.style.background='var(--bg-secondary)'"` : ''}>
-              <div style="display:flex;align-items:center;gap:20px;">
-                <div style="background:${period.isBreak ? 'linear-gradient(135deg, #fee140 0%, #ffa500 100%)' : `linear-gradient(135deg, ${period.color} 0%, ${period.color}dd 100%)`};min-width:90px;padding:12px;border-radius:12px;text-align:center;color:white;box-shadow:0 6px 16px ${period.color}40;">
-                  <div style="font-size:15px;font-weight:800;">${period.time}</div>
+              <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                <div style="background:${period.isBreak ? 'linear-gradient(135deg, #fee140 0%, #ffa500 100%)' : `linear-gradient(135deg, ${period.color} 0%, ${period.color}dd 100%)`};min-width:85px;padding:10px;border-radius:12px;text-align:center;color:white;box-shadow:0 6px 16px ${period.color}40;flex-shrink:0;">
+                  <div style="font-size:14px;font-weight:800;">${period.time}</div>
                 </div>
-                <div style="flex:1;">
-                  <h3 style="font-size:17px;font-weight:800;color:var(--text-primary);margin-bottom:${period.isBreak ? '0' : '6px'};display:flex;align-items:center;gap:8px;">
+                <div style="flex:1;min-width:200px;">
+                  <h3 style="font-size:16px;font-weight:800;color:var(--text-primary);margin-bottom:${period.isBreak ? '0' : '6px'};display:flex;align-items:center;gap:8px;">
                     ${period.isBreak ? icon('coffee', 18) : ''} ${period.subject}
                   </h3>
                   ${!period.isBreak ? `
-                    <div style="display:flex;align-items:center;gap:16px;font-size:13px;color:var(--text-muted);">
+                    <div style="display:flex;align-items:center;gap:12px;font-size:13px;color:var(--text-muted);flex-wrap:wrap;">
                       <span style="display:flex;align-items:center;gap:6px;">${icon('user', 14)} ${period.teacher}</span>
                       <span style="display:flex;align-items:center;gap:6px;">${icon('mapPin', 14)} Room ${period.room}</span>
                     </div>
@@ -184,19 +184,19 @@ export function renderSyllabus() {
   ];
 
   return `
-    <div style="min-height:100vh;background:var(--bg-primary);padding:80px 20px 80px;">
-      <div class="container">
+    <div style="min-height:100vh;background:var(--bg-primary);padding:80px 20px 80px;overflow-x:hidden;">
+      <div class="container" style="overflow-x:hidden;">
         <div style="text-align:center;margin-bottom:50px;">
           <div style="display:inline-flex;align-items:center;justify-content:center;width:70px;height:70px;background:var(--primary);border-radius:20px;margin-bottom:20px;box-shadow:0 8px 24px var(--primary-shadow);">
             ${icon('fileText', 36, 'white')}
           </div>
-          <h1 style="font-size:42px;font-weight:900;color:var(--text-primary);margin-bottom:12px;letter-spacing:-1px;">Syllabus</h1>
+          <h1 style="font-size:clamp(28px, 5vw, 42px);font-weight:900;color:var(--text-primary);margin-bottom:12px;letter-spacing:-1px;">Syllabus</h1>
           <p style="font-size:16px;color:var(--text-muted);">Course curriculum and study materials for Class 10</p>
         </div>
 
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;max-width:1200px;margin:0 auto;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;max-width:1200px;margin:0 auto;width:100%;">
           ${subjects.map((subject, idx) => `
-            <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:20px;padding:28px;box-shadow:0 4px 16px rgba(0,0,0,0.08);transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);animation:fadeInUp 0.6s ease ${idx * 0.1}s backwards;cursor:pointer;" 
+            <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:20px;padding:24px;box-shadow:0 4px 16px rgba(0,0,0,0.08);transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);animation:fadeInUp 0.6s ease ${idx * 0.1}s backwards;cursor:pointer;box-sizing:border-box;" 
                  onmouseover="this.style.transform='translateY(-12px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.12)';this.style.borderColor='var(--primary)'" 
                  onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)';this.style.borderColor='var(--border-color)'">
               
@@ -241,32 +241,32 @@ export function renderExamRoutine() {
   ];
 
   return `
-    <div style="min-height:100vh;background:var(--bg-primary);padding:80px 20px 80px;">
-      <div class="container" style="max-width:1100px;">
+    <div style="min-height:100vh;background:var(--bg-primary);padding:80px 20px 80px;overflow-x:hidden;">
+      <div class="container" style="max-width:1100px;overflow-x:hidden;">
         <div style="text-align:center;margin-bottom:50px;">
           <div style="display:inline-flex;align-items:center;justify-content:center;width:70px;height:70px;background:var(--primary);border-radius:20px;margin-bottom:20px;box-shadow:0 8px 24px var(--primary-shadow);">
             ${icon('clipboard', 36, 'white')}
           </div>
-          <h1 style="font-size:42px;font-weight:900;color:var(--text-primary);margin-bottom:12px;letter-spacing:-1px;">Exam Routine</h1>
+          <h1 style="font-size:clamp(28px, 5vw, 42px);font-weight:900;color:var(--text-primary);margin-bottom:12px;letter-spacing:-1px;">Exam Routine</h1>
           <p style="font-size:16px;color:var(--text-muted);">Annual Examination 2026 • Class 10</p>
         </div>
 
         <!-- Exam Schedule -->
-        <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);margin-bottom:30px;">
+        <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);margin-bottom:30px;width:100%;box-sizing:border-box;">
           ${exams.map((exam, idx) => `
-            <div style="padding:24px 28px;border-bottom:1px solid var(--border-color);transition:all 0.3s ease;animation:fadeInUp 0.5s ease ${idx * 0.08}s backwards;" 
+            <div style="padding:20px 24px;border-bottom:1px solid var(--border-color);transition:all 0.3s ease;animation:fadeInUp 0.5s ease ${idx * 0.08}s backwards;box-sizing:border-box;" 
                  onmouseover="this.style.background='var(--bg-primary)'" 
                  onmouseout="this.style.background='var(--bg-secondary)'">
-              <div style="display:flex;align-items:center;gap:24px;">
-                <div style="background:linear-gradient(135deg, ${exam.color} 0%, ${exam.color}dd 100%);min-width:100px;padding:16px;border-radius:16px;text-align:center;color:white;box-shadow:0 8px 20px ${exam.color}40;">
-                  <div style="font-size:13px;font-weight:600;opacity:0.9;margin-bottom:4px;">${new Date(exam.date).toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}</div>
-                  <div style="font-size:28px;font-weight:900;">${new Date(exam.date).getDate()}</div>
+              <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+                <div style="background:linear-gradient(135deg, ${exam.color} 0%, ${exam.color}dd 100%);min-width:95px;padding:14px;border-radius:16px;text-align:center;color:white;box-shadow:0 8px 20px ${exam.color}40;flex-shrink:0;">
+                  <div style="font-size:12px;font-weight:600;opacity:0.9;margin-bottom:4px;">${new Date(exam.date).toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}</div>
+                  <div style="font-size:26px;font-weight:900;">${new Date(exam.date).getDate()}</div>
                   <div style="font-size:11px;opacity:0.8;margin-top:4px;">${new Date(exam.date).toLocaleDateString('en-US', { weekday: 'short' })}</div>
                 </div>
                 
-                <div style="flex:1;">
-                  <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin-bottom:10px;">${exam.subject}</h3>
-                  <div style="display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--text-muted);">
+                <div style="flex:1;min-width:200px;">
+                  <h3 style="font-size:17px;font-weight:800;color:var(--text-primary);margin-bottom:10px;">${exam.subject}</h3>
+                  <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--text-muted);">
                     <span style="display:flex;align-items:center;gap:6px;">${icon('clock', 14)} ${exam.time}</span>
                     <span style="display:flex;align-items:center;gap:6px;">${icon('calendar', 14)} ${exam.duration}</span>
                     <span style="display:flex;align-items:center;gap:6px;">${icon('mapPin', 14)} Room ${exam.room}</span>
@@ -278,14 +278,14 @@ export function renderExamRoutine() {
         </div>
 
         <!-- Important Instructions -->
-        <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-left:4px solid var(--warning);border-radius:20px;padding:32px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
-          <div style="display:flex;gap:16px;">
+        <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-left:4px solid var(--warning);border-radius:20px;padding:28px;box-shadow:0 4px 16px rgba(0,0,0,0.08);width:100%;box-sizing:border-box;">
+          <div style="display:flex;gap:16px;flex-wrap:wrap;">
             <div style="width:48px;height:48px;background:linear-gradient(135deg, #fee140 0%, #ffa500 100%);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
               ${icon('alertCircle', 24, 'white')}
             </div>
-            <div>
+            <div style="flex:1;min-width:250px;">
               <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin-bottom:12px;">Important Instructions</h3>
-              <ul style="list-style:none;padding:0;margin:0;font-size:14px;color:var(--text-muted);line-height:2;">
+              <ul style="list-style:none;padding:0;margin:0;font-size:14px;color:var(--text-muted);line-height:1.9;">
                 <li style="display:flex;align-items:start;gap:8px;margin-bottom:8px;">
                   <span style="color:var(--warning);font-size:18px;">•</span>
                   <span>Students must bring their <strong style="color:var(--text-primary);">admit cards</strong> and present them at the exam hall entrance</span>
