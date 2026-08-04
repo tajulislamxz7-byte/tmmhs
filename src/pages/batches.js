@@ -101,16 +101,17 @@ export async function renderBatchDetail(batchId) {
   const allUsers = apiUsers || JSON.parse(localStorage.getItem('gfa_users_cache') || localStorage.getItem('gfa_users') || '[]');
   
   // Filter for students with matching batch (batch is stored as string like "2026", "2027", "2028")
-  const registeredStudents = allUsers.filter(u => u.role === 'student' && String(u.batch) === String(batchId)).map(u => ({
-    id: u.id,
-    name: u.name,
-    roll: u.roll || '—',
-    class: u.class || 'N/A',
-    section: u.section || 'N/A',
-    batch: u.batch || 'N/A',
-    avatar: u.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`,
-    gpa: u.gpa || 'N/A'
-  }));
+  const registeredStudents = allUsers.filter(u => u.role === 'student' && String(u.batch) === String(batchId)).map(u => {
+    return {
+      id: u.id,
+      name: u.name,
+      roll: u.roll || '—',
+      class: u.class || 'N/A',
+      section: u.section || 'N/A',
+      batch: u.batch || 'N/A',
+      avatar: u.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`
+    };
+  });
   
   // Merge with sample students from config (if any)
   const sampleBatchStudents = students.filter(s => String(s.batch) === String(batch.id));
@@ -189,7 +190,6 @@ export async function renderBatchDetail(batchId) {
                       <div class="min-w-0">
                         <div class="font-semibold text-sm truncate">${s.name}</div>
                         <div class="text-xs text-muted">${s.class} · Section ${s.section} · Roll ${s.roll}</div>
-                        <div class="text-xs" style="color:var(--success);">GPA: ${s.gpa}</div>
                       </div>
                     </div>
                   `).join('')}

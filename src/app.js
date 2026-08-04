@@ -441,25 +441,31 @@ function bindGlobalActions() {
     ui.statusText.textContent = 'Verifying code…';
     ui.statusText.className = 'otp-status-text';
     
-    // Animate boxes collapsing into capsule
+    // Animate boxes collapsing into capsule - SLOWER and more elegant
     setTimeout(() => {
       const rowRect = ui.otpRow.getBoundingClientRect();
       const centerX = rowRect.left + rowRect.width / 2;
       
-      ui.inputs.forEach(inp => {
+      ui.inputs.forEach((inp, idx) => {
         const r = inp.getBoundingClientRect();
         const boxCenter = r.left + r.width / 2;
         const dx = centerX - boxCenter;
         inp.style.setProperty('--dx', dx + 'px');
-        inp.classList.add('otp-collapsing');
+        
+        // Stagger the collapse - center boxes first (SLOWER)
+        const distanceFromCenter = Math.abs(idx - 2.5);
+        setTimeout(() => {
+          inp.classList.add('otp-collapsing');
+        }, distanceFromCenter * 80); // Changed from instant to 80ms stagger
       });
       
+      // Wait longer for boxes to collapse (650ms to account for stagger)
       setTimeout(() => {
         ui.capsule.classList.add('otp-show');
         ui.capsuleRing.classList.add('otp-show');
-      }, 140);
+      }, 650);
       
-      // Verify OTP
+      // Verify OTP - longer total animation time (1800ms)
       setTimeout(async () => {
         ui.capsuleRing.classList.remove('otp-show');
         
@@ -481,7 +487,7 @@ function bindGlobalActions() {
           
           setTimeout(() => {
             resetOtpInputs(ui);
-          }, 1600);
+          }, 2000); // Longer error display (2000ms)
         } else {
           // Success state
           ui.capsule.classList.add('otp-success');
@@ -499,10 +505,10 @@ function bindGlobalActions() {
           window._pendingUser = null;
           if (!user) { navigate('login'); return; }
           
-          setTimeout(() => _loginSuccess(user), 1200);
+          setTimeout(() => _loginSuccess(user), 1500); // Longer success display
         }
-      }, 1200);
-    }, 200);
+      }, 1800); // Longer verification time
+    }, 250); // Slightly longer initial pause
   };
   
   function spawnOtpParticles(container, color) {
@@ -528,17 +534,26 @@ function bindGlobalActions() {
     ui.ripple.className = 'otp-ripple';
     ui.particlesWrap.innerHTML = '';
     
-    ui.inputs.forEach(inp => {
-      inp.classList.remove('otp-collapsing');
-      inp.value = '';
-      inp.disabled = false;
+    // Slower, staggered return - center boxes expand first
+    const order = [2, 3, 1, 4, 0, 5];
+    order.forEach((originalIdx, delayIdx) => {
+      setTimeout(() => {
+        const inp = ui.inputs[originalIdx];
+        inp.classList.remove('otp-collapsing');
+        inp.value = '';
+        inp.disabled = false;
+      }, delayIdx * 90); // 90ms stagger for smooth return
     });
     
     ui.verifying = false;
     window._otpUIElements.verifying = false;
     ui.statusText.textContent = '';
     ui.statusText.className = 'otp-status-text';
-    ui.inputs[0].focus();
+    
+    // Focus first input after all boxes return (600ms)
+    setTimeout(() => {
+      ui.inputs[0].focus();
+    }, 600);
   }
 
   window.handlePrincipalLogin = async function(e) {
@@ -954,7 +969,7 @@ function bindGlobalActions() {
               <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
                 <div class="form-group">
                   <label>Class <span style="color:var(--danger);">*</span></label>
-                  <select name="class" class="form-input form-select" required>
+                  <select name="class" class="form-input form-select" onchange="toggleStudentGroupField()" id="studentClassSelect" required>
                     <option value="">Select</option>
                     <option value="Class 6">Class 6</option>
                     <option value="Class 7">Class 7</option>
@@ -984,6 +999,19 @@ function bindGlobalActions() {
                     <option value="B2028">Batch 2028</option>
                   </select>
                 </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="studentGroupFieldRow" style="display:none;">
+                <div class="form-group">
+                  <label>Group (Class 9/10 only)</label>
+                  <select name="group" class="form-input form-select" id="studentGroupSelect">
+                    <option value="">Select Group</option>
+                    <option value="Science">Science</option>
+                    <option value="Arts">Arts</option>
+                    <option value="Commerce">Commerce</option>
+                  </select>
+                </div>
+                <div></div>
               </div>
 
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -1023,6 +1051,24 @@ function bindGlobalActions() {
     if (overlay) overlay.remove();
   };
 
+  window.toggleStudentGroupField = function() {
+    const classSelect = document.getElementById('studentClassSelect');
+    const groupRow = document.getElementById('studentGroupFieldRow');
+    const groupSelect = document.getElementById('studentGroupSelect');
+    
+    if (!classSelect || !groupRow) return;
+    
+    const selectedClass = classSelect.value;
+    
+    // Show group field only for Class 9 and Class 10
+    if (selectedClass === 'Class 9' || selectedClass === 'Class 10') {
+      groupRow.style.display = 'grid';
+    } else {
+      groupRow.style.display = 'none';
+      if (groupSelect) groupSelect.value = '';
+    }
+  };
+
   window.adminAddStudent = async function(e) {
     e.preventDefault();
     if (!requireAdmin()) return;
@@ -1057,6 +1103,7 @@ function bindGlobalActions() {
         class: data.class,
         section: data.section,
         batch: data.batch,
+        group: data.group || '',
         guardian: data.guardian?.trim() || '',
         bloodGroup: data.bloodGroup || '',
         phone: data.phone.trim(),
@@ -1404,6 +1451,87 @@ window.confirmDialog = function(message, title = 'Confirm Action') {
     
     // Focus OK button for keyboard accessibility
     setTimeout(() => okBtn.focus(), 100);
+  });
+};
+
+// ── Custom Input Dialog ────────────────────────────
+window.inputDialog = function(message, title = 'Input', placeholder = '', defaultValue = '') {
+  return new Promise((resolve) => {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:9999;animation:fadeIn 0.2s;';
+    
+    modal.innerHTML = `
+      <div class="modal" style="max-width:480px;animation:slideUp 0.3s;margin:20px;">
+        <div class="modal-header" style="border-bottom:1px solid var(--border);padding:20px 24px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:40px;height:40px;border-radius:12px;background:var(--primary-100);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              ${icon('edit', 20, 'var(--primary)')}
+            </div>
+            <div class="font-semibold" style="font-size:16px;">${title}</div>
+          </div>
+        </div>
+        <div class="modal-body" style="padding:24px;">
+          <label style="display:block;color:var(--text-secondary);font-size:14px;margin-bottom:8px;">${message}</label>
+          <input type="text" id="inputDialogValue" class="form-input" 
+                 placeholder="${placeholder}" 
+                 value="${defaultValue}"
+                 style="width:100%;">
+        </div>
+        <div class="modal-footer" style="border-top:1px solid var(--border);padding:16px 24px;display:flex;gap:12px;justify-content:flex-end;">
+          <button class="btn btn-secondary" id="inputCancel" style="min-width:100px;">Cancel</button>
+          <button class="btn btn-primary" id="inputOk" style="min-width:100px;">Add</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    const input = modal.querySelector('#inputDialogValue');
+    const okBtn = modal.querySelector('#inputOk');
+    const cancelBtn = modal.querySelector('#inputCancel');
+    
+    const cleanup = () => {
+      modal.style.animation = 'fadeOut 0.2s';
+      setTimeout(() => modal.remove(), 200);
+    };
+    
+    const submit = () => {
+      const value = input.value.trim();
+      cleanup();
+      resolve(value || null);
+    };
+    
+    okBtn.onclick = submit;
+    
+    cancelBtn.onclick = () => {
+      cleanup();
+      resolve(null);
+    };
+    
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        cleanup();
+        resolve(null);
+      }
+    };
+    
+    // Handle Enter key
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submit();
+      } else if (e.key === 'Escape') {
+        cleanup();
+        resolve(null);
+      }
+    });
+    
+    // Focus input for immediate typing
+    setTimeout(() => {
+      input.focus();
+      input.select();
+    }, 100);
   });
 };
 

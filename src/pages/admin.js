@@ -431,10 +431,26 @@ function _examCard(e, i) {
   const actionBtn   = e.status !== 'Published'
     ? '<button class="btn btn-success btn-sm" onclick="publishExam('+i+')">Publish</button>'
     : '<button class="btn btn-ghost btn-sm" onclick="unpublishExam('+i+')">Unpublish</button>';
+  
+  // Build scope display
+  let scopeDisplay = e.class || (e.scope || 'All Classes');
+  if (e.section) scopeDisplay += `, Section ${e.section}`;
+  if (e.group) scopeDisplay += ` - ${e.group}`;
+  
+  const calendarIcon = SVG('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>', 12);
+  const bookIcon = SVG('<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>', 12);
+  
   return '<div class="card" style="border-left:4px solid '+borderColor+';">'
     + '<div class="card-body" style="padding:16px 20px;">'
     + '<div class="flex items-center gap-4">'
-    + '<div style="flex:1;"><div class="font-semibold">'+e.name+'</div><div class="text-xs text-muted">'+(e.scope||'')+'    '+(e.date||'')+'    Subjects: '+((e.subjects||[]).join(', '))+'</div></div>'
+    + '<div style="flex:1;">'
+    + '<div class="font-semibold" style="font-size:16px;">'+e.name+'</div>'
+    + '<div style="display:flex;gap:12px;margin-top:6px;flex-wrap:wrap;align-items:center;">'
+    + '<span class="badge badge-primary" style="font-size:11px;">'+scopeDisplay+'</span>'
+    + '<span class="text-xs text-muted" style="display:flex;align-items:center;gap:4px;">'+calendarIcon+' '+(e.date||'No date')+'</span>'
+    + '<span class="text-xs text-muted" style="display:flex;align-items:center;gap:4px;">'+bookIcon+' Subjects: '+((e.subjects||[]).join(', '))+'</span>'
+    + '</div>'
+    + '</div>'
     + '<span class="badge badge-'+badgeClass+'">'+e.status+'</span>'
     + '<div class="flex gap-2"><button class="btn btn-secondary btn-sm" onclick="openMarksEntry('+i+')">Enter Marks</button>'+actionBtn+'<button class="btn btn-danger btn-sm" onclick="deleteExam('+i+')">Delete</button></div>'
     + '</div></div></div>';
@@ -1095,10 +1111,57 @@ function renderAdminResults() {
               <input class="form-input" id="ex_date" type="date"></div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div class="form-group"><label class="form-label">Class/Scope</label>
-              <input class="form-input" id="ex_scope" placeholder="e.g. Class 9"10, All Sections"></div>
-            <div class="form-group"><label class="form-label">Subjects (comma separated)</label>
-              <input class="form-input" id="ex_subjects" placeholder="e.g. Bangla,English,Math,Science"></div>
+            <div class="form-group">
+              <label class="form-label">Class *</label>
+              <select class="form-select form-input" id="ex_class" onchange="toggleExamGroupField()">
+                <option value="">Select Class</option>
+                <option value="Class 6">Class 6</option>
+                <option value="Class 7">Class 7</option>
+                <option value="Class 8">Class 8</option>
+                <option value="Class 9">Class 9</option>
+                <option value="Class 10">Class 10</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Section (Optional)</label>
+              <select class="form-select form-input" id="ex_section">
+                <option value="">All Sections</option>
+                <option value="A">Section A</option>
+                <option value="B">Section B</option>
+                <option value="C">Section C</option>
+                <option value="D">Section D</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group" id="ex_group_field" style="display:none;">
+              <label class="form-label">Group (Class 9/10) *</label>
+              <select class="form-select form-input" id="ex_group" onchange="updateSubjectList()">
+                <option value="">Select Group</option>
+                <option value="Science">Science</option>
+                <option value="Arts">Arts</option>
+                <option value="Commerce">Commerce</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- Subject Selection -->
+          <div class="form-group">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <label class="form-label" style="margin-bottom:0;">Subjects *</label>
+              <button type="button" class="btn btn-sm" onclick="addCustomSubject()" 
+                      style="padding:6px 12px;font-size:12px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:4px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add Subject
+              </button>
+            </div>
+            <div id="subject_selector" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;padding:16px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;max-height:320px;overflow-y:auto;">
+              <div class="text-muted text-sm">Select class and group first</div>
+            </div>
+            <input type="hidden" id="ex_subjects">
           </div>
           <div class="flex gap-3">
             <button class="btn btn-primary" onclick="saveExam()">Create Exam</button>
@@ -1163,12 +1226,187 @@ function gradeFromPct(pct) {
 window.saveExam = async function() {
   const name     = document.getElementById('ex_name').value.trim();
   const date     = document.getElementById('ex_date').value;
-  const scope    = document.getElementById('ex_scope').value.trim();
+  const classVal = document.getElementById('ex_class').value;
+  const section  = document.getElementById('ex_section').value;
+  const group    = document.getElementById('ex_group').value;
   const subjects = document.getElementById('ex_subjects').value.split(',').map(s=>s.trim()).filter(Boolean);
+  
   if (!name) { showToast('Exam name is required','error'); return; }
-  await api.addExam({ name, date, scope, subjects });
+  if (!classVal) { showToast('Please select a class','error'); return; }
+  if (subjects.length === 0) { showToast('Please add at least one subject','error'); return; }
+  
+  // Build scope string
+  let scope = classVal;
+  if (section) scope += `, Section ${section}`;
+  if (group) scope += ` - ${group}`;
+  
+  await api.addExam({ name, date, scope, class: classVal, section, group, subjects });
   showToast('Exam created!','success');
+  
+  // Clear form
+  document.getElementById('ex_name').value = '';
+  document.getElementById('ex_date').value = '';
+  document.getElementById('ex_class').value = '';
+  document.getElementById('ex_section').value = '';
+  document.getElementById('ex_group').value = '';
+  document.getElementById('ex_subjects').value = '';
+  document.getElementById('addExamForm').style.display = 'none';
+  document.getElementById('ex_group_field').style.display = 'none';
+  
   await _refreshTab('results');
+};
+
+// Subject lists by group/class
+const SUBJECT_LISTS = {
+  'Science': [
+    'Bangla', 'Bangla 2nd', 'English', 'English 2nd', 'Mathematics',
+    'Bangladesh and Global Studies', 'Religion and Moral Education',
+    'Information and Communication Technology (ICT)', 'Physical Education',
+    'Physics', 'Chemistry', 'Biology', 'Higher Mathematics'
+  ],
+  'Arts': [
+    'Bangla', 'Bangla 2nd', 'English', 'English 2nd', 'Mathematics',
+    'Bangladesh and Global Studies', 'Religion and Moral Education',
+    'Information and Communication Technology (ICT)', 'Physical Education',
+    'History', 'Civics', 'Geography', 'Economics'
+  ],
+  'Commerce': [
+    'Bangla', 'Bangla 2nd', 'English', 'English 2nd', 'Mathematics',
+    'Bangladesh and Global Studies', 'Religion and Moral Education',
+    'Information and Communication Technology (ICT)', 'Physical Education',
+    'Accounting', 'Business Studies', 'Economics', 'Finance and Banking'
+  ],
+  'General': [
+    'Bangla', 'Bangla 2nd', 'English', 'English 2nd', 'Mathematics', 'Science',
+    'Bangladesh and Global Studies', 'Religion and Moral Education',
+    'Information and Communication Technology (ICT)', 'Physical Education',
+    'Agriculture', 'Home Economics'
+  ]
+};
+
+window.updateSubjectList = function() {
+  const classVal = document.getElementById('ex_class').value;
+  const groupVal = document.getElementById('ex_group').value;
+  const selector = document.getElementById('subject_selector');
+  
+  let subjects = [];
+  
+  // Determine which subject list to use
+  if (classVal === 'Class 9' || classVal === 'Class 10') {
+    if (groupVal === 'Science') subjects = SUBJECT_LISTS['Science'];
+    else if (groupVal === 'Arts') subjects = SUBJECT_LISTS['Arts'];
+    else if (groupVal === 'Commerce') subjects = SUBJECT_LISTS['Commerce'];
+    else {
+      selector.innerHTML = '<div class="text-muted text-sm">Please select a group first</div>';
+      return;
+    }
+  } else if (classVal) {
+    subjects = SUBJECT_LISTS['General'];
+  } else {
+    selector.innerHTML = '<div class="text-muted text-sm">Please select a class first</div>';
+    return;
+  }
+  
+  // Generate checkboxes
+  selector.innerHTML = subjects.map(subject => `
+    <label style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:all 0.2s;" 
+           class="subject-checkbox-label">
+      <input type="checkbox" class="subject-checkbox" value="${subject}" 
+             onchange="collectSelectedSubjects()"
+             style="width:16px;height:16px;cursor:pointer;accent-color:var(--primary);">
+      <span style="font-size:13px;user-select:none;color:var(--text-primary);">${subject}</span>
+    </label>
+  `).join('');
+  
+  // Auto-select common core subjects
+  const coreSubjects = ['Bangla', 'Bangla 2nd', 'English', 'English 2nd', 'Mathematics'];
+  setTimeout(() => {
+    document.querySelectorAll('.subject-checkbox').forEach(cb => {
+      if (coreSubjects.includes(cb.value)) {
+        cb.checked = true;
+      }
+    });
+    collectSelectedSubjects();
+  }, 0);
+};
+
+window.collectSelectedSubjects = function() {
+  const selected = Array.from(document.querySelectorAll('.subject-checkbox:checked'))
+    .map(cb => cb.value);
+  document.getElementById('ex_subjects').value = selected.join(',');
+};
+
+window.addCustomSubject = async function() {
+  const subjectName = await inputDialog(
+    'Subject Name',
+    'Add Custom Subject',
+    'e.g. Agricultural Science',
+    ''
+  );
+  
+  if (!subjectName) return;
+  
+  const trimmedName = subjectName.trim();
+  const selector = document.getElementById('subject_selector');
+  
+  // Check if subject already exists
+  const existingCheckboxes = Array.from(document.querySelectorAll('.subject-checkbox'));
+  if (existingCheckboxes.some(cb => cb.value === trimmedName)) {
+    showToast('Subject already exists', 'warning');
+    return;
+  }
+  
+  // Create new checkbox for custom subject
+  const newCheckbox = document.createElement('label');
+  newCheckbox.style.cssText = 'display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:all 0.2s;';
+  newCheckbox.className = 'subject-checkbox-label';
+  newCheckbox.innerHTML = `
+    <input type="checkbox" class="subject-checkbox" value="${trimmedName}" 
+           onchange="collectSelectedSubjects()" checked
+           style="width:16px;height:16px;cursor:pointer;accent-color:var(--primary);">
+    <span style="font-size:13px;user-select:none;color:var(--text-primary);">${trimmedName}</span>
+    <button type="button" onclick="removeCustomSubject(this)" 
+            style="margin-left:auto;padding:2px 6px;background:transparent;color:var(--text-muted);border:none;border-radius:4px;cursor:pointer;font-size:16px;line-height:1;transition:all 0.2s;"
+            onmouseover="this.style.color='var(--danger)';this.style.background='var(--danger-50)'" 
+            onmouseout="this.style.color='var(--text-muted)';this.style.background='transparent'"
+            title="Remove subject">×</button>
+  `;
+  
+  // Add to selector
+  selector.appendChild(newCheckbox);
+  
+  // Update selected subjects
+  collectSelectedSubjects();
+  showToast('Custom subject added', 'success');
+};
+
+window.removeCustomSubject = function(btn) {
+  btn.closest('.subject-checkbox-label').remove();
+  collectSelectedSubjects();
+};
+
+window.toggleExamGroupField = function() {
+  const classVal = document.getElementById('ex_class').value;
+  const groupField = document.getElementById('ex_group_field');
+  
+  // Show group field only for Class 9 and Class 10
+  if (classVal === 'Class 9' || classVal === 'Class 10') {
+    groupField.style.display = '';
+    // Don't update subjects yet, wait for group selection
+    const groupVal = document.getElementById('ex_group').value;
+    if (groupVal) {
+      updateSubjectList();
+    } else {
+      document.getElementById('subject_selector').innerHTML = '<div class="text-muted text-sm">Please select a group first</div>';
+    }
+  } else {
+    groupField.style.display = 'none';
+    document.getElementById('ex_group').value = '';
+    // Update subject list for general classes
+    if (classVal) {
+      updateSubjectList();
+    }
+  }
 };
 
 window.deleteExam = async function(i) {
@@ -1326,10 +1564,23 @@ window.openMarksEntry = function(examIndex) {
   const exams = _cache.exams;
   const exam = exams[examIndex];
   if (!exam) return;
+  
   const allUsers = _cache.users;
   // Include both active and unlinked students for marks entry
   // Case-insensitive role filtering for Google Sign-In compatibility
-  const studentUsers = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'student' && (u.status === 'active' || u.status === 'unlinked'));
+  let studentUsers = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'student' && (u.status === 'active' || u.status === 'unlinked'));
+  
+  // Filter students by exam's class, section, and group
+  if (exam.class) {
+    studentUsers = studentUsers.filter(st => st.class === exam.class);
+  }
+  if (exam.section) {
+    studentUsers = studentUsers.filter(st => st.section === exam.section);
+  }
+  if (exam.group) {
+    studentUsers = studentUsers.filter(st => st.group === exam.group);
+  }
+  
   const savedResults = _cache.results;
 
   const panel = document.getElementById('marksEntryPanel');
@@ -1340,7 +1591,19 @@ window.openMarksEntry = function(examIndex) {
 
   panel.style.display = 'block';
   panel.dataset.examIndex = examIndex;
-  title.textContent = `Enter Marks " ${exam.name}`;
+  
+  // Show class/section/group info in title
+  let scopeInfo = exam.class || exam.scope;
+  if (exam.section) scopeInfo += `, Section ${exam.section}`;
+  if (exam.group) scopeInfo += ` - ${exam.group}`;
+  
+  title.innerHTML = `Enter Marks — ${exam.name} <span class="badge badge-primary" style="font-size:11px;margin-left:8px;">${scopeInfo}</span> <span class="badge badge-gray" style="font-size:11px;">${studentUsers.length} students</span>`;
+
+  if (studentUsers.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="20" style="text-align:center;padding:40px;color:var(--text-muted);">No students found for <strong>${scopeInfo}</strong>. Please check the class/section/group or add students first.</td></tr>';
+    thead.innerHTML = '';
+    return;
+  }
 
   const subjects = exam.subjects || [];
   thead.innerHTML = '<tr><th>Student</th>'+subjects.map(s=>'<th>'+s+'<br><small style="font-weight:400;font-size:10px;">(/100)</small></th>').join('')+'<th>Total</th><th>%</th><th>Grade</th></tr>';
@@ -1354,9 +1617,9 @@ window.openMarksEntry = function(examIndex) {
     return '<tr data-student-id="'+st.id+'" data-student-name="'+st.name+'">'
       + '<td><div class="flex items-center gap-2"><img src="'+(st.avatar||'')+'" class="avatar avatar-xs" onerror="this.src=\'https://api.dicebear.com/7.x/avataaars/svg?seed='+encodeURIComponent(st.name)+'\'"><span class="font-medium text-sm">'+st.name+'</span></div></td>'
       + subjectInputs
-      + '<td class="total-cell font-bold">"</td>'
-      + '<td class="pct-cell">"</td>'
-      + '<td class="grade-cell">"</td>'
+      + '<td class="total-cell font-bold">—</td>'
+      + '<td class="pct-cell">—</td>'
+      + '<td class="grade-cell">—</td>'
       + '</tr>';
   }).join('');
 
@@ -2603,17 +2866,13 @@ window.saveLeadershipCard = async function(index) {
     
     const card = settings.leadershipCards[index];
     
-    // Update card data
+    // Update all card data
     card.title = document.getElementById(`lc_${index}_title`)?.value || card.title;
     card.heading = document.getElementById(`lc_${index}_heading`)?.value || card.heading;
-    
-    // Only update name, designation, qualification, message for non-principal cards
-    if (card.role !== 'principal') {
-      card.name = document.getElementById(`lc_${index}_name`)?.value || '';
-      card.designation = document.getElementById(`lc_${index}_designation`)?.value || '';
-      card.qualification = document.getElementById(`lc_${index}_qualification`)?.value || '';
-      card.message = document.getElementById(`lc_${index}_message`)?.value || '';
-    }
+    card.name = document.getElementById(`lc_${index}_name`)?.value || '';
+    card.designation = document.getElementById(`lc_${index}_designation`)?.value || '';
+    card.qualification = document.getElementById(`lc_${index}_qualification`)?.value || '';
+    card.message = document.getElementById(`lc_${index}_message`)?.value || '';
     
     // Save to backend
     await api.saveSettings(settings);

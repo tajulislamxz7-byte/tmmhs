@@ -20,11 +20,15 @@ export async function renderAbout() {
   const phone    = settings.phone     || schoolInfo.phone;
   const email    = settings.email     || schoolInfo.email;
 
-  // Fetch real principal from users
-  const principalUser = allUsers.find(u => u.role && u.role.toLowerCase().trim() === 'principal' && u.status === 'active');
-  const principal = principalUser?.name || settings.principalName || schoolInfo.principalName || 'Principal';
-  const principalAvatar = principalUser?.avatar || 'https://i.imgur.com/x9wE0QT.png';
-  const principalMessage = principalUser?.bio || settings.principalMessage || schoolInfo.principalMessage || '';
+  // Get principal data from leadershipCards (settings)
+  const leadershipCards = settings.leadershipCards || [];
+  const principalCard = leadershipCards.find(card => card.role === 'principal' && card.enabled !== false);
+  
+  const principal = principalCard?.name || 'Principal';
+  const principalAvatar = principalCard?.avatar || 'https://i.imgur.com/x9wE0QT.png';
+  const principalMessage = principalCard?.message || '';
+  const principalDesignation = principalCard?.designation || `Principal, ${name}`;
+  const principalQualification = principalCard?.qualification || '';
 
   const achievements = settings.achievements && settings.achievements.length > 0 ? settings.achievements : [];
 
@@ -92,12 +96,13 @@ export async function renderAbout() {
             </div>
           </div>
           <div class="principal-message">
-            <div class="section-tag">Message from the Principal</div>
-            <h2 class="font-display" style="font-size:var(--text-3xl);font-weight:700;margin:12px 0 16px;">${principal}</h2>
+            <div class="section-tag">${principalCard?.title || 'Message from the Principal'}</div>
+            <h2 class="font-display" style="font-size:var(--text-3xl);font-weight:700;margin:12px 0 16px;">${principalCard?.heading || principal}</h2>
             <blockquote class="principal-quote">"${principalMessage}"</blockquote>
             <div class="principal-info">
               <div class="font-bold" style="font-size:var(--text-lg);">${principal}</div>
-              <div class="text-muted text-sm">Principal, ${name}</div>
+              <div class="text-muted text-sm">${principalDesignation}</div>
+              ${principalQualification ? `<div class="text-muted text-xs" style="margin-top:4px;">${principalQualification}</div>` : ''}
             </div>
           </div>
         </div>

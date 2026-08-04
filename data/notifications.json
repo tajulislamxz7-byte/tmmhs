@@ -1,1 +1,29 @@
-[]
+[
+  {
+    "id": "NOTIF-1785832528595",
+    "type": "result",
+    "title": "New Results Published",
+    "message": "hg results are now available",
+    "link": "results",
+    "read": true,
+    "createdAt": "2026-08-04T08:35:28.595Z"
+  },
+  {
+    "id": "NOTIF-1785830880279",
+    "type": "result",
+    "title": "New Results Published",
+    "message": "First Terminal Exam - Science Group results are now available",
+    "link": "results",
+    "read": true,
+    "createdAt": "2026-08-04T08:08:00.280Z"
+  },
+  {
+    "id": "NOTIF-1785828855914",
+    "type": "result",
+    "title": "New Results Published",
+    "message": "Class Test - Mathematics results are now available",
+    "link": "results",
+    "read": true,
+    "createdAt": "2026-08-04T07:34:15.914Z"
+  }
+]

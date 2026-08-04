@@ -22,6 +22,7 @@ export function isSmsConfigured() {
  */
 export async function sendOtp(phone) {
   try {
+    // Normalize phone number
     let normalized = String(phone).replace(/\s+/g, '');
     if (!normalized.startsWith('+')) {
       if (normalized.startsWith('0')) normalized = '+880' + normalized.slice(1);
@@ -29,73 +30,46 @@ export async function sendOtp(phone) {
       else normalized = '+880' + normalized;
     }
     
+    // Check if SMS API is configured
+    if (!isSmsConfigured()) {
+      return { ok: false, error: 'SMS service is not configured. Please contact administrator.' };
+    }
+    
     // Generate 6-digit OTP
     const code = String(Math.floor(100000 + Math.random() * 900000));
     
-    // Check if running on localhost
-    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    // Create message
+    const message = `Your Tiarkhali School verification code is: ${code}. Valid for 5 minutes. Do not share this code.`;
     
-    if (isDev) {
-      // ========== LOCALHOST MODE ==========
-      // Show OTP in console immediately (no SMS needed)
-      console.log('%c═══════════════════════════════════════', 'color: #10b981; font-weight: bold');
-      console.log('%c🔐 DEVELOPMENT MODE - OTP CODE', 'color: #10b981; font-weight: bold; font-size: 14px');
-      console.log('%c═══════════════════════════════════════', 'color: #10b981; font-weight: bold');
-      console.log('%cPhone:', 'color: #6b7280; font-weight: bold', normalized);
-      console.log('%cOTP Code:', 'color: #f59e0b; font-weight: bold; font-size: 20px', code);
-      console.log('%cExpires:', 'color: #6b7280; font-weight: bold', '5 minutes');
-      console.log('%c═══════════════════════════════════════', 'color: #10b981; font-weight: bold');
-      console.log('%c⚠️  Console OTP (localhost only)', 'color: #ef4444; font-size: 11px');
-      console.log('%c═══════════════════════════════════════', 'color: #10b981; font-weight: bold');
+    // Send SMS via API
+    try {
+      const response = await fetch('/api/send-sms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: normalized, message }),
+      });
       
-      // Create OTP session immediately (no SMS API needed)
-      _otpSession = {
-        phone: normalized,
-        code,
-        expires: Date.now() + 5 * 60 * 1000,
-      };
+      const result = await response.json();
       
-      return { ok: true };
-      
-    } else {
-      // ========== PRODUCTION MODE ==========
-      // Check if SMS API is configured
-      if (!isSmsConfigured()) {
-        return { ok: false, error: 'SMS service is not configured. Please contact administrator.' };
-      }
-      
-      // Send SMS via API
-      const message = `Your Tiarkhali School verification code is: ${code}. Valid for 5 minutes. Do not share this code.`;
-      
-      try {
-        const response = await fetch('/api/send-sms', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone: normalized, message }),
-        });
-        
-        const result = await response.json();
-        
-        if (response.ok && result.ok && !result.error) {
-          // SMS sent successfully
-          _otpSession = {
-            phone: normalized,
-            code,
-            expires: Date.now() + 5 * 60 * 1000,
-          };
-          return { ok: true };
-        } else {
-          return { 
-            ok: false, 
-            error: result.error || 'Failed to send SMS. Please check your SMS API configuration.' 
-          };
-        }
-      } catch (smsError) {
+      if (response.ok && result.ok && !result.error) {
+        // SMS sent successfully - create OTP session
+        _otpSession = {
+          phone: normalized,
+          code,
+          expires: Date.now() + 5 * 60 * 1000,
+        };
+        return { ok: true };
+      } else {
         return { 
           ok: false, 
-          error: 'Failed to connect to SMS service. Please try again or contact administrator.' 
+          error: result.error || 'Failed to send SMS. Please check your SMS API configuration.' 
         };
       }
+    } catch (smsError) {
+      return { 
+        ok: false, 
+        error: 'Failed to connect to SMS service. Please try again or contact administrator.' 
+      };
     }
     
   } catch (err) {

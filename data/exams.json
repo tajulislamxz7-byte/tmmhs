@@ -1,24 +1,28 @@
 [
   {
-    "id": "EX1001",
-    "name": "First Terminal Examination 2026",
-    "scope": "Class 9-10",
-    "date": "2026-09-10",
-    "subjects": ["Bangla", "English", "Mathematics", "Physics", "Chemistry", "Biology"],
-    "totalMarks": 100,
-    "passingMarks": 33,
-    "status": "Upcoming",
-    "createdAt": "2026-08-01T00:00:00.000Z"
-  },
-  {
-    "id": "EX1002",
-    "name": "Class Test - Mathematics",
-    "scope": "Class 10, Section A",
-    "date": "2026-08-25",
-    "subjects": ["Mathematics"],
-    "totalMarks": 50,
-    "passingMarks": 17,
-    "status": "Draft",
-    "createdAt": "2026-08-10T00:00:00.000Z"
+    "id": "EX1785832026238",
+    "name": "hg",
+    "date": "2026-08-06",
+    "scope": "Class 10, Section A - Science",
+    "class": "Class 10",
+    "section": "A",
+    "group": "Science",
+    "subjects": [
+      "Bangla",
+      "Bangla 2nd",
+      "English",
+      "English 2nd",
+      "Mathematics",
+      "Bangladesh and Global Studies",
+      "Religion and Moral Education",
+      "Information and Communication Technology (ICT)",
+      "Physical Education",
+      "Physics",
+      "Chemistry",
+      "Biology",
+      "Higher Mathematics"
+    ],
+    "status": "Published",
+    "createdAt": "2026-08-04T08:27:06.238Z"
   }
 ]
