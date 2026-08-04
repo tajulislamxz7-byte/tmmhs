@@ -65,11 +65,26 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
             Academic ${icon('chevronDown', 13)}
           </button>
           <div class="dropdown-menu">
+            <div class="dropdown-item" onclick="navigate('academic-calendar')" style="cursor:pointer;">
+              ${icon('calendar', 15)} <span>Academic Calendar</span>
+            </div>
+            <div class="dropdown-item" onclick="navigate('holiday-calendar')" style="cursor:pointer;">
+              ${icon('calendar', 15)} <span>Holiday Calendar</span>
+            </div>
+            <div class="dropdown-item" onclick="navigate('class-routine')" style="cursor:pointer;">
+              ${icon('clock', 15)} <span>Class Routine</span>
+            </div>
+            <div class="dropdown-item" onclick="navigate('syllabus')" style="cursor:pointer;">
+              ${icon('fileText', 15)} <span>Syllabus</span>
+            </div>
+            <div class="dropdown-item" onclick="navigate('exam-routine')" style="cursor:pointer;">
+              ${icon('clipboard', 15)} <span>Exam Routine</span>
+            </div>
             <div class="dropdown-item" onclick="navigate('batches')" style="cursor:pointer;">
               ${icon('bookOpen', 15)} <span>Batches</span>
             </div>
             <div class="dropdown-item" onclick="navigate('results')" style="cursor:pointer;">
-              ${icon('fileText', 15)} <span>Results</span>
+              ${icon('trendingUp', 15)} <span>Results</span>
             </div>
           </div>
         </div>
@@ -183,6 +198,11 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
       <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('staff')">${icon('briefcase', 18)} Support Staff</div>
       
       <div class="mobile-menu-section-title">Academic</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('academic-calendar')">${icon('calendar', 18)} Academic Calendar</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('holiday-calendar')">${icon('calendar', 18)} Holiday Calendar</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('class-routine')">${icon('clock', 18)} Class Routine</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('syllabus')">${icon('fileText', 18)} Syllabus</div>
+      <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('exam-routine')">${icon('clipboard', 18)} Exam Routine</div>
       <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('batches')">${icon('bookOpen', 18)} Batches</div>
       <div class="mobile-nav-link" onclick="toggleMobileMenu();navigate('results')">${icon('trendingUp', 18)} Results</div>
       

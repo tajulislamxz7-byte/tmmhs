@@ -13,6 +13,7 @@ import { renderLogin, renderRegister, renderForgotPassword, renderResetPassword,
 import { renderTeachers, renderTeacherProfile, renderTeacherDashboard } from './pages/teachers.js';
 import { renderBatches, renderBatchDetail } from './pages/batches.js';
 import { renderResults, renderStudentDashboard } from './pages/results.js';
+import { renderAcademicCalendar, renderHolidayCalendar, renderClassRoutine, renderSyllabus, renderExamRoutine } from './pages/academic.js';
 import { renderNotices }        from './pages/notices.js';
 import { renderEvents }         from './pages/events.js';
 import { renderGallery }        from './pages/gallery.js';
@@ -150,6 +151,11 @@ async function getPageContent(user, role) {
     case 'batches':           return await renderBatches();
     case 'batch-detail':      return await renderBatchDetail(currentParam);
     case 'results':           return await renderResults(role, user);
+    case 'academic-calendar': return renderAcademicCalendar();
+    case 'holiday-calendar':  return renderHolidayCalendar();
+    case 'class-routine':     return renderClassRoutine();
+    case 'syllabus':          return renderSyllabus();
+    case 'exam-routine':      return renderExamRoutine();
     case 'notices':           return await renderNotices();
     case 'events':            return await renderEvents();
     case 'gallery':           return renderGallery();
