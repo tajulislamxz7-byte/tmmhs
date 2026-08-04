@@ -6,6 +6,7 @@ import { students, teachers, supportStaff, batches, notices, events, results } f
 import * as auth from '../utils/auth.js';
 import { api } from '../utils/api.js';
 import { handleProfilePictureUpload, getDefaultAvatar } from '../utils/imageHandler.js';
+import { icon } from '../utils/icons.js';
 
 const SVG = (paths, size=18, color='currentColor') =>
   `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
@@ -2015,10 +2016,18 @@ function renderAdminSettings() {
             <!-- Branding Fields -->
             <div style="display:flex;flex-direction:column;gap:14px;">
               <div class="form-group">
-                <label class="form-label">Logo URL (Direct Image Link)</label>
-                <input class="form-input" id="s_logo_url" value="${s.schoolLogoUrl || ''}" placeholder="https://example.com/logo.png" 
-                       onchange="updateLogoPreview(this.value)">
-                <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Upload your logo to an image host (like Imgur) and paste the direct link here</div>
+                <label class="form-label">Logo Image</label>
+                <div style="display:grid;grid-template-columns:1fr auto;gap:8px;">
+                  <input class="form-input" id="s_logo_url" value="${s.schoolLogoUrl || ''}" placeholder="Or paste direct image URL" 
+                         oninput="updateLogoPreview(this.value)">
+                  <div style="position:relative;">
+                    <button class="btn btn-secondary" onclick="document.getElementById('logoFileInput').click()" type="button">
+                      ${icon('upload', 16)} Upload
+                    </button>
+                    <input type="file" id="logoFileInput" accept="image/*" style="display:none;" onchange="handleLogoUpload(this)">
+                  </div>
+                </div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Upload a file or paste direct image URL (Imgur, etc.)</div>
               </div>
               
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -2035,7 +2044,7 @@ function renderAdminSettings() {
                 </div>
               </div>
 
-              <button class="btn btn-primary" onclick="saveBranding()">Save Logo & Branding</button>
+              <button class="btn btn-primary" onclick="saveBranding()" id="saveBrandingBtn">Save Logo & Branding</button>
             </div>
           </div>
         </div>
@@ -2864,35 +2873,136 @@ window.saveSettings = async function() {
 };
 
 // "" Branding & Logo ""
-window.saveBranding = async function() {
-  const existing = await api.getSettings() || {};
-  const s = {
-    ...existing,
-    schoolLogoUrl:   document.getElementById('s_logo_url')?.value?.trim() || '',
-    schoolShortName: document.getElementById('s_short_name')?.value?.trim() || 'Tiarkhali M.M',
-    schoolTagline:   document.getElementById('s_navbar_tagline')?.value?.trim() || 'High School & College',
+window.handleLogoUpload = function(input) {
+  const file = input.files?.[0];
+  if (!file) return;
+  
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    showToast('Please select an image file', 'error');
+    return;
+  }
+  
+  // Validate file size (max 2MB)
+  if (file.size > 2 * 1024 * 1024) {
+    showToast('Image size should be less than 2MB', 'error');
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64 = e.target.result;
+    window._uploadedLogoData = base64;
+    
+    // Update preview
+    const preview = document.getElementById('logoPreview');
+    if (preview) {
+      if (preview.tagName === 'IMG') {
+        preview.src = base64;
+      } else {
+        preview.outerHTML = `<img src="${base64}" alt="Logo Preview" id="logoPreview" style="width:80px;height:80px;border-radius:10px;object-fit:cover;margin:0 auto;display:block;">`;
+      }
+    }
+    
+    // Update URL field to show it's uploaded
+    const urlField = document.getElementById('s_logo_url');
+    if (urlField) {
+      urlField.value = '[Uploaded File - Will be saved as base64]';
+      urlField.disabled = true;
+    }
+    
+    showToast('Logo uploaded! Click "Save Logo & Branding" to apply.', 'success');
   };
+  reader.readAsDataURL(file);
+};
+
+window.saveBranding = async function() {
+  const btn = document.getElementById('saveBrandingBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+  }
   
-  await api.saveSettings(s);
-  _cache.settings = s;
-  window._schoolSettings = s; // Update cached settings for navbar
-  showToast('Logo & branding saved! Refresh page to see changes in navbar.', 'success');
-  await _refreshTab('settings');
-  
-  // Force navbar refresh
-  setTimeout(() => {
-    if (typeof render === 'function') render();
-  }, 500);
+  try {
+    const existing = await api.getSettings() || {};
+    
+    // Get logo URL - either from uploaded file or URL field
+    let logoUrl = '';
+    if (window._uploadedLogoData) {
+      logoUrl = window._uploadedLogoData;
+    } else {
+      const urlField = document.getElementById('s_logo_url');
+      logoUrl = urlField?.value?.trim() || '';
+      if (logoUrl === '[Uploaded File - Will be saved as base64]') {
+        logoUrl = existing.schoolLogoUrl || '';
+      }
+    }
+    
+    const s = {
+      ...existing,
+      schoolLogoUrl:   logoUrl,
+      schoolShortName: document.getElementById('s_short_name')?.value?.trim() || 'Tiarkhali M.M',
+      schoolTagline:   document.getElementById('s_navbar_tagline')?.value?.trim() || 'High School & College',
+    };
+    
+    console.log('Saving branding:', {
+      logoLength: s.schoolLogoUrl?.length,
+      shortName: s.schoolShortName,
+      tagline: s.schoolTagline
+    });
+    
+    await api.saveSettings(s);
+    _cache.settings = s;
+    window._schoolSettings = s; // Update cached settings for navbar
+    window._uploadedLogoData = null; // Clear uploaded data
+    
+    showToast('Logo & branding saved successfully!', 'success');
+    
+    // Re-enable URL field
+    const urlField = document.getElementById('s_logo_url');
+    if (urlField) {
+      urlField.disabled = false;
+      if (s.schoolLogoUrl && s.schoolLogoUrl.startsWith('data:')) {
+        urlField.value = '[Base64 Image Saved]';
+      } else {
+        urlField.value = s.schoolLogoUrl;
+      }
+    }
+    
+    await _refreshTab('settings');
+    
+    // Force navbar refresh
+    setTimeout(() => {
+      location.reload();
+    }, 1000);
+  } catch (error) {
+    console.error('Error saving branding:', error);
+    showToast('Failed to save branding: ' + error.message, 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Save Logo & Branding';
+    }
+  }
 };
 
 window.updateLogoPreview = function(url) {
+  // Clear uploaded file data when URL is changed
+  if (url && url !== '[Uploaded File - Will be saved as base64]' && url !== '[Base64 Image Saved]') {
+    window._uploadedLogoData = null;
+  }
+  
   const preview = document.getElementById('logoPreview');
   if (!preview) return;
   
-  if (!url || !url.trim()) {
+  if (!url || !url.trim() || url === '[Uploaded File - Will be saved as base64]' || url === '[Base64 Image Saved]') {
+    // Don't change preview for placeholder text
+    if (url === '[Uploaded File - Will be saved as base64]' || url === '[Base64 Image Saved]') {
+      return;
+    }
     // Show default SVG logo
-    preview.innerHTML = `
-      <div style="width:80px;height:80px;border-radius:10px;background:var(--primary);margin:0 auto;display:flex;align-items:center;justify-content:center;">
+    preview.outerHTML = `
+      <div id="logoPreview" style="width:80px;height:80px;border-radius:10px;background:var(--primary);margin:0 auto;display:flex;align-items:center;justify-content:center;">
         <svg width="40" height="40" viewBox="0 0 34 34" fill="none">
           <path d="M7 26L17 9L27 26H7Z" fill="white" opacity="0.92"/>
           <circle cx="17" cy="19" r="4.5" fill="#93c5fd"/>
@@ -2901,7 +3011,14 @@ window.updateLogoPreview = function(url) {
     `;
   } else {
     // Show image
-    preview.innerHTML = `<img src="${url}" alt="Logo Preview" style="width:80px;height:80px;border-radius:10px;object-fit:cover;margin:0 auto;display:block;" onerror="this.src='';this.style.display='none';this.parentElement.innerHTML='<div style=\\'color:var(--danger);font-size:11px;\\'>Invalid URL</div>';">`;
+    if (preview.tagName === 'IMG') {
+      preview.src = url;
+      preview.onerror = function() {
+        this.outerHTML = '<div id="logoPreview" style="color:var(--danger);font-size:11px;padding:20px;">Invalid URL</div>';
+      };
+    } else {
+      preview.outerHTML = `<img src="${url}" alt="Logo Preview" id="logoPreview" style="width:80px;height:80px;border-radius:10px;object-fit:cover;margin:0 auto;display:block;" onerror="this.outerHTML='<div id=\\'logoPreview\\' style=\\'color:var(--danger);font-size:11px;padding:20px;\\'>Invalid URL</div>';">`;
+    }
   }
 };
 
