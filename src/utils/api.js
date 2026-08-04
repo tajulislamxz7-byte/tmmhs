@@ -4,12 +4,13 @@
 // ================================================
 
 // Detect environment and set API base URL
-// Production URL can be overridden from Admin → API Keys → Server URL
+// Production URL can be overridden from Admin → Settings → API Configuration
 const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 function _getBase() {
   if (isDevelopment) return '/api';
   try {
     const s = JSON.parse(localStorage.getItem('gfa_settings') || '{}');
+    // Your Render.com backend URL - already deployed!
     return s.apiBaseUrl || 'https://school-project-qi8m.onrender.com/api';
   } catch {
     return 'https://school-project-qi8m.onrender.com/api';
