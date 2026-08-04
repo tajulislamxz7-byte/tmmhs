@@ -93,12 +93,15 @@
   z-index: 10001 !important;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
   cursor: pointer;
-  flex-shrink: 0;
+  flex-shrink: 0 !important;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
   order: 999;
+  min-width: 48px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .hamburger-inner {
@@ -187,6 +190,9 @@
     display: flex !important;
     z-index: 10001 !important;
     position: relative !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    flex-shrink: 0 !important;
   } 
   
   .navbar-actions {
@@ -201,6 +207,10 @@
   
   /* Ensure hamburger is always visible */
   .user-avatar-btn {
+    z-index: 9999;
+  }
+  
+  #userMenuWrapper {
     z-index: 9999;
   }
 }
@@ -502,6 +512,9 @@
     height: 42px !important;
     padding: 10px !important;
     min-width: 42px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
   
   /* Mobile dropdown positioning - center it */
@@ -571,6 +584,11 @@
     padding: 9px !important;
     min-width: 40px !important;
     margin-left: 3px !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: 10001 !important;
   }
   
   .hamburger-inner {
