@@ -46,6 +46,11 @@ export function initSearch() {
   const clearBtn = document.getElementById('searchClear');
   const resultsPanel = document.getElementById('resultsPanel');
 
+  // If search elements don't exist, return early
+  if (!searchRoot || !shell || !toggleBtn || !input || !clearBtn || !resultsPanel) {
+    return;
+  }
+
   let state = {
     expanded: false,
     resultsOpen: false,
