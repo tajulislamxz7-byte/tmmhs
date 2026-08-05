@@ -1400,11 +1400,22 @@ function bindGlobalActions() {
   };
 
   // Close dropdown on outside click
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('#userMenuWrapper')) {
-      document.getElementById('userDropdown')?.classList.add('hidden');
+  const handleDropdownClose = (e) => {
+    const wrapper = document.getElementById('userMenuWrapper');
+    const dropdown = document.getElementById('userDropdown');
+    if (wrapper && dropdown && !wrapper.contains(e.target)) {
+      dropdown.classList.add('hidden');
     }
-  }, { once: true });
+  };
+  
+  // Remove old listener if it exists
+  if (window._dropdownCloseHandler) {
+    document.removeEventListener('click', window._dropdownCloseHandler);
+  }
+  
+  // Add new listener and store reference
+  window._dropdownCloseHandler = handleDropdownClose;
+  document.addEventListener('click', handleDropdownClose);
 
   // ── Filters ──
   window.filterStudents = function() {
