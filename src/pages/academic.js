@@ -135,8 +135,6 @@ export async function renderClassRoutine() {
   // Define the function globally BEFORE rendering HTML
   window.routinesData = routines;
   window.showClassRoutine = function(className, btnIndex) {
-    console.log('showClassRoutine called:', className, btnIndex);
-    
     // Update subtitle
     document.getElementById('routineSubtitle').textContent = className + ' • Daily Schedule';
     
@@ -277,8 +275,6 @@ export async function renderSyllabus() {
   // Define the function globally BEFORE rendering HTML
   window.syllabusDataStore = syllabusData;
   window.showSyllabus = function(className, btnIndex) {
-    console.log('showSyllabus called:', className, btnIndex);
-    
     // Update subtitle
     document.getElementById('syllabusSubtitle').textContent = 'Course curriculum and study materials for ' + className;
     
@@ -354,9 +350,15 @@ export async function renderSyllabus() {
             </div>
           </div>
           
-          <button class="btn w-full" style="background:linear-gradient(135deg, ${subject.color} 0%, ${subject.color}dd 100%);border:none;color:white;padding:12px;border-radius:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="alert('Download ${subject.file}')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PDF
-          </button>
+          ${subject.fileData ? `
+            <a href="${subject.fileData}" download="${subject.fileName || 'syllabus.pdf'}" class="btn w-full" style="background:linear-gradient(135deg, ${subject.color} 0%, ${subject.color}dd 100%);border:none;color:white;padding:12px;border-radius:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download ${subject.fileName || 'PDF'}
+            </a>
+          ` : `
+            <div class="btn w-full" style="background:var(--bg-tertiary);border:1px solid var(--border);color:var(--text-muted);padding:12px;border-radius:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;cursor:not-allowed;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> No file uploaded
+            </div>
+          `}
         </div>
       `;
     }).join('');
@@ -405,22 +407,28 @@ export async function renderSyllabus() {
               </div>
               
               <h3 style="font-size:20px;font-weight:800;color:var(--text-primary);margin-bottom:8px;">${subject.name}</h3>
-              <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">Class 10</p>
+              <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">Class 6</p>
               
               <div style="display:flex;gap:16px;margin-bottom:20px;">
                 <div style="flex:1;background:var(--bg-primary);padding:12px;border-radius:12px;text-align:center;">
-                  <div style="font-size:20px;font-weight:900;color:${subject.color};">${subject.chapters}</div>
+                  <div style="font-size:20px;font-weight:900;color:${subject.color};">${subject.chapters || 0}</div>
                   <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Chapters</div>
                 </div>
                 <div style="flex:1;background:var(--bg-primary);padding:12px;border-radius:12px;text-align:center;">
-                  <div style="font-size:20px;font-weight:900;color:${subject.color};">${subject.topics}</div>
+                  <div style="font-size:20px;font-weight:900;color:${subject.color};">${subject.topics || 0}</div>
                   <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Topics</div>
                 </div>
               </div>
               
-              <button class="btn w-full" style="background:linear-gradient(135deg, ${subject.color} 0%, ${subject.color}dd 100%);border:none;color:white;padding:12px;border-radius:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="alert('Download ${subject.file}')">
-                ${icon('download', 16)} Download PDF
-              </button>
+              ${subject.fileData ? `
+                <a href="${subject.fileData}" download="${subject.fileName || 'syllabus.pdf'}" class="btn w-full" style="background:linear-gradient(135deg, ${subject.color} 0%, ${subject.color}dd 100%);border:none;color:white;padding:12px;border-radius:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
+                  ${icon('download', 16, 'white')} Download ${subject.fileName || 'PDF'}
+                </a>
+              ` : `
+                <div class="btn w-full" style="background:var(--bg-tertiary);border:1px solid var(--border);color:var(--text-muted);padding:12px;border-radius:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;cursor:not-allowed;">
+                  ${icon('fileText', 16, 'var(--text-muted)')} No file uploaded
+                </div>
+              `}
             </div>
           `).join('')}
         </div>
@@ -440,8 +448,6 @@ export async function renderExamRoutine() {
   // Define the function globally BEFORE rendering HTML
   window.examSchedulesData = examSchedules;
   window.showExamRoutine = function(className, btnIndex) {
-    console.log('showExamRoutine called:', className, btnIndex);
-    
     // Update subtitle
     document.getElementById('examSubtitle').textContent = 'Annual Examination 2026 • ' + className;
     

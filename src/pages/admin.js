@@ -29,6 +29,7 @@ const ICONS = {
   users2:    `<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>`,
   image:     `<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>`,
   api:       `<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>`,
+  bookOpen:  `<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>`,
 };
 
 // Notification Helper
@@ -191,17 +192,18 @@ async function _refreshTab(tab) {
 }
 
 function renderAdminMain() {
-  const allUsers = _cache.users;
-  // Case-insensitive role filtering for Google Sign-In compatibility
-  const studentCount = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'student' && u.status === 'active').length;
-  const unlinkedCount = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'student' && u.status === 'unlinked').length;
-  const teacherCount = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'teacher' && u.status === 'active').length;
-  const pendingCount = allUsers.filter(u => u.status !== 'active' && u.status !== 'unlinked' && u.role !== 'admin').length;
-  const S = _cache.settings;
-  const noticesCount = _cache.notices.length;
-  const eventsCount  = _cache.events.length;
-  const notificationCount = _cache.notifications.length;
-  const today = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  try {
+    const allUsers = _cache.users || [];
+    // Case-insensitive role filtering for Google Sign-In compatibility
+    const studentCount = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'student' && u.status === 'active').length;
+    const unlinkedCount = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'student' && u.status === 'unlinked').length;
+    const teacherCount = allUsers.filter(u => u.role && u.role.toLowerCase().trim() === 'teacher' && u.status === 'active').length;
+    const pendingCount = allUsers.filter(u => u.status !== 'active' && u.status !== 'unlinked' && u.role !== 'admin').length;
+    const S = _cache.settings || {};
+    const noticesCount = (_cache.notices || []).length;
+    const eventsCount  = (_cache.events || []).length;
+    const notificationCount = (_cache.notifications || []).length;
+    const today = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
 
   return `
@@ -209,7 +211,7 @@ function renderAdminMain() {
       <div class="flex items-center justify-between mb-6">
         <div>
           <h1 style="font-size:24px;font-weight:800;">Dashboard Overview</h1>
-          <div class="text-muted text-sm">${today}    ${S.year||'Academic Year 2025"26'}</div>
+          <div class="text-muted text-sm">${today} • ${S.year||'Academic Year 2025-26'}</div>
         </div>
         <button class="btn btn-primary" onclick="showToast('Report generation coming soon','info')">
           ${SVG('<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',14,'white')} Export Report
@@ -285,6 +287,10 @@ function renderAdminMain() {
       </div>` : ''}
     </div>
   `;
+  } catch (error) {
+    console.error('Error rendering dashboard:', error);
+    return `<div class="card"><div class="card-body"><div class="text-danger">Error loading dashboard. Please refresh the page.</div></div></div>`;
+  }
 }
 
 function _studentRow(s) {
@@ -4652,11 +4658,25 @@ function renderSyllabusEditor(academic) {
 function renderSyllabusRow(className, subject, idx) {
   return `
     <div class="card" style="margin-bottom:12px;padding:16px;">
-      <div style="display:grid;grid-template-columns:1fr 100px 100px 200px 60px;gap:12px;align-items:center;">
+      <div style="display:grid;grid-template-columns:1fr 100px 100px auto 60px;gap:12px;align-items:center;">
         <input type="text" class="form-input form-input-sm" value="${subject.name || ''}" placeholder="Subject Name" onchange="updateSyllabus('${className}',${idx},'name',this.value)">
         <input type="number" class="form-input form-input-sm" value="${subject.chapters || ''}" placeholder="Chapters" onchange="updateSyllabus('${className}',${idx},'chapters',this.value)">
         <input type="number" class="form-input form-input-sm" value="${subject.topics || ''}" placeholder="Topics" onchange="updateSyllabus('${className}',${idx},'topics',this.value)">
-        <input type="text" class="form-input form-input-sm" value="${subject.file || ''}" placeholder="filename.pdf" onchange="updateSyllabus('${className}',${idx},'file',this.value)">
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${subject.fileData ? `
+            <a href="${subject.fileData}" download="${subject.fileName || 'syllabus.pdf'}" class="btn btn-secondary btn-sm" title="Download ${subject.fileName || 'file'}">
+              ${SVG('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',16)} ${subject.fileName || 'file'}
+            </a>
+            <button class="btn btn-danger btn-sm btn-icon" onclick="removeSyllabusFile('${className}',${idx})" title="Remove file">
+              ${SVG('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',14)}
+            </button>
+          ` : `
+            <label class="btn btn-primary btn-sm" style="cursor:pointer;margin:0;">
+              <input type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="display:none;" onchange="uploadSyllabusFile('${className}',${idx},this)">
+              ${SVG('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',14,'white')} Upload
+            </label>
+          `}
+        </div>
         <button class="btn btn-danger btn-sm btn-icon" onclick="deleteSyllabus('${className}',${idx})" title="Delete">
           ${SVG('<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',16)}
         </button>
@@ -4850,6 +4870,50 @@ window.deleteSyllabus = function(className, idx) {
   refreshSyllabusList(className);
 };
 
+window.uploadSyllabusFile = async function(className, idx, input) {
+  const file = input.files?.[0];
+  if (!file) return;
+  
+  // Check file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('File size must be less than 5MB', 'error');
+    input.value = '';
+    return;
+  }
+  
+  try {
+    // Read file as base64
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const base64Data = e.target.result;
+      
+      // Store file data
+      if (!academicData.syllabus[className]) academicData.syllabus[className] = [];
+      academicData.syllabus[className][idx].fileData = base64Data;
+      academicData.syllabus[className][idx].fileName = file.name;
+      
+      showToast(`File "${file.name}" uploaded successfully!`, 'success');
+      refreshSyllabusList(className);
+    };
+    reader.onerror = function() {
+      showToast('Failed to read file', 'error');
+      input.value = '';
+    };
+    reader.readAsDataURL(file);
+  } catch (error) {
+    showToast('Error uploading file: ' + error.message, 'error');
+    input.value = '';
+  }
+};
+
+window.removeSyllabusFile = function(className, idx) {
+  if (!academicData.syllabus[className]) return;
+  delete academicData.syllabus[className][idx].fileData;
+  delete academicData.syllabus[className][idx].fileName;
+  showToast('File removed', 'success');
+  refreshSyllabusList(className);
+};
+
 function refreshSyllabusList(className) {
   const container = document.getElementById('syllabusList_'+className.replace(' ',''));
   if (!container) return;
@@ -4861,14 +4925,19 @@ function refreshSyllabusList(className) {
 
 // Save Function
 window.saveAcademicData = async function() {
-  const settings = await api.getSettings();
-  settings.academic = academicData;
-  const result = await api.saveSettings(settings);
-  if (result && result.ok !== false) {
-    showToast('Academic data saved successfully!', 'success');
-    await _refreshTab('academic');
-  } else {
-    showToast('Failed to save academic data', 'error');
+  try {
+    const settings = await api.getSettings();
+    settings.academic = academicData;
+    
+    const result = await api.saveSettings(settings);
+    if (result && result.ok !== false) {
+      showToast('Academic data saved successfully!', 'success');
+      await _refreshTab('academic');
+    } else {
+      showToast('Failed to save academic data', 'error');
+    }
+  } catch (error) {
+    showToast('Error saving: ' + error.message, 'error');
   }
 };
 

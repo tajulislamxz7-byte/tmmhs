@@ -92,8 +92,8 @@ async function render() {
   const footerRoot = document.getElementById('footer-root');
   const searchRoot = document.getElementById('search-root');
 
-  // Topbar (always show except on auth pages)
-  if (AUTH_PAGES.includes(currentPage)) {
+  // Topbar (always show except on auth pages and admin pages)
+  if (AUTH_PAGES.includes(currentPage) || ADMIN_PAGES.includes(currentPage)) {
     topbarRoot.innerHTML = '';
     topbarRoot.style.display = 'none';
   } else {
@@ -102,7 +102,7 @@ async function render() {
   }
 
   // Navbar
-  if (AUTH_PAGES.includes(currentPage)) {
+  if (AUTH_PAGES.includes(currentPage) || ADMIN_PAGES.includes(currentPage)) {
     navRoot.innerHTML  = '';
     navRoot.style.display = 'none';
   } else {

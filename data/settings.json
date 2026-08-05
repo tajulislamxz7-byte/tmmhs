@@ -155,162 +155,917 @@
   "academic": {
     "classRoutines": {
       "Class 6": [
-        {"time": "8:00-8:45", "subject": "Bengali", "teacher": "Mrs. Rahman", "room": "101", "color": "#4facfe"},
-        {"time": "8:45-9:30", "subject": "English", "teacher": "Mr. Khan", "room": "102", "color": "#43e97b"},
-        {"time": "9:30-10:15", "subject": "Mathematics", "teacher": "Ms. Ahmed", "room": "103", "color": "#fa709a"},
-        {"time": "10:15-10:30", "subject": "Break Time", "isBreak": true, "teacher": "", "room": "", "color": "#fee140"},
-        {"time": "10:30-11:15", "subject": "Science", "teacher": "Dr. Hossain", "room": "104", "color": "#30cfd0"},
-        {"time": "11:15-12:00", "subject": "Social Studies", "teacher": "Mrs. Begum", "room": "105", "color": "#a8edea"},
-        {"time": "12:00-12:45", "subject": "ICT", "teacher": "Mr. Islam", "room": "Computer Lab", "color": "#667eea"}
+        {
+          "time": "8:00-8:45",
+          "subject": "Bengali",
+          "teacher": "Mrs. Rahman",
+          "room": "101",
+          "color": "#4facfe"
+        },
+        {
+          "time": "8:45-9:30",
+          "subject": "English",
+          "teacher": "Mr. Khan",
+          "room": "102",
+          "color": "#43e97b"
+        },
+        {
+          "time": "9:30-10:15",
+          "subject": "Mathematics",
+          "teacher": "Ms. Ahmed",
+          "room": "103",
+          "color": "#fa709a"
+        },
+        {
+          "time": "10:15-10:30",
+          "subject": "Break Time",
+          "isBreak": true,
+          "teacher": "",
+          "room": "",
+          "color": "#fee140"
+        },
+        {
+          "time": "10:30-11:15",
+          "subject": "Science",
+          "teacher": "Dr. Hossain",
+          "room": "104",
+          "color": "#30cfd0"
+        },
+        {
+          "time": "11:15-12:00",
+          "subject": "Social Studies",
+          "teacher": "Mrs. Begum",
+          "room": "105",
+          "color": "#a8edea"
+        },
+        {
+          "time": "12:00-12:45",
+          "subject": "ICT",
+          "teacher": "Mr. Islam",
+          "room": "Computer Lab",
+          "color": "#667eea"
+        }
       ],
       "Class 7": [
-        {"time": "8:00-8:45", "subject": "English", "teacher": "Mr. Ali", "room": "201", "color": "#43e97b"},
-        {"time": "8:45-9:30", "subject": "Bengali", "teacher": "Mrs. Karim", "room": "202", "color": "#4facfe"},
-        {"time": "9:30-10:15", "subject": "Mathematics", "teacher": "Ms. Nahar", "room": "203", "color": "#fa709a"},
-        {"time": "10:15-10:30", "subject": "Break Time", "isBreak": true, "teacher": "", "room": "", "color": "#fee140"},
-        {"time": "10:30-11:15", "subject": "Physics", "teacher": "Dr. Rahman", "room": "204", "color": "#30cfd0"},
-        {"time": "11:15-12:00", "subject": "History", "teacher": "Mr. Miah", "room": "205", "color": "#a8edea"},
-        {"time": "12:00-12:45", "subject": "Computer Science", "teacher": "Ms. Sultana", "room": "Computer Lab", "color": "#667eea"}
+        {
+          "time": "8:00-8:45",
+          "subject": "English",
+          "teacher": "Mr. Ali",
+          "room": "201",
+          "color": "#43e97b"
+        },
+        {
+          "time": "8:45-9:30",
+          "subject": "Bengali",
+          "teacher": "Mrs. Karim",
+          "room": "202",
+          "color": "#4facfe"
+        },
+        {
+          "time": "9:30-10:15",
+          "subject": "Mathematics",
+          "teacher": "Ms. Nahar",
+          "room": "203",
+          "color": "#fa709a"
+        },
+        {
+          "time": "10:15-10:30",
+          "subject": "Break Time",
+          "isBreak": true,
+          "teacher": "",
+          "room": "",
+          "color": "#fee140"
+        },
+        {
+          "time": "10:30-11:15",
+          "subject": "Physics",
+          "teacher": "Dr. Rahman",
+          "room": "204",
+          "color": "#30cfd0"
+        },
+        {
+          "time": "11:15-12:00",
+          "subject": "History",
+          "teacher": "Mr. Miah",
+          "room": "205",
+          "color": "#a8edea"
+        },
+        {
+          "time": "12:00-12:45",
+          "subject": "Computer Science",
+          "teacher": "Ms. Sultana",
+          "room": "Computer Lab",
+          "color": "#667eea"
+        }
       ],
       "Class 8": [
-        {"time": "8:00-8:45", "subject": "Mathematics", "teacher": "Dr. Siddique", "room": "301", "color": "#fa709a"},
-        {"time": "8:45-9:30", "subject": "English", "teacher": "Mrs. Akter", "room": "302", "color": "#43e97b"},
-        {"time": "9:30-10:15", "subject": "Bengali", "teacher": "Mr. Hasan", "room": "303", "color": "#4facfe"},
-        {"time": "10:15-10:30", "subject": "Break Time", "isBreak": true, "teacher": "", "room": "", "color": "#fee140"},
-        {"time": "10:30-11:15", "subject": "Chemistry", "teacher": "Dr. Alam", "room": "Lab 1", "color": "#30cfd0"},
-        {"time": "11:15-12:00", "subject": "Geography", "teacher": "Ms. Noor", "room": "305", "color": "#a8edea"},
-        {"time": "12:00-12:45", "subject": "ICT", "teacher": "Mr. Kabir", "room": "Computer Lab", "color": "#667eea"}
+        {
+          "time": "8:00-8:45",
+          "subject": "Mathematics",
+          "teacher": "Dr. Siddique",
+          "room": "301",
+          "color": "#fa709a"
+        },
+        {
+          "time": "8:45-9:30",
+          "subject": "English",
+          "teacher": "Mrs. Akter",
+          "room": "302",
+          "color": "#43e97b"
+        },
+        {
+          "time": "9:30-10:15",
+          "subject": "Bengali",
+          "teacher": "Mr. Hasan",
+          "room": "303",
+          "color": "#4facfe"
+        },
+        {
+          "time": "10:15-10:30",
+          "subject": "Break Time",
+          "isBreak": true,
+          "teacher": "",
+          "room": "",
+          "color": "#fee140"
+        },
+        {
+          "time": "10:30-11:15",
+          "subject": "Chemistry",
+          "teacher": "Dr. Alam",
+          "room": "Lab 1",
+          "color": "#30cfd0"
+        },
+        {
+          "time": "11:15-12:00",
+          "subject": "Geography",
+          "teacher": "Ms. Noor",
+          "room": "305",
+          "color": "#a8edea"
+        },
+        {
+          "time": "12:00-12:45",
+          "subject": "ICT",
+          "teacher": "Mr. Kabir",
+          "room": "Computer Lab",
+          "color": "#667eea"
+        }
       ],
       "Class 9": [
-        {"time": "8:00-8:45", "subject": "Physics", "teacher": "Dr. Chowdhury", "room": "Lab 2", "color": "#30cfd0"},
-        {"time": "8:45-9:30", "subject": "Chemistry", "teacher": "Dr. Parveen", "room": "Lab 1", "color": "#30cfd0"},
-        {"time": "9:30-10:15", "subject": "Mathematics", "teacher": "Mr. Sarkar", "room": "401", "color": "#fa709a"},
-        {"time": "10:15-10:30", "subject": "Break Time", "isBreak": true, "teacher": "", "room": "", "color": "#fee140"},
-        {"time": "10:30-11:15", "subject": "English", "teacher": "Ms. Das", "room": "402", "color": "#43e97b"},
-        {"time": "11:15-12:00", "subject": "Bengali", "teacher": "Mrs. Roy", "room": "403", "color": "#4facfe"},
-        {"time": "12:00-12:45", "subject": "Biology", "teacher": "Dr. Sen", "room": "Lab 3", "color": "#f093fb"}
+        {
+          "time": "8:00-8:45",
+          "subject": "Physics",
+          "teacher": "Dr. Chowdhury",
+          "room": "Lab 2",
+          "color": "#30cfd0"
+        },
+        {
+          "time": "8:45-9:30",
+          "subject": "Chemistry",
+          "teacher": "Dr. Parveen",
+          "room": "Lab 1",
+          "color": "#30cfd0"
+        },
+        {
+          "time": "9:30-10:15",
+          "subject": "Mathematics",
+          "teacher": "Mr. Sarkar",
+          "room": "401",
+          "color": "#fa709a"
+        },
+        {
+          "time": "10:15-10:30",
+          "subject": "Break Time",
+          "isBreak": true,
+          "teacher": "",
+          "room": "",
+          "color": "#fee140"
+        },
+        {
+          "time": "10:30-11:15",
+          "subject": "English",
+          "teacher": "Ms. Das",
+          "room": "402",
+          "color": "#43e97b"
+        },
+        {
+          "time": "11:15-12:00",
+          "subject": "Bengali",
+          "teacher": "Mrs. Roy",
+          "room": "403",
+          "color": "#4facfe"
+        },
+        {
+          "time": "12:00-12:45",
+          "subject": "Biology",
+          "teacher": "Dr. Sen",
+          "room": "Lab 3",
+          "color": "#f093fb"
+        }
       ],
       "Class 10": [
-        {"time": "8:00-8:45", "subject": "Higher Mathematics", "teacher": "Dr. Bhattacharya", "room": "501", "color": "#fa709a"},
-        {"time": "8:45-9:30", "subject": "Physics", "teacher": "Dr. Mazumder", "room": "Lab 2", "color": "#30cfd0"},
-        {"time": "9:30-10:15", "subject": "Chemistry", "teacher": "Dr. Ghosh", "room": "Lab 1", "color": "#30cfd0"},
-        {"time": "10:15-10:30", "subject": "Break Time", "isBreak": true, "teacher": "", "room": "", "color": "#fee140"},
-        {"time": "10:30-11:15", "subject": "English", "teacher": "Mrs. Barua", "room": "502", "color": "#43e97b"},
-        {"time": "11:15-12:00", "subject": "Bengali", "teacher": "Mr. Datta", "room": "503", "color": "#4facfe"},
-        {"time": "12:00-12:45", "subject": "Biology", "teacher": "Dr. Biswas", "room": "Lab 3", "color": "#f093fb"}
+        {
+          "time": "8:00-8:45",
+          "subject": "Higher Mathematics",
+          "teacher": "Dr. Bhattacharya",
+          "room": "501",
+          "color": "#fa709a"
+        },
+        {
+          "time": "8:45-9:30",
+          "subject": "Physics",
+          "teacher": "Dr. Mazumder",
+          "room": "Lab 2",
+          "color": "#30cfd0"
+        },
+        {
+          "time": "9:30-10:15",
+          "subject": "Chemistry",
+          "teacher": "Dr. Ghosh",
+          "room": "Lab 1",
+          "color": "#30cfd0"
+        },
+        {
+          "time": "10:15-10:30",
+          "subject": "Break Time",
+          "isBreak": true,
+          "teacher": "",
+          "room": "",
+          "color": "#fee140"
+        },
+        {
+          "time": "10:30-11:15",
+          "subject": "English",
+          "teacher": "Mrs. Barua",
+          "room": "502",
+          "color": "#43e97b"
+        },
+        {
+          "time": "11:15-12:00",
+          "subject": "Bengali",
+          "teacher": "Mr. Datta",
+          "room": "503",
+          "color": "#4facfe"
+        },
+        {
+          "time": "12:00-12:45",
+          "subject": "Biology",
+          "teacher": "Dr. Biswas",
+          "room": "Lab 3",
+          "color": "#f093fb"
+        }
       ]
     },
     "examRoutines": {
       "Class 6": [
-        {"date": "2026-12-01", "subject": "Bengali", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "101", "color": "#4facfe"},
-        {"date": "2026-12-03", "subject": "English", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "102", "color": "#43e97b"},
-        {"date": "2026-12-05", "subject": "Mathematics", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "103", "color": "#fa709a"},
-        {"date": "2026-12-07", "subject": "Science", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "104", "color": "#30cfd0"},
-        {"date": "2026-12-09", "subject": "Social Studies", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "105", "color": "#a8edea"},
-        {"date": "2026-12-11", "subject": "ICT", "time": "9:00 AM - 11:00 AM", "duration": "2 hours", "room": "Computer Lab", "color": "#667eea"}
+        {
+          "date": "2026-12-01",
+          "subject": "Bengali",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "101",
+          "color": "#4facfe"
+        },
+        {
+          "date": "2026-12-03",
+          "subject": "English",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "102",
+          "color": "#43e97b"
+        },
+        {
+          "date": "2026-12-05",
+          "subject": "Mathematics",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "103",
+          "color": "#fa709a"
+        },
+        {
+          "date": "2026-12-07",
+          "subject": "Science",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "104",
+          "color": "#30cfd0"
+        },
+        {
+          "date": "2026-12-09",
+          "subject": "Social Studies",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "105",
+          "color": "#a8edea"
+        },
+        {
+          "date": "2026-12-11",
+          "subject": "ICT",
+          "time": "9:00 AM - 11:00 AM",
+          "duration": "2 hours",
+          "room": "Computer Lab",
+          "color": "#667eea"
+        }
       ],
       "Class 7": [
-        {"date": "2026-12-01", "subject": "English", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "201", "color": "#43e97b"},
-        {"date": "2026-12-03", "subject": "Bengali", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "202", "color": "#4facfe"},
-        {"date": "2026-12-05", "subject": "Mathematics", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "203", "color": "#fa709a"},
-        {"date": "2026-12-07", "subject": "Physics", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "204", "color": "#30cfd0"},
-        {"date": "2026-12-09", "subject": "History", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "205", "color": "#a8edea"},
-        {"date": "2026-12-11", "subject": "Computer Science", "time": "9:00 AM - 11:00 AM", "duration": "2 hours", "room": "Computer Lab", "color": "#667eea"}
+        {
+          "date": "2026-12-01",
+          "subject": "English",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "201",
+          "color": "#43e97b"
+        },
+        {
+          "date": "2026-12-03",
+          "subject": "Bengali",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "202",
+          "color": "#4facfe"
+        },
+        {
+          "date": "2026-12-05",
+          "subject": "Mathematics",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "203",
+          "color": "#fa709a"
+        },
+        {
+          "date": "2026-12-07",
+          "subject": "Physics",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "204",
+          "color": "#30cfd0"
+        },
+        {
+          "date": "2026-12-09",
+          "subject": "History",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "205",
+          "color": "#a8edea"
+        },
+        {
+          "date": "2026-12-11",
+          "subject": "Computer Science",
+          "time": "9:00 AM - 11:00 AM",
+          "duration": "2 hours",
+          "room": "Computer Lab",
+          "color": "#667eea"
+        }
       ],
       "Class 8": [
-        {"date": "2026-12-01", "subject": "Mathematics", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "301", "color": "#fa709a"},
-        {"date": "2026-12-03", "subject": "English", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "302", "color": "#43e97b"},
-        {"date": "2026-12-05", "subject": "Bengali", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "303", "color": "#4facfe"},
-        {"date": "2026-12-07", "subject": "Chemistry", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "Lab 1", "color": "#30cfd0"},
-        {"date": "2026-12-09", "subject": "Geography", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "305", "color": "#a8edea"},
-        {"date": "2026-12-11", "subject": "ICT", "time": "9:00 AM - 11:00 AM", "duration": "2 hours", "room": "Computer Lab", "color": "#667eea"}
+        {
+          "date": "2026-12-01",
+          "subject": "Mathematics",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "301",
+          "color": "#fa709a"
+        },
+        {
+          "date": "2026-12-03",
+          "subject": "English",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "302",
+          "color": "#43e97b"
+        },
+        {
+          "date": "2026-12-05",
+          "subject": "Bengali",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "303",
+          "color": "#4facfe"
+        },
+        {
+          "date": "2026-12-07",
+          "subject": "Chemistry",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "Lab 1",
+          "color": "#30cfd0"
+        },
+        {
+          "date": "2026-12-09",
+          "subject": "Geography",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "305",
+          "color": "#a8edea"
+        },
+        {
+          "date": "2026-12-11",
+          "subject": "ICT",
+          "time": "9:00 AM - 11:00 AM",
+          "duration": "2 hours",
+          "room": "Computer Lab",
+          "color": "#667eea"
+        }
       ],
       "Class 9": [
-        {"date": "2026-12-01", "subject": "Physics", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "Lab 2", "color": "#30cfd0"},
-        {"date": "2026-12-03", "subject": "Chemistry", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "Lab 1", "color": "#30cfd0"},
-        {"date": "2026-12-05", "subject": "Mathematics", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "401", "color": "#fa709a"},
-        {"date": "2026-12-07", "subject": "English", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "402", "color": "#43e97b"},
-        {"date": "2026-12-09", "subject": "Bengali", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "403", "color": "#4facfe"},
-        {"date": "2026-12-11", "subject": "Biology", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "Lab 3", "color": "#f093fb"}
+        {
+          "date": "2026-12-01",
+          "subject": "Physics",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "Lab 2",
+          "color": "#30cfd0"
+        },
+        {
+          "date": "2026-12-03",
+          "subject": "Chemistry",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "Lab 1",
+          "color": "#30cfd0"
+        },
+        {
+          "date": "2026-12-05",
+          "subject": "Mathematics",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "401",
+          "color": "#fa709a"
+        },
+        {
+          "date": "2026-12-07",
+          "subject": "English",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "402",
+          "color": "#43e97b"
+        },
+        {
+          "date": "2026-12-09",
+          "subject": "Bengali",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "403",
+          "color": "#4facfe"
+        },
+        {
+          "date": "2026-12-11",
+          "subject": "Biology",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "Lab 3",
+          "color": "#f093fb"
+        }
       ],
       "Class 10": [
-        {"date": "2026-12-01", "subject": "Higher Mathematics", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "501", "color": "#fa709a"},
-        {"date": "2026-12-03", "subject": "Physics", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "Lab 2", "color": "#30cfd0"},
-        {"date": "2026-12-05", "subject": "Chemistry", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "Lab 1", "color": "#30cfd0"},
-        {"date": "2026-12-07", "subject": "English", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "502", "color": "#43e97b"},
-        {"date": "2026-12-09", "subject": "Bengali", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "503", "color": "#4facfe"},
-        {"date": "2026-12-11", "subject": "Biology", "time": "9:00 AM - 12:00 PM", "duration": "3 hours", "room": "Lab 3", "color": "#f093fb"}
+        {
+          "date": "2026-12-01",
+          "subject": "Higher Mathematics",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "501",
+          "color": "#fa709a"
+        },
+        {
+          "date": "2026-12-03",
+          "subject": "Physics",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "Lab 2",
+          "color": "#30cfd0"
+        },
+        {
+          "date": "2026-12-05",
+          "subject": "Chemistry",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "Lab 1",
+          "color": "#30cfd0"
+        },
+        {
+          "date": "2026-12-07",
+          "subject": "English",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "502",
+          "color": "#43e97b"
+        },
+        {
+          "date": "2026-12-09",
+          "subject": "Bengali",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "503",
+          "color": "#4facfe"
+        },
+        {
+          "date": "2026-12-11",
+          "subject": "Biology",
+          "time": "9:00 AM - 12:00 PM",
+          "duration": "3 hours",
+          "room": "Lab 3",
+          "color": "#f093fb"
+        }
       ]
     },
     "syllabus": {
       "Class 6": [
-        {"name": "Bengali", "chapters": 12, "topics": 48, "color": "#4facfe", "icon": "bookOpen", "file": "class6-bengali.pdf"},
-        {"name": "English", "chapters": 10, "topics": 40, "color": "#43e97b", "icon": "bookOpen", "file": "class6-english.pdf"},
-        {"name": "Mathematics", "chapters": 15, "topics": 60, "color": "#fa709a", "icon": "activity", "file": "class6-math.pdf"},
-        {"name": "Science", "chapters": 14, "topics": 56, "color": "#30cfd0", "icon": "zap", "file": "class6-science.pdf"},
-        {"name": "Social Studies", "chapters": 12, "topics": 48, "color": "#a8edea", "icon": "globe", "file": "class6-social.pdf"},
-        {"name": "ICT", "chapters": 8, "topics": 32, "color": "#667eea", "icon": "monitor", "file": "class6-ict.pdf"}
+        {
+          "name": "Bengali",
+          "chapters": 12,
+          "topics": 48,
+          "color": "#4facfe",
+          "icon": "bookOpen",
+          "file": "class6-bengali.pdf"
+        },
+        {
+          "name": "English",
+          "chapters": 10,
+          "topics": 40,
+          "color": "#43e97b",
+          "icon": "bookOpen",
+          "file": "class6-english.pdf"
+        },
+        {
+          "name": "Mathematics",
+          "chapters": 15,
+          "topics": 60,
+          "color": "#fa709a",
+          "icon": "activity",
+          "file": "class6-math.pdf"
+        },
+        {
+          "name": "Science",
+          "chapters": 14,
+          "topics": 56,
+          "color": "#30cfd0",
+          "icon": "zap",
+          "file": "class6-science.pdf"
+        },
+        {
+          "name": "Social Studies",
+          "chapters": 12,
+          "topics": 48,
+          "color": "#a8edea",
+          "icon": "globe",
+          "file": "class6-social.pdf"
+        },
+        {
+          "name": "ICT",
+          "chapters": 8,
+          "topics": 32,
+          "color": "#667eea",
+          "icon": "monitor",
+          "file": "class6-ict.pdf"
+        }
       ],
       "Class 7": [
-        {"name": "English", "chapters": 12, "topics": 48, "color": "#43e97b", "icon": "bookOpen", "file": "class7-english.pdf"},
-        {"name": "Bengali", "chapters": 14, "topics": 56, "color": "#4facfe", "icon": "bookOpen", "file": "class7-bengali.pdf"},
-        {"name": "Mathematics", "chapters": 16, "topics": 64, "color": "#fa709a", "icon": "activity", "file": "class7-math.pdf"},
-        {"name": "Physics", "chapters": 10, "topics": 40, "color": "#30cfd0", "icon": "zap", "file": "class7-physics.pdf"},
-        {"name": "History", "chapters": 12, "topics": 48, "color": "#a8edea", "icon": "globe", "file": "class7-history.pdf"},
-        {"name": "Computer Science", "chapters": 10, "topics": 40, "color": "#667eea", "icon": "monitor", "file": "class7-cs.pdf"}
+        {
+          "name": "English",
+          "chapters": 12,
+          "topics": 48,
+          "color": "#43e97b",
+          "icon": "bookOpen",
+          "file": "class7-english.pdf"
+        },
+        {
+          "name": "Bengali",
+          "chapters": 14,
+          "topics": 56,
+          "color": "#4facfe",
+          "icon": "bookOpen",
+          "file": "class7-bengali.pdf"
+        },
+        {
+          "name": "Mathematics",
+          "chapters": 16,
+          "topics": 64,
+          "color": "#fa709a",
+          "icon": "activity",
+          "file": "class7-math.pdf"
+        },
+        {
+          "name": "Physics",
+          "chapters": 10,
+          "topics": 40,
+          "color": "#30cfd0",
+          "icon": "zap",
+          "file": "class7-physics.pdf"
+        },
+        {
+          "name": "History",
+          "chapters": 12,
+          "topics": 48,
+          "color": "#a8edea",
+          "icon": "globe",
+          "file": "class7-history.pdf"
+        },
+        {
+          "name": "Computer Science",
+          "chapters": 10,
+          "topics": 40,
+          "color": "#667eea",
+          "icon": "monitor",
+          "file": "class7-cs.pdf"
+        }
       ],
       "Class 8": [
-        {"name": "Mathematics", "chapters": 18, "topics": 72, "color": "#fa709a", "icon": "activity", "file": "class8-math.pdf"},
-        {"name": "English", "chapters": 14, "topics": 56, "color": "#43e97b", "icon": "bookOpen", "file": "class8-english.pdf"},
-        {"name": "Bengali", "chapters": 15, "topics": 60, "color": "#4facfe", "icon": "bookOpen", "file": "class8-bengali.pdf"},
-        {"name": "Chemistry", "chapters": 12, "topics": 48, "color": "#30cfd0", "icon": "droplet", "file": "class8-chemistry.pdf"},
-        {"name": "Geography", "chapters": 10, "topics": 40, "color": "#a8edea", "icon": "globe", "file": "class8-geography.pdf"},
-        {"name": "ICT", "chapters": 10, "topics": 40, "color": "#667eea", "icon": "monitor", "file": "class8-ict.pdf"}
+        {
+          "name": "Mathematics",
+          "chapters": 18,
+          "topics": 72,
+          "color": "#fa709a",
+          "icon": "activity",
+          "file": "class8-math.pdf"
+        },
+        {
+          "name": "English",
+          "chapters": 14,
+          "topics": 56,
+          "color": "#43e97b",
+          "icon": "bookOpen",
+          "file": "class8-english.pdf"
+        },
+        {
+          "name": "Bengali",
+          "chapters": 15,
+          "topics": 60,
+          "color": "#4facfe",
+          "icon": "bookOpen",
+          "file": "class8-bengali.pdf"
+        },
+        {
+          "name": "Chemistry",
+          "chapters": 12,
+          "topics": 48,
+          "color": "#30cfd0",
+          "icon": "droplet",
+          "file": "class8-chemistry.pdf"
+        },
+        {
+          "name": "Geography",
+          "chapters": 10,
+          "topics": 40,
+          "color": "#a8edea",
+          "icon": "globe",
+          "file": "class8-geography.pdf"
+        },
+        {
+          "name": "ICT",
+          "chapters": 10,
+          "topics": 40,
+          "color": "#667eea",
+          "icon": "monitor",
+          "file": "class8-ict.pdf"
+        }
       ],
       "Class 9": [
-        {"name": "Physics", "chapters": 14, "topics": 56, "color": "#30cfd0", "icon": "zap", "file": "class9-physics.pdf"},
-        {"name": "Chemistry", "chapters": 14, "topics": 56, "color": "#30cfd0", "icon": "droplet", "file": "class9-chemistry.pdf"},
-        {"name": "Mathematics", "chapters": 20, "topics": 80, "color": "#fa709a", "icon": "activity", "file": "class9-math.pdf"},
-        {"name": "English", "chapters": 16, "topics": 64, "color": "#43e97b", "icon": "bookOpen", "file": "class9-english.pdf"},
-        {"name": "Bengali", "chapters": 16, "topics": 64, "color": "#4facfe", "icon": "bookOpen", "file": "class9-bengali.pdf"},
-        {"name": "Biology", "chapters": 12, "topics": 48, "color": "#f093fb", "icon": "heart", "file": "class9-biology.pdf"}
+        {
+          "name": "Physics",
+          "chapters": 14,
+          "topics": 56,
+          "color": "#30cfd0",
+          "icon": "zap",
+          "file": "class9-physics.pdf"
+        },
+        {
+          "name": "Chemistry",
+          "chapters": 14,
+          "topics": 56,
+          "color": "#30cfd0",
+          "icon": "droplet",
+          "file": "class9-chemistry.pdf"
+        },
+        {
+          "name": "Mathematics",
+          "chapters": 20,
+          "topics": 80,
+          "color": "#fa709a",
+          "icon": "activity",
+          "file": "class9-math.pdf"
+        },
+        {
+          "name": "English",
+          "chapters": 16,
+          "topics": 64,
+          "color": "#43e97b",
+          "icon": "bookOpen",
+          "file": "class9-english.pdf"
+        },
+        {
+          "name": "Bengali",
+          "chapters": 16,
+          "topics": 64,
+          "color": "#4facfe",
+          "icon": "bookOpen",
+          "file": "class9-bengali.pdf"
+        },
+        {
+          "name": "Biology",
+          "chapters": 12,
+          "topics": 48,
+          "color": "#f093fb",
+          "icon": "heart",
+          "file": "class9-biology.pdf"
+        }
       ],
       "Class 10": [
-        {"name": "Higher Mathematics", "chapters": 22, "topics": 88, "color": "#fa709a", "icon": "activity", "file": "class10-higher-math.pdf"},
-        {"name": "Physics", "chapters": 16, "topics": 64, "color": "#30cfd0", "icon": "zap", "file": "class10-physics.pdf"},
-        {"name": "Chemistry", "chapters": 16, "topics": 64, "color": "#30cfd0", "icon": "droplet", "file": "class10-chemistry.pdf"},
-        {"name": "English", "chapters": 18, "topics": 72, "color": "#43e97b", "icon": "bookOpen", "file": "class10-english.pdf"},
-        {"name": "Bengali", "chapters": 18, "topics": 72, "color": "#4facfe", "icon": "bookOpen", "file": "class10-bengali.pdf"},
-        {"name": "Biology", "chapters": 14, "topics": 56, "color": "#f093fb", "icon": "heart", "file": "class10-biology.pdf"}
+        {
+          "name": "Higher Mathematics",
+          "chapters": 22,
+          "topics": 88,
+          "color": "#fa709a",
+          "icon": "activity",
+          "file": "class10-higher-math.pdf"
+        },
+        {
+          "name": "Physics",
+          "chapters": 16,
+          "topics": 64,
+          "color": "#30cfd0",
+          "icon": "zap",
+          "file": "class10-physics.pdf"
+        },
+        {
+          "name": "Chemistry",
+          "chapters": 16,
+          "topics": 64,
+          "color": "#30cfd0",
+          "icon": "droplet",
+          "file": "class10-chemistry.pdf"
+        },
+        {
+          "name": "English",
+          "chapters": 18,
+          "topics": 72,
+          "color": "#43e97b",
+          "icon": "bookOpen",
+          "file": "class10-english.pdf"
+        },
+        {
+          "name": "Bengali",
+          "chapters": 18,
+          "topics": 72,
+          "color": "#4facfe",
+          "icon": "bookOpen",
+          "file": "class10-bengali.pdf"
+        },
+        {
+          "name": "Biology",
+          "chapters": 14,
+          "topics": 56,
+          "color": "#f093fb",
+          "icon": "heart",
+          "file": "class10-biology.pdf"
+        }
       ]
     },
     "academicCalendar": [
-      {"date": "2026-01-01", "title": "New Year Celebration", "desc": "School remains closed", "type": "holiday"},
-      {"date": "2026-01-10", "title": "First Term Begins", "desc": "Academic session starts for all classes", "type": "academic"},
-      {"date": "2026-02-21", "title": "International Mother Language Day", "desc": "Special programs and cultural activities", "type": "academic"},
-      {"date": "2026-03-26", "title": "Independence Day", "desc": "National holiday, school closed", "type": "holiday"},
-      {"date": "2026-04-14", "title": "Bengali New Year", "desc": "Pohela Boishakh celebration", "type": "academic"},
-      {"date": "2026-05-01", "title": "May Day", "desc": "International Workers' Day holiday", "type": "holiday"},
-      {"date": "2026-06-15", "title": "First Term Exams Begin", "desc": "Annual examination for all classes", "type": "academic"},
-      {"date": "2026-07-15", "title": "Summer Vacation Begins", "desc": "Schools closed for summer break", "type": "academic"},
-      {"date": "2026-08-15", "title": "National Mourning Day", "desc": "Commemorating Bangabandhu", "type": "holiday"},
-      {"date": "2026-09-01", "title": "Second Term Begins", "desc": "Classes resume after summer vacation", "type": "academic"},
-      {"date": "2026-10-10", "title": "Sports Day", "desc": "Annual sports competition and activities", "type": "academic"},
-      {"date": "2026-12-01", "title": "Final Exams Begin", "desc": "Year-end examinations for all classes", "type": "academic"},
-      {"date": "2026-12-16", "title": "Victory Day", "desc": "National holiday celebrating independence", "type": "holiday"},
-      {"date": "2026-12-25", "title": "Results Published", "desc": "Final exam results announcement", "type": "academic"}
+      {
+        "date": "2026-01-01",
+        "title": "New Year Celebration",
+        "desc": "School remains closed",
+        "type": "holiday"
+      },
+      {
+        "date": "2026-01-10",
+        "title": "First Term Begins",
+        "desc": "Academic session starts for all classes",
+        "type": "academic"
+      },
+      {
+        "date": "2026-02-21",
+        "title": "International Mother Language Day",
+        "desc": "Special programs and cultural activities",
+        "type": "academic"
+      },
+      {
+        "date": "2026-03-26",
+        "title": "Independence Day",
+        "desc": "National holiday, school closed",
+        "type": "holiday"
+      },
+      {
+        "date": "2026-04-14",
+        "title": "Bengali New Year",
+        "desc": "Pohela Boishakh celebration",
+        "type": "academic"
+      },
+      {
+        "date": "2026-05-01",
+        "title": "May Day",
+        "desc": "International Workers' Day holiday",
+        "type": "holiday"
+      },
+      {
+        "date": "2026-06-15",
+        "title": "First Term Exams Begin",
+        "desc": "Annual examination for all classes",
+        "type": "academic"
+      },
+      {
+        "date": "2026-07-15",
+        "title": "Summer Vacation Begins",
+        "desc": "Schools closed for summer break",
+        "type": "academic"
+      },
+      {
+        "date": "2026-08-15",
+        "title": "National Mourning Day",
+        "desc": "Commemorating Bangabandhu",
+        "type": "holiday"
+      },
+      {
+        "date": "2026-09-01",
+        "title": "Second Term Begins",
+        "desc": "Classes resume after summer vacation",
+        "type": "academic"
+      },
+      {
+        "date": "2026-10-10",
+        "title": "Sports Day",
+        "desc": "Annual sports competition and activities",
+        "type": "academic"
+      },
+      {
+        "date": "2026-12-01",
+        "title": "Final Exams Begin",
+        "desc": "Year-end examinations for all classes",
+        "type": "academic"
+      },
+      {
+        "date": "2026-12-16",
+        "title": "Victory Day",
+        "desc": "National holiday celebrating independence",
+        "type": "holiday"
+      },
+      {
+        "date": "2026-12-25",
+        "title": "Results Published",
+        "desc": "Final exam results announcement",
+        "type": "academic"
+      }
     ],
     "holidayCalendar": [
-      {"date": "2026-01-01", "title": "New Year's Day", "desc": "Public holiday to celebrate the new year", "color": "#f093fb"},
-      {"date": "2026-02-21", "title": "International Mother Language Day", "desc": "UNESCO recognized day honoring language martyrs", "color": "#4facfe"},
-      {"date": "2026-03-17", "title": "Sheikh Mujibur Rahman's Birthday", "desc": "National holiday celebrating the Father of the Nation", "color": "#43e97b"},
-      {"date": "2026-03-26", "title": "Independence Day", "desc": "Celebrating Bangladesh's independence from Pakistan", "color": "#fa709a"},
-      {"date": "2026-04-14", "title": "Pohela Boishakh", "desc": "Bengali New Year celebration", "color": "#fee140"},
-      {"date": "2026-05-01", "title": "May Day", "desc": "International Workers' Day", "color": "#30cfd0"},
-      {"date": "2026-08-15", "title": "National Mourning Day", "desc": "Remembering Bangabandhu Sheikh Mujibur Rahman", "color": "#667eea"},
-      {"date": "2026-12-16", "title": "Victory Day", "desc": "Celebrating the victory in the Liberation War", "color": "#fa709a"},
-      {"date": "2026-12-25", "title": "Christmas Day", "desc": "Christian religious holiday", "color": "#f093fb"},
-      {"date": "2026-07-15", "title": "Summer Vacation Start", "desc": "School closed for summer break (3 weeks)", "color": "#ffa500"}
+      {
+        "date": "2026-01-01",
+        "title": "New Year's Day",
+        "desc": "Public holiday to celebrate the new year",
+        "color": "#f093fb"
+      },
+      {
+        "date": "2026-02-21",
+        "title": "International Mother Language Day",
+        "desc": "UNESCO recognized day honoring language martyrs",
+        "color": "#4facfe"
+      },
+      {
+        "date": "2026-03-17",
+        "title": "Sheikh Mujibur Rahman's Birthday",
+        "desc": "National holiday celebrating the Father of the Nation",
+        "color": "#43e97b"
+      },
+      {
+        "date": "2026-03-26",
+        "title": "Independence Day",
+        "desc": "Celebrating Bangladesh's independence from Pakistan",
+        "color": "#fa709a"
+      },
+      {
+        "date": "2026-04-14",
+        "title": "Pohela Boishakh",
+        "desc": "Bengali New Year celebration",
+        "color": "#fee140"
+      },
+      {
+        "date": "2026-05-01",
+        "title": "May Day",
+        "desc": "International Workers' Day",
+        "color": "#30cfd0"
+      },
+      {
+        "date": "2026-08-15",
+        "title": "National Mourning Day",
+        "desc": "Remembering Bangabandhu Sheikh Mujibur Rahman",
+        "color": "#667eea"
+      },
+      {
+        "date": "2026-12-16",
+        "title": "Victory Day",
+        "desc": "Celebrating the victory in the Liberation War",
+        "color": "#fa709a"
+      },
+      {
+        "date": "2026-12-25",
+        "title": "Christmas Day",
+        "desc": "Christian religious holiday",
+        "color": "#f093fb"
+      },
+      {
+        "date": "2026-07-15",
+        "title": "Summer Vacation Start",
+        "desc": "School closed for summer break (3 weeks)",
+        "color": "#ffa500"
+      }
     ]
   }
 }
