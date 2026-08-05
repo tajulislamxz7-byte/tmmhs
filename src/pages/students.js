@@ -193,7 +193,7 @@ function renderStudentCard(s) {
           <img src="${s.avatar}" alt="${s.name}" class="avatar avatar-xl mx-auto">
           <div class="student-gpa-badge">${s.gpa}</div>
         </div>
-        <div class="font-bold" style="font-size:15px;margin-bottom:4px;">${s.name}</div>
+        <div class="font-bold notranslate" style="font-size:15px;margin-bottom:4px;" translate="no">${s.name}</div>
         <div class="text-xs text-muted mb-3">${s.id}</div>
         <div class="flex gap-2 justify-center flex-wrap mb-3">
           <span class="badge badge-primary">${s.class}</span>
@@ -276,7 +276,7 @@ export function renderStudentProfile(studentId) {
               </div>
               <div class="profile-info">
                 <div class="flex items-center gap-3 flex-wrap mb-2">
-                  <h1 style="font-size:32px;font-weight:800;">${student.name}</h1>
+                  <h1 class="notranslate" style="font-size:32px;font-weight:800;" translate="no">${student.name}</h1>
                   <span class="badge badge-success">Active Student</span>
                 </div>
                 <div class="text-muted mb-4">${student.id} · Roll No. ${student.roll}</div>
