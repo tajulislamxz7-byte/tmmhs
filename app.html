@@ -19,6 +19,17 @@
       emailjs.init({ publicKey: 'En-j_tpNxs4dbH-D4' });
     })();
   </script>
+  
+  <!-- Google Translate - Simple working version -->
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'en,bn'
+      }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
   <!-- Preconnect for fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -39,7 +50,13 @@
   </script>
 </head>
 <body>
+  <!-- Hidden Google Translate container -->
+  <div id="google_translate_element" style="display:none;"></div>
+  
   <div id="app">
+    <!-- Topbar (dates & language) -->
+    <div id="topbar-root"></div>
+    
     <!-- Navbar injected here -->
     <div id="navbar-root"></div>
 

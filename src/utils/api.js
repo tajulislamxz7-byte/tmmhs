@@ -37,12 +37,10 @@ async function req(method, path, body) {
     
     // Server is online
     if (_serverOnline === false) {
-      console.log('[API] Server reconnected ✓');
       _serverOnline = true;
       _hasShownOfflineWarning = false;
     } else if (_serverOnline === null) {
       _serverOnline = true;
-      console.log('[API] Server connected ✓');
     }
     
     // Always parse JSON response, even for error status codes
@@ -57,8 +55,6 @@ async function req(method, path, body) {
   } catch (e) {
     // Server is offline
     if (_serverOnline !== false && !_hasShownOfflineWarning) {
-      console.warn('[API] Server offline, using localStorage fallback');
-      console.warn('[API] Make sure server is running: npm run server');
       _hasShownOfflineWarning = true;
     }
     _serverOnline = false;
@@ -179,12 +175,6 @@ function lsLoginByPhoneOrEmail(phone, email, password) {
   const settings = LS.get('gfa_settings', {});
   const smsConfigured = !!(settings.smsApiKey && settings.smsApiKey.trim() && settings.smsApiKey !== '');
   
-  console.log('🔐 Client login check:', { 
-    phone: phone ? 'provided' : 'none', 
-    email: email ? 'provided' : 'none',
-    role: user.role,
-    smsConfigured 
-  });
   
   // Admin bypasses OTP
   if (user.role === 'admin') {

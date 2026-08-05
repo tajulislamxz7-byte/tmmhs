@@ -1,38 +1,111 @@
 [
   {
-    "id": "N1001",
-    "title": "First Terminal Examination 2026",
-    "content": "First Terminal Examination will start from September 10, 2026. Students should prepare accordingly. Detailed schedule is posted on the notice board.",
+    "id": "N2026001",
+    "title": "Final Terminal Examination 2026 - Schedule Published",
+    "content": "The Final Terminal Examination for all classes will commence from December 1, 2026. Detailed examination schedule has been posted on the notice board and uploaded on the website. Students must bring their admit cards and arrive 30 minutes before exam time. No electronic devices are allowed in the examination hall.",
     "category": "Exam",
     "priority": "urgent",
-    "date": "2026-08-20",
-    "postedBy": "Admin"
+    "date": "2026-11-15",
+    "postedBy": "Principal",
+    "attachments": ["exam-schedule-2026.pdf"]
   },
   {
-    "id": "N1002",
-    "title": "Annual Sports Day 2026",
-    "content": "Annual Sports Day will be held on September 5, 2026. All students are requested to participate actively in various sports events.",
+    "id": "N2026002",
+    "title": "Annual Sports Day 2026 - Registration Open",
+    "content": "Annual Sports Day will be held on October 10, 2026 at the school playground. Students interested in participating must register by September 30, 2026. Events include: 100m sprint, relay race, long jump, cricket, football, and badminton. Contact the sports teacher for registration.",
     "category": "Event",
     "priority": "high",
-    "date": "2026-08-18",
-    "postedBy": "Admin"
+    "date": "2026-09-15",
+    "postedBy": "Sports Committee"
   },
   {
-    "id": "N1003",
-    "title": "School Closed - Eid Holiday",
-    "content": "School will remain closed from August 25 to September 1, 2026 for Eid ul-Adha holidays. Classes will resume on September 2, 2026.",
-    "category": "Holiday",
-    "priority": "medium",
-    "date": "2026-08-15",
-    "postedBy": "Admin"
+    "id": "N2026003",
+    "title": "Victory Day Celebration - December 16, 2026",
+    "content": "School will organize a cultural program to celebrate Victory Day on December 16, 2026. Students can participate in patriotic songs, drama, poetry recitation, and art competition. Interested students should contact the cultural committee by December 10, 2026.",
+    "category": "Event",
+    "priority": "high",
+    "date": "2026-12-01",
+    "postedBy": "Cultural Committee"
   },
   {
-    "id": "N1004",
-    "title": "Parent-Teacher Meeting",
-    "content": "Parent-Teacher Meeting is scheduled for September 8, 2026. All guardians are requested to attend and discuss their child's progress.",
+    "id": "N2026004",
+    "title": "Parent-Teacher Meeting - November 20, 2026",
+    "content": "Parent-Teacher Meeting is scheduled for November 20, 2026 from 10:00 AM to 2:00 PM. All guardians are requested to attend and discuss their child's academic progress, attendance, and behavior. Teachers will be available in their respective classrooms.",
     "category": "General",
     "priority": "high",
-    "date": "2026-08-10",
+    "date": "2026-11-10",
     "postedBy": "Admin"
+  },
+  {
+    "id": "N2026005",
+    "title": "Winter Vacation Notice",
+    "content": "School will remain closed for winter vacation from December 25, 2026 to January 5, 2027. Classes will resume on January 6, 2027. Students are advised to complete their holiday homework during this period.",
+    "category": "Holiday",
+    "priority": "medium",
+    "date": "2026-12-10",
+    "postedBy": "Admin"
+  },
+  {
+    "id": "N2026006",
+    "title": "Science Fair 2026 - Call for Projects",
+    "content": "The annual Science Fair will be held on September 20, 2026. Students from classes 6-10 can participate individually or in groups of 2-3. Topics can be from Physics, Chemistry, Biology, or Environmental Science. Last date for project submission is September 15, 2026. Winners will represent the school at district level competition.",
+    "category": "Academic",
+    "priority": "high",
+    "date": "2026-08-20",
+    "postedBy": "Science Department"
+  },
+  {
+    "id": "N2026007",
+    "title": "Independence Day Holiday",
+    "content": "School will remain closed on March 26, 2026 to observe Independence Day. A special assembly will be held on March 25, 2026 at 9:00 AM to commemorate this historic day. All students must attend in proper uniform.",
+    "category": "Holiday",
+    "priority": "medium",
+    "date": "2026-03-15",
+    "postedBy": "Admin"
+  },
+  {
+    "id": "N2026008",
+    "title": "New Library Books Available",
+    "content": "The school library has received 500 new books covering various subjects including science, literature, history, and reference materials. Students can borrow up to 2 books for 2 weeks. Library timings: Monday-Thursday 8:00 AM - 3:00 PM. Late return fee: 5 Tk per day.",
+    "category": "General",
+    "priority": "low",
+    "date": "2026-07-01",
+    "postedBy": "Librarian"
+  },
+  {
+    "id": "N2026009",
+    "title": "Admission Open for Academic Year 2027",
+    "content": "Admission for Class 6-10 for the academic year 2027 is now open. Application forms are available at the school office from January 10, 2027. Last date for submission: February 15, 2027. Admission test will be held on February 20, 2027. For details, visit the admission section on our website.",
+    "category": "Admission",
+    "priority": "urgent",
+    "date": "2027-01-05",
+    "postedBy": "Admin"
+  },
+  {
+    "id": "N2026010",
+    "title": "Computer Lab Upgraded with New Systems",
+    "content": "The computer lab has been upgraded with 30 new computers and high-speed internet. Students will have access to modern software for learning programming, graphics design, and office applications. Lab timing: 9:00 AM - 4:00 PM on school days.",
+    "category": "General",
+    "priority": "low",
+    "date": "2026-08-01",
+    "postedBy": "ICT Department"
+  },
+  {
+    "id": "N2026011",
+    "title": "Blood Donation Camp - October 5, 2026",
+    "content": "A blood donation camp will be organized in collaboration with Dhaka Medical College Hospital on October 5, 2026 from 10:00 AM to 3:00 PM. Students above 18 years, teachers, and staff can donate blood. Health checkup will be done before donation. Donors will receive a certificate and refreshments.",
+    "category": "Event",
+    "priority": "medium",
+    "date": "2026-09-25",
+    "postedBy": "Health Committee"
+  },
+  {
+    "id": "N2026012",
+    "title": "Debate Competition - Inter-School Event",
+    "content": "Our school will host an inter-school debate competition on November 15, 2026. Topic: 'Technology: Blessing or Curse for Modern Education'. Students interested in representing our school should contact the English department by November 5, 2026. Selection trials will be held on November 8, 2026.",
+    "category": "Academic",
+    "priority": "high",
+    "date": "2026-10-28",
+    "postedBy": "English Department"
   }
 ]

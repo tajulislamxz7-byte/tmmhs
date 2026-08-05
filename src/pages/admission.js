@@ -3,14 +3,42 @@
 // ================================================
 
 import { classes } from '../data/schoolConfig.js';
+import { api } from '../utils/api.js';
 
-export function renderAdmission() {
+export async function renderAdmission() {
+  // Load admission settings from API
+  const settings = await api.getSettings() || {};
+  const admission = settings.admission || {};
+  
+  // Default values - use nullish coalescing to allow empty strings
+  const title = admission.title ?? 'Online Admission';
+  const subtitle = admission.subtitle ?? 'Apply for admission to Tiarkhali M.M High School and College — Session 2025–2026';
+  const session = admission.session ?? '2025–2026';
+  const infoTitle = admission.infoTitle ?? `Admission ${session}`;
+  const infoDesc = admission.infoDesc ?? 'Apply online for Classes 6 to 9. Admission to Class 10 is only through internal promotion.';
+  const availableClasses = admission.classes ? admission.classes.split(',').map(c => c.trim()) : classes.filter(c=>c.name!=='Class 10').map(c=>c.name);
+  
+  const dates = admission.dates ?? [
+    {event:'Form Submission Opens', date:'August 1, 2025'},
+    {event:'Form Submission Closes', date:'August 25, 2025'},
+    {event:'Written Test', date:'September 5, 2025'},
+    {event:'Results Published', date:'September 15, 2025'},
+    {event:'Admission Confirmation', date:'September 20, 2025'},
+  ];
+  
+  const eligibility = admission.eligibility ?? [
+    'Class 6: Completed Grade 5 with minimum GPA 4.0',
+    "Class 7–9: Previous year's marksheet required",
+    'Transfer students: Contact office directly',
+    'All students require guardian ID and birth certificate',
+  ];
+  
   return `
     <div class="page-container">
       <div class="page-header">
         <div class="container">
-          <h1 class="page-title">Online Admission</h1>
-          <p class="page-subtitle">Apply for admission to Tiarkhali M.M High School and College — Session 2025–2026</p>
+          <h1 class="page-title">${title}</h1>
+          <p class="page-subtitle">${subtitle}</p>
         </div>
       </div>
       <div class="container section-sm">
@@ -20,25 +48,19 @@ export function renderAdmission() {
             <div class="card">
               <div class="card-body">
                 <div style="margin-bottom:12px;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
-                <div class="font-bold" style="font-size:18px;margin-bottom:8px;">Admission 2025–26</div>
-                <p class="text-secondary text-sm line-height-1.7">Apply online for Classes 6 to 9. Admission to Class 10 is only through internal promotion.</p>
+                <div class="font-bold" style="font-size:18px;margin-bottom:8px;">${infoTitle}</div>
+                <p class="text-secondary text-sm line-height-1.7">${infoDesc}</p>
               </div>
             </div>
             <div class="card">
               <div class="card-header"><div class="font-semibold">Important Dates</div></div>
               <div class="card-body">
-                ${[
-                  {e:'Form Submission Opens',d:'August 1, 2025'},
-                  {e:'Form Submission Closes',d:'August 25, 2025'},
-                  {e:'Written Test',d:'September 5, 2025'},
-                  {e:'Results Published',d:'September 15, 2025'},
-                  {e:'Admission Confirmation',d:'September 20, 2025'},
-                ].map(item=>`
+                ${dates.map(item=>`
                   <div class="flex items-start gap-3 mb-3">
                     <div style="flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
                     <div>
-                      <div class="font-medium text-sm">${item.e}</div>
-                      <div class="text-xs text-muted">${item.d}</div>
+                      <div class="font-medium text-sm">${item.event}</div>
+                      <div class="text-xs text-muted">${item.date}</div>
                     </div>
                   </div>
                 `).join('')}
@@ -47,12 +69,7 @@ export function renderAdmission() {
             <div class="card">
               <div class="card-header"><div class="font-semibold">Eligibility</div></div>
               <div class="card-body">
-                ${[
-                  'Class 6: Completed Grade 5 with minimum GPA 4.0',
-                  'Class 7–9: Previous year\'s marksheet required',
-                  'Transfer students: Contact office directly',
-                  'All students require guardian ID and birth certificate',
-                ].map(r=>`<div class="flex items-start gap-2 mb-2 text-sm text-secondary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>${r}</span></div>`).join('')}
+                ${eligibility.map(r=>`<div class="flex items-start gap-2 mb-2 text-sm text-secondary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>${r}</span></div>`).join('')}
               </div>
             </div>
           </div>
@@ -97,7 +114,7 @@ export function renderAdmission() {
                     <label class="form-label">Applying for Class *</label>
                     <select class="form-input form-select" required>
                       <option value="">Select Class</option>
-                      ${classes.filter(c=>c.name!=='Class 10').map(c=>`<option>${c.name}</option>`).join('')}
+                      ${availableClasses.map(c=>`<option>${c}</option>`).join('')}
                     </select>
                   </div>
                   <div class="form-group">

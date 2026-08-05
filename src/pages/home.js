@@ -4,8 +4,11 @@
 
 import { schoolInfo, stats, batches } from '../data/schoolConfig.js';
 import { api } from '../utils/api.js';
+import { getCurrentLanguage, t } from '../utils/translator.js';
 
 export async function renderHome() {
+  const currentLang = getCurrentLanguage();
+  
   // Load settings from API
   const S = await api.getSettings() || JSON.parse(localStorage.getItem('gfa_settings') || '{}');
   const schoolName    = S.name     || schoolInfo.name;
@@ -46,13 +49,13 @@ export async function renderHome() {
           <div class="hero-text animate-fadeIn">
             <div class="hero-badge">
               <span class="badge-dot"></span>
-              Est. ${schoolFounded} · Tiarkhali, Bangladesh
+              <span>Est. ${schoolFounded} · ${t('Tiarkhali')}, ${t('Bangladesh')}</span>
             </div>
             <h1 class="hero-title font-display">
               ${schoolTagline.split(',')[0]},<br>
               <span class="hero-title-highlight">${schoolTagline.split(',')[1]?.trim() || 'Inspiring Futures'}</span>
             </h1>
-            <p class="hero-subtitle">${schoolName} — A premier institution where knowledge meets character, and potential becomes achievement.</p>
+            <p class="hero-subtitle">${currentLang === 'bn' ? t('Tiarkhali M.M High School and College') : schoolName} — A premier institution where knowledge meets character, and potential becomes achievement.</p>
             <div class="hero-actions">
               <button class="btn btn-primary btn-xl" onclick="navigate('admission')">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
@@ -330,7 +333,7 @@ export async function renderHomeExtra() {
             <blockquote class="principal-quote">"${principalMsg}"</blockquote>
             <div class="principal-info">
               <div class="font-bold" style="font-size:var(--text-lg);">${principalName}</div>
-              <div class="text-muted text-sm">Principal, Tiarkhali M.M High School and College</div>
+              <div class="text-muted text-sm">Principal, ${t('Tiarkhali M.M High School and College')}</div>
               <div class="text-muted text-sm">PhD Physics, BUET · 18+ Years Experience</div>
             </div>
           </div>
@@ -413,7 +416,7 @@ export async function renderHomeExtra() {
         <div class="cta-content">
           <div class="section-tag" style="background:rgba(255,255,255,0.15);color:white;">Join Us Today</div>
           <h2 class="cta-title font-display">Ready to Begin Your Journey?</h2>
-          <p class="cta-subtitle">Join thousands of students who have shaped their future at Tiarkhali M.M High School and College.</p>
+          <p class="cta-subtitle">Join thousands of students who have shaped their future at ${t('Tiarkhali M.M High School and College')}.</p>
           <div class="flex gap-4 justify-center flex-wrap">
             <button class="btn btn-xl" style="background:white;color:var(--primary);font-weight:700;" onclick="navigate('admission')">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>

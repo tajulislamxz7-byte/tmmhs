@@ -1,32 +1,138 @@
 [
   {
-    "id": "EV1001",
+    "id": "EV2026001",
     "title": "Annual Sports Day 2026",
-    "description": "Annual inter-school sports competition featuring athletics, football, cricket and more. Open to all classes.",
-    "date": "2026-09-05",
-    "time": "09:00",
+    "description": "Annual inter-school sports competition featuring athletics, football, cricket, badminton, and other sports. Open to all classes. Winners will receive medals and certificates. Special guest: Olympic athlete Mr. Shahidul Islam.",
+    "date": "2026-10-10",
+    "time": "08:00",
     "location": "School Sports Ground",
     "category": "Sports",
-    "organizer": "Sports Committee"
+    "organizer": "Sports Committee",
+    "status": "Upcoming",
+    "registrationDeadline": "2026-09-30"
   },
   {
-    "id": "EV1002",
+    "id": "EV2026002",
     "title": "Science Fair 2026",
-    "description": "Students will showcase innovative science projects. Judges from local universities will evaluate. Winner gets district-level participation.",
+    "description": "Students will showcase innovative science projects in Physics, Chemistry, Biology, and Environmental Science. Judges from local universities will evaluate projects. Winners get district-level participation and prizes worth 50,000 Tk.",
     "date": "2026-09-20",
+    "time": "09:00",
+    "location": "School Auditorium & Science Labs",
+    "category": "Academic",
+    "organizer": "Science Department",
+    "status": "Upcoming",
+    "registrationDeadline": "2026-09-15"
+  },
+  {
+    "id": "EV2026003",
+    "title": "Victory Day Celebration",
+    "description": "Cultural performances including patriotic songs, dances, drama and poetry recitation celebrating Bangladesh's Victory Day. Special documentary screening on Liberation War. Guest speaker: Freedom Fighter Mr. Abdul Kader.",
+    "date": "2026-12-16",
+    "time": "09:00",
+    "location": "School Auditorium",
+    "category": "Cultural",
+    "organizer": "Cultural Committee",
+    "status": "Upcoming"
+  },
+  {
+    "id": "EV2026004",
+    "title": "Independence Day Program",
+    "description": "Flag hoisting ceremony followed by cultural program. Students will perform patriotic songs and plays. Special assembly on the history of Bangladesh's independence. All students must wear national flag badges.",
+    "date": "2026-03-26",
+    "time": "08:00",
+    "location": "School Playground",
+    "category": "National",
+    "organizer": "School Administration",
+    "status": "Completed"
+  },
+  {
+    "id": "EV2026005",
+    "title": "Bengali New Year (Pohela Boishakh) Celebration",
+    "description": "Traditional Bengali New Year celebration with cultural programs, traditional games, and Boishakhi food festival. Students encouraged to wear traditional Bengali attire. Mangal Shobhajatra procession at 10 AM.",
+    "date": "2026-04-14",
+    "time": "09:00",
+    "location": "School Campus",
+    "category": "Cultural",
+    "organizer": "Cultural Committee",
+    "status": "Completed"
+  },
+  {
+    "id": "EV2026006",
+    "title": "Annual Prize Distribution Ceremony",
+    "description": "Award ceremony to honor top academic performers, sports champions, and students with exemplary conduct. Chief Guest: District Education Officer. Parents and guardians invited to attend.",
+    "date": "2026-02-28",
+    "time": "14:00",
+    "location": "School Auditorium",
+    "category": "Academic",
+    "organizer": "School Administration",
+    "status": "Completed"
+  },
+  {
+    "id": "EV2026007",
+    "title": "Inter-School Debate Competition",
+    "description": "Hosting debate competition with 12 schools participating. Topic: 'Technology: Blessing or Curse for Modern Education'. Finals will be judged by university professors. Prizes and certificates for winners.",
+    "date": "2026-11-15",
     "time": "10:00",
     "location": "School Auditorium",
     "category": "Academic",
-    "organizer": "Science Department"
+    "organizer": "English Department",
+    "status": "Upcoming",
+    "registrationDeadline": "2026-11-05"
   },
   {
-    "id": "EV1003",
-    "title": "Cultural Program - Independence Day",
-    "description": "Cultural performances including songs, dances, drama and poetry recitation celebrating Independence Day.",
-    "date": "2026-12-16",
-    "time": "16:00",
-    "location": "School Auditorium",
+    "id": "EV2026008",
+    "title": "Blood Donation Camp",
+    "description": "Blood donation camp in collaboration with Dhaka Medical College Hospital. Open to students (18+), teachers, and staff. Free health checkup, refreshments, and certificate for all donors.",
+    "date": "2026-10-05",
+    "time": "10:00",
+    "location": "School Seminar Hall",
+    "category": "Social",
+    "organizer": "Health Committee",
+    "status": "Upcoming"
+  },
+  {
+    "id": "EV2026009",
+    "title": "Study Tour to Cox's Bazar",
+    "description": "3-day educational tour for Class 9 & 10 students. Visit to marine drive, Himchari, Inani Beach, and marine aquarium. Educational sessions on marine life and coastal ecology. Cost: 8,000 Tk per student.",
+    "date": "2026-11-25",
+    "time": "06:00",
+    "location": "Cox's Bazar",
+    "category": "Tour",
+    "organizer": "Tour Committee",
+    "status": "Upcoming",
+    "registrationDeadline": "2026-11-10"
+  },
+  {
+    "id": "EV2026010",
+    "title": "Parent-Teacher Meeting",
+    "description": "Quarterly parent-teacher meeting to discuss student progress, academic performance, attendance, and behavior. Individual consultations with subject teachers available. Report cards will be distributed.",
+    "date": "2026-11-20",
+    "time": "10:00",
+    "location": "Respective Classrooms",
+    "category": "Academic",
+    "organizer": "School Administration",
+    "status": "Upcoming"
+  },
+  {
+    "id": "EV2026011",
+    "title": "Art & Craft Exhibition",
+    "description": "Display of student artworks including paintings, sculptures, crafts, and digital art. Open to all students. Best artworks will be selected for permanent display in school gallery. Prizes for top 3 entries.",
+    "date": "2026-08-15",
+    "time": "11:00",
+    "location": "School Art Room",
     "category": "Cultural",
-    "organizer": "Cultural Committee"
+    "organizer": "Arts Department",
+    "status": "Completed"
+  },
+  {
+    "id": "EV2026012",
+    "title": "Math Olympiad Preparation Workshop",
+    "description": "Intensive 5-day workshop for students interested in Math Olympiad. Expert trainers from Dhaka University will conduct sessions on problem-solving techniques. Free for all students.",
+    "date": "2026-07-10",
+    "time": "09:00",
+    "location": "Mathematics Lab",
+    "category": "Academic",
+    "organizer": "Mathematics Department",
+    "status": "Completed"
   }
 ]

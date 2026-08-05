@@ -2,19 +2,13 @@
 // ACADEMIC PAGES — Modern Professional Design
 // ================================================
 import { icon } from '../utils/icons.js';
+import { api } from '../utils/api.js';
 
 // ── Academic Calendar ─────────────────────────────
-export function renderAcademicCalendar() {
-  const events = [
-    { date: '2026-01-05', title: 'First Day of School', type: 'academic', desc: 'Classes begin for all grades' },
-    { date: '2026-02-21', title: 'International Mother Language Day', type: 'holiday', desc: 'National holiday celebrating Bangla language' },
-    { date: '2026-03-17', title: 'Birthday of Bangabandhu', type: 'holiday', desc: 'National holiday honoring the Father of the Nation' },
-    { date: '2026-03-26', title: 'Independence Day', type: 'holiday', desc: 'Celebrating Bangladesh independence' },
-    { date: '2026-04-14', title: 'Pohela Boishakh', type: 'holiday', desc: 'Bengali New Year celebration' },
-    { date: '2026-05-01', title: 'May Day', type: 'holiday', desc: 'International Workers Day' },
-    { date: '2026-08-15', title: 'National Mourning Day', type: 'holiday', desc: 'Remembering martyrs of August 15' },
-    { date: '2026-12-16', title: 'Victory Day', type: 'holiday', desc: 'Celebrating victory in Liberation War' },
-  ];
+export async function renderAcademicCalendar() {
+  // Load events from API settings
+  const settings = await api.getSettings();
+  const events = settings?.academic?.academicCalendar || [];
 
   return `
     <div style="min-height:100vh;background:var(--bg-primary);padding:80px 20px 80px;overflow-x:hidden;">
@@ -30,7 +24,15 @@ export function renderAcademicCalendar() {
 
         <!-- Events Grid -->
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;width:100%;">
-          ${events.map((event, idx) => `
+          ${events.length === 0 ? `
+            <div style="grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--text-muted);">
+              <div style="margin-bottom:20px;">
+                ${icon('calendar', 64, 'var(--text-muted)')}
+              </div>
+              <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text-primary);">No Events Configured</h3>
+              <p style="font-size:14px;margin-bottom:24px;">Academic calendar events can be added from the admin panel.</p>
+            </div>
+          ` : events.map((event, idx) => `
             <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:20px;padding:24px;box-shadow:0 4px 16px rgba(0,0,0,0.1);transition:all 0.3s ease;animation:fadeInUp 0.6s ease ${idx * 0.1}s backwards;cursor:pointer;box-sizing:border-box;" 
                  onmouseover="this.style.transform='translateY(-8px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.15)';this.style.borderColor='var(--primary)'" 
                  onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 16px rgba(0,0,0,0.1)';this.style.borderColor='var(--border-color)'">
@@ -71,17 +73,10 @@ export function renderAcademicCalendar() {
 }
 
 // ── Holiday Calendar ──────────────────────────────
-export function renderHolidayCalendar() {
-  const holidays = [
-    { date: '2026-02-21', title: 'International Mother Language Day', desc: 'Martyrs Day', color: '#f093fb' },
-    { date: '2026-03-17', title: 'Birthday of Bangabandhu Sheikh Mujibur Rahman', desc: 'National Day', color: '#fa709a' },
-    { date: '2026-03-26', title: 'Independence Day', desc: 'National Holiday', color: '#fee140' },
-    { date: '2026-04-14', title: 'Pohela Boishakh', desc: 'Bengali New Year', color: '#30cfd0' },
-    { date: '2026-05-01', title: 'May Day', desc: 'International Workers Day', color: '#a8edea' },
-    { date: '2026-08-15', title: 'National Mourning Day', desc: 'Remembrance Day', color: '#fed6e3' },
-    { date: '2026-12-16', title: 'Victory Day', desc: 'National Holiday', color: '#c471f5' },
-    { date: '2026-12-25', title: 'Christmas Day', desc: 'Optional Holiday', color: '#fa709a' },
-  ];
+export async function renderHolidayCalendar() {
+  // Load holidays from API settings
+  const settings = await api.getSettings();
+  const holidays = settings?.academic?.holidayCalendar || [];
 
   return `
     <div style="min-height:100vh;background:var(--bg-primary);padding:80px 20px 80px;overflow-x:hidden;">
@@ -95,7 +90,15 @@ export function renderHolidayCalendar() {
         </div>
 
         <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);width:100%;box-sizing:border-box;">
-          ${holidays.map((h, idx) => `
+          ${holidays.length === 0 ? `
+            <div style="text-align:center;padding:80px 20px;color:var(--text-muted);">
+              <div style="margin-bottom:20px;">
+                ${icon('calendar', 64, 'var(--text-muted)')}
+              </div>
+              <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text-primary);">No Holidays Configured</h3>
+              <p style="font-size:14px;margin-bottom:24px;">Holiday calendar can be added from the admin panel.</p>
+            </div>
+          ` : holidays.map((h, idx) => `
             <div style="padding:24px 28px;border-bottom:1px solid var(--border-color);transition:all 0.3s ease;cursor:pointer;animation:fadeInUp 0.5s ease ${idx * 0.05}s backwards;box-sizing:border-box;" 
                  onmouseover="this.style.background='var(--bg-primary)';this.style.transform='translateX(8px)'" 
                  onmouseout="this.style.background='var(--bg-secondary)';this.style.transform='translateX(0)'">
@@ -122,30 +125,108 @@ export function renderHolidayCalendar() {
 }
 
 // ── Class Routine ─────────────────────────────────
-export function renderClassRoutine() {
-  const routine = [
-    { time: '8:00-8:45', subject: 'English', teacher: 'Mr. Rahman', room: '201', color: '#667eea' },
-    { time: '8:45-9:30', subject: 'Mathematics', teacher: 'Mrs. Ahmed', room: '305', color: '#f093fb' },
-    { time: '9:30-10:15', subject: 'Physics', teacher: 'Mr. Khan', room: '401', color: '#4facfe' },
-    { time: '10:15-10:30', subject: 'Break', teacher: '', room: '', color: '#fee140', isBreak: true },
-    { time: '10:30-11:15', subject: 'Chemistry', teacher: 'Dr. Islam', room: '402', color: '#30cfd0' },
-    { time: '11:15-12:00', subject: 'Biology', teacher: 'Ms. Haque', room: '403', color: '#a8edea' },
-    { time: '12:00-12:45', subject: 'ICT', teacher: 'Mr. Karim', room: '501', color: '#fa709a' },
-  ];
+export async function renderClassRoutine() {
+  const classes = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'];
+  
+  // Load routines from API settings
+  const settings = await api.getSettings();
+  const routines = settings?.academic?.classRoutines || {};
+  
+  // Define the function globally BEFORE rendering HTML
+  window.routinesData = routines;
+  window.showClassRoutine = function(className, btnIndex) {
+    console.log('showClassRoutine called:', className, btnIndex);
+    
+    // Update subtitle
+    document.getElementById('routineSubtitle').textContent = className + ' • Daily Schedule';
+    
+    // Update button styles
+    for (let i = 0; i < 5; i++) {
+      const btn = document.getElementById('classBtn' + i);
+      if (i === btnIndex) {
+        btn.style.background = 'var(--primary)';
+        btn.style.color = 'white';
+        btn.style.borderColor = 'var(--primary)';
+        btn.style.boxShadow = '0 4px 12px var(--primary-shadow)';
+      } else {
+        btn.style.background = 'var(--bg-secondary)';
+        btn.style.color = 'var(--text-primary)';
+        btn.style.borderColor = 'var(--border-color)';
+        btn.style.boxShadow = 'none';
+      }
+    }
+    
+    // Update routine content
+    const routine = window.routinesData[className] || [];
+    const container = document.getElementById('routineContainer');
+    
+    if (routine.length === 0) {
+      container.innerHTML = `
+        <div style="text-align:center;padding:80px 20px;color:var(--text-muted);">
+          <div style="margin-bottom:20px;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text-primary);">No Routine for ${className}</h3>
+          <p style="font-size:14px;margin-bottom:24px;">Class routine can be added from the admin panel.</p>
+        </div>
+      `;
+      return;
+    }
+    
+    container.innerHTML = routine.map((period, idx) => `
+      <div style="padding:20px 24px;border-bottom:1px solid var(--border-color);transition:all 0.3s ease;${period.isBreak ? 'background:linear-gradient(90deg, rgba(254, 225, 64, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);' : ''}animation:fadeInUp 0.5s ease ${idx * 0.05}s backwards;box-sizing:border-box;" 
+           ${!period.isBreak ? 'onmouseover="this.style.background=\'var(--bg-primary)\'" onmouseout="this.style.background=\'var(--bg-secondary)\'"' : ''}>
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+          <div style="background:${period.isBreak ? 'linear-gradient(135deg, #fee140 0%, #ffa500 100%)' : 'linear-gradient(135deg, ' + period.color + ' 0%, ' + period.color + 'dd 100%)'};min-width:85px;padding:10px;border-radius:12px;text-align:center;color:white;box-shadow:0 6px 16px ${period.color}40;flex-shrink:0;">
+            <div style="font-size:14px;font-weight:800;">${period.time}</div>
+          </div>
+          <div style="flex:1;min-width:200px;">
+            <h3 style="font-size:16px;font-weight:800;color:var(--text-primary);margin-bottom:${period.isBreak ? '0' : '6px'};display:flex;align-items:center;gap:8px;">
+              ${period.isBreak ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zm5-7L6 3m4-2 1 2m4-2-1 2"/></svg>' : ''} ${period.subject}
+            </h3>
+            ${!period.isBreak ? '<div style="display:flex;align-items:center;gap:12px;font-size:13px;color:var(--text-muted);flex-wrap:wrap;"><span style="display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> ' + period.teacher + '</span><span style="display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Room ' + period.room + '</span></div>' : ''}
+          </div>
+        </div>
+      </div>
+    `).join('');
+  };
 
   return `
     <div style="min-height:100vh;background:var(--bg-primary);padding:80px 20px 80px;overflow-x:hidden;">
       <div class="container" style="max-width:900px;overflow-x:hidden;">
-        <div style="text-align:center;margin-bottom:50px;">
+        <div style="text-align:center;margin-bottom:40px;">
           <div style="display:inline-flex;align-items:center;justify-content:center;width:70px;height:70px;background:var(--primary);border-radius:20px;margin-bottom:20px;box-shadow:0 8px 24px var(--primary-shadow);">
             ${icon('clock', 36, 'white')}
           </div>
           <h1 style="font-size:clamp(28px, 5vw, 42px);font-weight:900;color:var(--text-primary);margin-bottom:12px;letter-spacing:-1px;">Class Routine</h1>
-          <p style="font-size:16px;color:var(--text-muted);">Class 10 - Section A • Daily Schedule</p>
+          <p id="routineSubtitle" style="font-size:16px;color:var(--text-muted);">Class 6 • Daily Schedule</p>
         </div>
 
-        <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);width:100%;box-sizing:border-box;">
-          ${routine.map((period, idx) => `
+        <!-- Class Selection Buttons -->
+        <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:40px;">
+          ${classes.map((cls, idx) => `
+            <button 
+              id="classBtn${idx}" 
+              onclick="showClassRoutine('${cls}', ${idx})"
+              style="padding:12px 24px;border-radius:12px;font-weight:700;font-size:14px;border:2px solid var(--border-color);background:${cls === 'Class 6' ? 'var(--primary)' : 'var(--bg-secondary)'};color:${cls === 'Class 6' ? 'white' : 'var(--text-primary)'};cursor:pointer;transition:all 0.3s ease;box-shadow:${cls === 'Class 6' ? '0 4px 12px var(--primary-shadow)' : 'none'};"
+            >
+              ${cls}
+            </button>
+          `).join('')}
+        </div>
+
+        <div id="routineContainer" style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);width:100%;box-sizing:border-box;">
+          ${!routines['Class 6'] || routines['Class 6'].length === 0 ? `
+            <div style="text-align:center;padding:80px 20px;color:var(--text-muted);">
+              <div style="margin-bottom:20px;">
+                ${icon('clock', 64, 'var(--text-muted)')}
+              </div>
+              <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text-primary);">No Class Routine Configured</h3>
+              <p style="font-size:14px;margin-bottom:24px;">Class routines can be added from the admin panel.</p>
+            </div>
+          ` : routines['Class 6'].map((period, idx) => `
             <div style="padding:20px 24px;border-bottom:1px solid var(--border-color);transition:all 0.3s ease;${period.isBreak ? 'background:linear-gradient(90deg, rgba(254, 225, 64, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);' : ''}animation:fadeInUp 0.5s ease ${idx * 0.05}s backwards;box-sizing:border-box;" 
                  ${!period.isBreak ? `onmouseover="this.style.background='var(--bg-primary)'" onmouseout="this.style.background='var(--bg-secondary)'"` : ''}>
               <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
@@ -169,33 +250,152 @@ export function renderClassRoutine() {
         </div>
       </div>
     </div>
+
+    <style>
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
   `;
 }
 
 // ── Syllabus ──────────────────────────────────────
-export function renderSyllabus() {
-  const subjects = [
-    { name: 'English', class: 'Class 10', topics: 15, chapters: 12, file: 'english-syllabus.pdf', color: '#667eea', icon: 'bookOpen' },
-    { name: 'Mathematics', class: 'Class 10', topics: 20, chapters: 16, file: 'math-syllabus.pdf', color: '#f093fb', icon: 'activity' },
-    { name: 'Physics', class: 'Class 10', topics: 18, chapters: 14, file: 'physics-syllabus.pdf', color: '#4facfe', icon: 'zap' },
-    { name: 'Chemistry', class: 'Class 10', topics: 16, chapters: 13, file: 'chemistry-syllabus.pdf', color: '#30cfd0', icon: 'droplet' },
-    { name: 'Biology', class: 'Class 10', topics: 19, chapters: 15, file: 'biology-syllabus.pdf', color: '#a8edea', icon: 'heart' },
-    { name: 'ICT', class: 'Class 10', topics: 12, chapters: 10, file: 'ict-syllabus.pdf', color: '#fa709a', icon: 'monitor' },
-  ];
+export async function renderSyllabus() {
+  const classes = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'];
+  
+  // Load syllabus from API settings
+  const settings = await api.getSettings();
+  const syllabusData = settings?.academic?.syllabus || {};
+  
+  // Define the function globally BEFORE rendering HTML
+  window.syllabusDataStore = syllabusData;
+  window.showSyllabus = function(className, btnIndex) {
+    console.log('showSyllabus called:', className, btnIndex);
+    
+    // Update subtitle
+    document.getElementById('syllabusSubtitle').textContent = 'Course curriculum and study materials for ' + className;
+    
+    // Update button styles
+    for (let i = 0; i < 5; i++) {
+      const btn = document.getElementById('syllabusClassBtn' + i);
+      if (i === btnIndex) {
+        btn.style.background = 'var(--primary)';
+        btn.style.color = 'white';
+        btn.style.borderColor = 'var(--primary)';
+        btn.style.boxShadow = '0 4px 12px var(--primary-shadow)';
+      } else {
+        btn.style.background = 'var(--bg-secondary)';
+        btn.style.color = 'var(--text-primary)';
+        btn.style.borderColor = 'var(--border-color)';
+        btn.style.boxShadow = 'none';
+      }
+    }
+    
+    // Update syllabus content
+    const subjects = window.syllabusDataStore[className] || [];
+    const container = document.getElementById('syllabusContainer');
+    const classNum = className.replace('Class ', '');
+    
+    if (subjects.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--text-muted);">
+          <div style="margin-bottom:20px;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text-primary);">No Syllabus for ${className}</h3>
+          <p style="font-size:14px;margin-bottom:24px;">Syllabus can be added from the admin panel.</p>
+        </div>
+      `;
+      return;
+    }
+    
+    container.innerHTML = subjects.map((subject, idx) => {
+      const iconSVG = {
+        'bookOpen': '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+        'activity': '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+        'zap': '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+        'droplet': '<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>',
+        'heart': '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
+        'monitor': '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+        'globe': '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'
+      };
+      
+      return `
+        <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:20px;padding:24px;box-shadow:0 4px 16px rgba(0,0,0,0.08);transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);animation:fadeInUp 0.6s ease ${idx * 0.1}s backwards;cursor:pointer;box-sizing:border-box;" 
+             onmouseover="this.style.transform='translateY(-12px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.12)';this.style.borderColor='var(--primary)'" 
+             onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)';this.style.borderColor='var(--border-color)'">
+          
+          <div style="width:60px;height:60px;background:linear-gradient(135deg, ${subject.color} 0%, ${subject.color}dd 100%);border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 8px 20px ${subject.color}40;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              ${iconSVG[subject.icon] || ''}
+            </svg>
+          </div>
+          
+          <h3 style="font-size:20px;font-weight:800;color:var(--text-primary);margin-bottom:8px;">${subject.name}</h3>
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">${className}</p>
+          
+          <div style="display:flex;gap:16px;margin-bottom:20px;">
+            <div style="flex:1;background:var(--bg-primary);padding:12px;border-radius:12px;text-align:center;">
+              <div style="font-size:20px;font-weight:900;color:${subject.color};">${subject.chapters}</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Chapters</div>
+            </div>
+            <div style="flex:1;background:var(--bg-primary);padding:12px;border-radius:12px;text-align:center;">
+              <div style="font-size:20px;font-weight:900;color:${subject.color};">${subject.topics}</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Topics</div>
+            </div>
+          </div>
+          
+          <button class="btn w-full" style="background:linear-gradient(135deg, ${subject.color} 0%, ${subject.color}dd 100%);border:none;color:white;padding:12px;border-radius:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="alert('Download ${subject.file}')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PDF
+          </button>
+        </div>
+      `;
+    }).join('');
+  };
 
   return `
     <div style="min-height:100vh;background:var(--bg-primary);padding:80px 20px 80px;overflow-x:hidden;">
       <div class="container" style="overflow-x:hidden;">
-        <div style="text-align:center;margin-bottom:50px;">
+        <div style="text-align:center;margin-bottom:40px;">
           <div style="display:inline-flex;align-items:center;justify-content:center;width:70px;height:70px;background:var(--primary);border-radius:20px;margin-bottom:20px;box-shadow:0 8px 24px var(--primary-shadow);">
             ${icon('fileText', 36, 'white')}
           </div>
           <h1 style="font-size:clamp(28px, 5vw, 42px);font-weight:900;color:var(--text-primary);margin-bottom:12px;letter-spacing:-1px;">Syllabus</h1>
-          <p style="font-size:16px;color:var(--text-muted);">Course curriculum and study materials for Class 10</p>
+          <p id="syllabusSubtitle" style="font-size:16px;color:var(--text-muted);">Course curriculum and study materials for Class 6</p>
         </div>
 
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;max-width:1200px;margin:0 auto;width:100%;">
-          ${subjects.map((subject, idx) => `
+        <!-- Class Selection Buttons -->
+        <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:40px;">
+          ${classes.map((cls, idx) => `
+            <button 
+              id="syllabusClassBtn${idx}" 
+              onclick="showSyllabus('${cls}', ${idx})"
+              style="padding:12px 24px;border-radius:12px;font-weight:700;font-size:14px;border:2px solid var(--border-color);background:${cls === 'Class 6' ? 'var(--primary)' : 'var(--bg-secondary)'};color:${cls === 'Class 6' ? 'white' : 'var(--text-primary)'};cursor:pointer;transition:all 0.3s ease;box-shadow:${cls === 'Class 6' ? '0 4px 12px var(--primary-shadow)' : 'none'};"
+            >
+              ${cls}
+            </button>
+          `).join('')}
+        </div>
+
+        <div id="syllabusContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;max-width:1200px;margin:0 auto;width:100%;">
+          ${!syllabusData['Class 6'] || syllabusData['Class 6'].length === 0 ? `
+            <div style="grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--text-muted);">
+              <div style="margin-bottom:20px;">
+                ${icon('fileText', 64, 'var(--text-muted)')}
+              </div>
+              <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text-primary);">No Syllabus Configured</h3>
+              <p style="font-size:14px;margin-bottom:24px;">Syllabus information can be added from the admin panel.</p>
+            </div>
+          ` : syllabusData['Class 6'].map((subject, idx) => `
             <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:20px;padding:24px;box-shadow:0 4px 16px rgba(0,0,0,0.08);transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);animation:fadeInUp 0.6s ease ${idx * 0.1}s backwards;cursor:pointer;box-sizing:border-box;" 
                  onmouseover="this.style.transform='translateY(-12px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.12)';this.style.borderColor='var(--primary)'" 
                  onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)';this.style.borderColor='var(--border-color)'">
@@ -205,7 +405,7 @@ export function renderSyllabus() {
               </div>
               
               <h3 style="font-size:20px;font-weight:800;color:var(--text-primary);margin-bottom:8px;">${subject.name}</h3>
-              <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">${subject.class}</p>
+              <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">Class 10</p>
               
               <div style="display:flex;gap:16px;margin-bottom:20px;">
                 <div style="flex:1;background:var(--bg-primary);padding:12px;border-radius:12px;text-align:center;">
@@ -230,30 +430,118 @@ export function renderSyllabus() {
 }
 
 // ── Exam Routine ──────────────────────────────────
-export function renderExamRoutine() {
-  const exams = [
-    { date: '2026-08-10', time: '10:00 AM', subject: 'English', duration: '3 hours', room: '201', color: '#667eea' },
-    { date: '2026-08-12', time: '10:00 AM', subject: 'Mathematics', duration: '3 hours', room: '305', color: '#f093fb' },
-    { date: '2026-08-14', time: '10:00 AM', subject: 'Physics', duration: '3 hours', room: '401', color: '#4facfe' },
-    { date: '2026-08-16', time: '10:00 AM', subject: 'Chemistry', duration: '3 hours', room: '402', color: '#30cfd0' },
-    { date: '2026-08-18', time: '10:00 AM', subject: 'Biology', duration: '3 hours', room: '403', color: '#a8edea' },
-    { date: '2026-08-20', time: '10:00 AM', subject: 'ICT', duration: '2 hours', room: '501', color: '#fa709a' },
-  ];
+export async function renderExamRoutine() {
+  const classes = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'];
+  
+  // Load exam schedules from API settings
+  const settings = await api.getSettings();
+  const examSchedules = settings?.academic?.examRoutines || {};
+  
+  // Define the function globally BEFORE rendering HTML
+  window.examSchedulesData = examSchedules;
+  window.showExamRoutine = function(className, btnIndex) {
+    console.log('showExamRoutine called:', className, btnIndex);
+    
+    // Update subtitle
+    document.getElementById('examSubtitle').textContent = 'Annual Examination 2026 • ' + className;
+    
+    // Update button styles
+    for (let i = 0; i < 5; i++) {
+      const btn = document.getElementById('examClassBtn' + i);
+      if (i === btnIndex) {
+        btn.style.background = 'var(--primary)';
+        btn.style.color = 'white';
+        btn.style.borderColor = 'var(--primary)';
+        btn.style.boxShadow = '0 4px 12px var(--primary-shadow)';
+      } else {
+        btn.style.background = 'var(--bg-secondary)';
+        btn.style.color = 'var(--text-primary)';
+        btn.style.borderColor = 'var(--border-color)';
+        btn.style.boxShadow = 'none';
+      }
+    }
+    
+    // Update exam schedule content
+    const exams = window.examSchedulesData[className] || [];
+    const container = document.getElementById('examContainer');
+    
+    if (exams.length === 0) {
+      container.innerHTML = `
+        <div style="text-align:center;padding:80px 20px;color:var(--text-muted);">
+          <div style="margin-bottom:20px;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5">
+              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+          </div>
+          <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text-primary);">No Exam Routine for ${className}</h3>
+          <p style="font-size:14px;margin-bottom:24px;">Exam routine can be added from the admin panel.</p>
+        </div>
+      `;
+      return;
+    }
+    
+    container.innerHTML = exams.map((exam, idx) => {
+      const examDate = new Date(exam.date);
+      return `
+        <div style="padding:20px 24px;border-bottom:1px solid var(--border-color);transition:all 0.3s ease;animation:fadeInUp 0.5s ease ${idx * 0.08}s backwards;box-sizing:border-box;" 
+             onmouseover="this.style.background='var(--bg-primary)'" 
+             onmouseout="this.style.background='var(--bg-secondary)'">
+          <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+            <div style="background:linear-gradient(135deg, ${exam.color} 0%, ${exam.color}dd 100%);min-width:95px;padding:14px;border-radius:16px;text-align:center;color:white;box-shadow:0 8px 20px ${exam.color}40;flex-shrink:0;">
+              <div style="font-size:12px;font-weight:600;opacity:0.9;margin-bottom:4px;">${examDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}</div>
+              <div style="font-size:26px;font-weight:900;">${examDate.getDate()}</div>
+              <div style="font-size:11px;opacity:0.8;margin-top:4px;">${examDate.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+            </div>
+            
+            <div style="flex:1;min-width:200px;">
+              <h3 style="font-size:17px;font-weight:800;color:var(--text-primary);margin-bottom:10px;">${exam.subject}</h3>
+              <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--text-muted);">
+                <span style="display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${exam.time}</span>
+                <span style="display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ${exam.duration}</span>
+                <span style="display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Room ${exam.room}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  };
 
   return `
     <div style="min-height:100vh;background:var(--bg-primary);padding:80px 20px 80px;overflow-x:hidden;">
       <div class="container" style="max-width:1100px;overflow-x:hidden;">
-        <div style="text-align:center;margin-bottom:50px;">
+        <div style="text-align:center;margin-bottom:40px;">
           <div style="display:inline-flex;align-items:center;justify-content:center;width:70px;height:70px;background:var(--primary);border-radius:20px;margin-bottom:20px;box-shadow:0 8px 24px var(--primary-shadow);">
             ${icon('clipboard', 36, 'white')}
           </div>
           <h1 style="font-size:clamp(28px, 5vw, 42px);font-weight:900;color:var(--text-primary);margin-bottom:12px;letter-spacing:-1px;">Exam Routine</h1>
-          <p style="font-size:16px;color:var(--text-muted);">Annual Examination 2026 • Class 10</p>
+          <p id="examSubtitle" style="font-size:16px;color:var(--text-muted);">Annual Examination 2026 • Class 6</p>
+        </div>
+
+        <!-- Class Selection Buttons -->
+        <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:40px;">
+          ${classes.map((cls, idx) => `
+            <button 
+              id="examClassBtn${idx}" 
+              onclick="showExamRoutine('${cls}', ${idx})"
+              style="padding:12px 24px;border-radius:12px;font-weight:700;font-size:14px;border:2px solid var(--border-color);background:${cls === 'Class 6' ? 'var(--primary)' : 'var(--bg-secondary)'};color:${cls === 'Class 6' ? 'white' : 'var(--text-primary)'};cursor:pointer;transition:all 0.3s ease;box-shadow:${cls === 'Class 6' ? '0 4px 12px var(--primary-shadow)' : 'none'};"
+            >
+              ${cls}
+            </button>
+          `).join('')}
         </div>
 
         <!-- Exam Schedule -->
-        <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);margin-bottom:30px;width:100%;box-sizing:border-box;">
-          ${exams.map((exam, idx) => `
+        <div id="examContainer" style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);margin-bottom:30px;width:100%;box-sizing:border-box;">
+          ${!examSchedules['Class 6'] || examSchedules['Class 6'].length === 0 ? `
+            <div style="text-align:center;padding:80px 20px;color:var(--text-muted);">
+              <div style="margin-bottom:20px;">
+                ${icon('clipboard', 64, 'var(--text-muted)')}
+              </div>
+              <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text-primary);">No Exam Routine Configured</h3>
+              <p style="font-size:14px;margin-bottom:24px;">Exam routines can be added from the admin panel.</p>
+            </div>
+          ` : examSchedules['Class 6'].map((exam, idx) => `
             <div style="padding:20px 24px;border-bottom:1px solid var(--border-color);transition:all 0.3s ease;animation:fadeInUp 0.5s ease ${idx * 0.08}s backwards;box-sizing:border-box;" 
                  onmouseover="this.style.background='var(--bg-primary)'" 
                  onmouseout="this.style.background='var(--bg-secondary)'">

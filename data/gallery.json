@@ -1,56 +1,182 @@
 [
   {
-    "id": "PHOTO-001",
+    "id": "PHOTO-2026-001",
     "url": "https://picsum.photos/800/600?random=101",
-    "title": "Annual Sports Day 2025",
-    "description": "Students competing in the annual sports day",
+    "title": "Annual Sports Day 2026",
+    "description": "Students competing in 100m sprint race. Energetic atmosphere with cheering crowds.",
     "category": "Sports",
-    "uploadedAt": "2026-03-10T10:00:00.000Z",
-    "uploadedBy": "admin"
+    "uploadedAt": "2026-10-10T14:00:00.000Z",
+    "uploadedBy": "admin",
+    "tags": ["sports", "athletics", "competition"]
   },
   {
-    "id": "PHOTO-002",
-    "url": "https://picsum.photos/800/600?random=202",
-    "title": "Science Fair Winners",
-    "description": "Science fair winners with their trophies",
+    "id": "PHOTO-2026-002",
+    "url": "https://picsum.photos/800/600?random=102",
+    "title": "Science Fair 2026 - Winner",
+    "description": "First prize winner presenting solar-powered water purification project.",
     "category": "Science Fair",
-    "uploadedAt": "2026-02-20T10:00:00.000Z",
-    "uploadedBy": "admin"
+    "uploadedAt": "2026-09-20T16:00:00.000Z",
+    "uploadedBy": "admin",
+    "tags": ["science", "innovation", "award"]
   },
   {
-    "id": "PHOTO-003",
-    "url": "https://picsum.photos/800/600?random=303",
-    "title": "Annual Function 2025",
-    "description": "Cultural performance at annual function",
-    "category": "Annual Function",
-    "uploadedAt": "2026-01-15T09:00:00.000Z",
-    "uploadedBy": "admin"
+    "id": "PHOTO-2026-003",
+    "url": "https://picsum.photos/800/600?random=103",
+    "title": "Victory Day Celebration",
+    "description": "Students performing patriotic drama on Bangladesh Liberation War.",
+    "category": "Cultural",
+    "uploadedAt": "2026-12-16T11:00:00.000Z",
+    "uploadedBy": "admin",
+    "tags": ["victory day", "drama", "patriotic"]
   },
   {
-    "id": "PHOTO-004",
-    "url": "https://picsum.photos/800/600?random=404",
-    "title": "Farewell 2025",
-    "description": "Farewell ceremony for graduating batch",
-    "category": "Farewell",
-    "uploadedAt": "2025-12-05T14:00:00.000Z",
-    "uploadedBy": "admin"
+    "id": "PHOTO-2026-004",
+    "url": "https://picsum.photos/800/600?random=104",
+    "title": "Independence Day Flag Hoisting",
+    "description": "Principal hoisting national flag on Independence Day with students saluting.",
+    "category": "National Event",
+    "uploadedAt": "2026-03-26T08:30:00.000Z",
+    "uploadedBy": "admin",
+    "tags": ["independence day", "flag", "ceremony"]
   },
   {
-    "id": "PHOTO-005",
-    "url": "https://picsum.photos/800/600?random=505",
-    "title": "Study Tour - Cox's Bazar",
-    "description": "Students enjoying the study tour",
+    "id": "PHOTO-2026-005",
+    "url": "https://picsum.photos/800/600?random=105",
+    "title": "Pohela Boishakh Celebration",
+    "description": "Students in traditional Bengali attire celebrating Bengali New Year.",
+    "category": "Cultural",
+    "uploadedAt": "2026-04-14T10:00:00.000Z",
+    "uploadedBy": "admin",
+    "tags": ["pohela boishakh", "bengali new year", "traditional"]
+  },
+  {
+    "id": "PHOTO-2026-006",
+    "url": "https://picsum.photos/800/600?random=106",
+    "title": "Prize Distribution Ceremony",
+    "description": "Top students receiving awards from District Education Officer.",
+    "category": "Academic",
+    "uploadedAt": "2026-02-28T15:00:00.000Z",
+    "uploadedBy": "admin",
+    "tags": ["awards", "ceremony", "achievement"]
+  },
+  {
+    "id": "PHOTO-2026-007",
+    "url": "https://picsum.photos/800/600?random=107",
+    "title": "Study Tour - Cox's Bazar Beach",
+    "description": "Class 9 & 10 students enjoying educational tour at the longest sea beach.",
     "category": "Tour",
-    "uploadedAt": "2025-11-20T11:00:00.000Z",
-    "uploadedBy": "admin"
+    "uploadedAt": "2026-11-25T12:00:00.000Z",
+    "uploadedBy": "admin",
+    "tags": ["tour", "cox's bazar", "beach"]
   },
   {
-    "id": "PHOTO-006",
-    "url": "https://picsum.photos/800/600?random=606",
-    "title": "Alumni Reunion 2025",
-    "description": "Alumni gathering after 5 years",
-    "category": "Reunion",
-    "uploadedAt": "2025-12-20T10:00:00.000Z",
-    "uploadedBy": "admin"
+    "id": "PHOTO-2026-008",
+    "url": "https://picsum.photos/800/600?random=108",
+    "title": "Blood Donation Camp",
+    "description": "Students and teachers donating blood to save lives.",
+    "category": "Social",
+    "uploadedAt": "2026-10-05T13:00:00.000Z",
+    "uploadedBy": "admin",
+    "tags": ["blood donation", "social service", "health"]
+  },
+  {
+    "id": "PHOTO-2026-009",
+    "url": "https://picsum.photos/800/600?random=109",
+    "title": "Debate Competition Finals",
+    "description": "Intense debate competition between teams from different schools.",
+    "category": "Academic",
+    "uploadedAt": "2026-11-15T14:00:00.000Z",
+    "uploadedBy": "admin",
+    "tags": ["debate", "competition", "inter-school"]
+  },
+  {
+    "id": "PHOTO-2026-010",
+    "url": "https://picsum.photos/800/600?random=110",
+    "title": "Computer Lab - New Systems",
+    "description": "Students learning programming on newly installed computers.",
+    "category": "Academic",
+    "uploadedAt": "2026-08-01T10:00:00.000Z",
+    "uploadedBy": "admin",
+    "tags": ["ict", "computer lab", "technology"]
+  },
+  {
+    "id": "PHOTO-2026-011",
+    "url": "https://picsum.photos/800/600?random=111",
+    "title": "Art Exhibition 2026",
+    "description": "Display of creative artworks by talented students.",
+    "category": "Cultural",
+    "uploadedAt": "2026-08-15T11:00:00.000Z",
+    "uploadedBy": "admin",
+    "tags": ["art", "exhibition", "creativity"]
+  },
+  {
+    "id": "PHOTO-2026-012",
+    "url": "https://picsum.photos/800/600?random=112",
+    "title": "Math Olympiad Workshop",
+    "description": "Students solving complex mathematical problems during workshop.",
+    "category": "Academic",
+    "uploadedAt": "2026-07-10T09:30:00.000Z",
+    "uploadedBy": "admin",
+    "tags": ["math", "olympiad", "workshop"]
+  },
+  {
+    "id": "PHOTO-2026-013",
+    "url": "https://picsum.photos/800/600?random=113",
+    "title": "Football Match - Inter-House",
+    "description": "Exciting football match between Red House and Blue House.",
+    "category": "Sports",
+    "uploadedAt": "2026-09-15T16:00:00.000Z",
+    "uploadedBy": "admin",
+    "tags": ["football", "sports", "inter-house"]
+  },
+  {
+    "id": "PHOTO-2026-014",
+    "url": "https://picsum.photos/800/600?random=114",
+    "title": "Science Lab Experiment",
+    "description": "Chemistry students conducting titration experiment.",
+    "category": "Academic",
+    "uploadedAt": "2026-07-20T11:00:00.000Z",
+    "uploadedBy": "admin",
+    "tags": ["science", "chemistry", "lab"]
+  },
+  {
+    "id": "PHOTO-2026-015",
+    "url": "https://picsum.photos/800/600?random=115",
+    "title": "Library Reading Session",
+    "description": "Students engaged in silent reading at the newly renovated library.",
+    "category": "Academic",
+    "uploadedAt": "2026-07-01T14:00:00.000Z",
+    "uploadedBy": "admin",
+    "tags": ["library", "reading", "books"]
+  },
+  {
+    "id": "PHOTO-2026-016",
+    "url": "https://picsum.photos/800/600?random=116",
+    "title": "Parent-Teacher Meeting",
+    "description": "Teachers discussing student progress with parents.",
+    "category": "Academic",
+    "uploadedAt": "2026-11-20T12:00:00.000Z",
+    "uploadedBy": "admin",
+    "tags": ["ptm", "parents", "meeting"]
+  },
+  {
+    "id": "PHOTO-2026-017",
+    "url": "https://picsum.photos/800/600?random=117",
+    "title": "Cultural Night Performance",
+    "description": "Students performing traditional Bangladeshi dance.",
+    "category": "Cultural",
+    "uploadedAt": "2026-05-10T19:00:00.000Z",
+    "uploadedBy": "admin",
+    "tags": ["dance", "cultural", "performance"]
+  },
+  {
+    "id": "PHOTO-2026-018",
+    "url": "https://picsum.photos/800/600?random=118",
+    "title": "Robotics Club Project",
+    "description": "Students showcasing their robot at science exhibition.",
+    "category": "Science Fair",
+    "uploadedAt": "2026-09-20T14:00:00.000Z",
+    "uploadedBy": "admin",
+    "tags": ["robotics", "technology", "innovation"]
   }
 ]

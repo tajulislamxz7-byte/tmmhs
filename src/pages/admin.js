@@ -54,6 +54,7 @@ const ADMIN_NAV = [
   {key:'messages',    label:'Messages',     icon:'messages'},
   {key:'aboutpage',   label:'About Page',   icon:'info'},
   {key:'principal',   label:'Principal',    icon:'users2'},
+  {key:'academic',    label:'Academic',     icon:'bookOpen'},
   {key:'roles',       label:'Users',        icon:'roles'},
   {key:'settings',    label:'Settings',     icon:'settings'},
   {key:'api',         label:'API Keys',     icon:'api'},
@@ -168,6 +169,7 @@ function renderAdminTab(tab) {
     case 'aboutpage':    return renderAdminAboutPage();
     case 'principal':    return renderAdminPrincipal();
     case 'settings':     return renderAdminSettings();
+    case 'academic':     return renderAdminAcademic();
     case 'api':          return renderAdminApiSettings();
     case 'roles':        return renderAdminUsers();
     default:             return renderAdminMain();
@@ -2132,6 +2134,109 @@ function renderAdminSettings() {
       </div>
         </div>
       </div>
+
+      <!-- Admission Settings -->
+      <div style="margin-top:32px;margin-bottom:32px;">
+        <h2 style="font-size:20px;font-weight:800;margin-bottom:16px;">Admission Page Settings</h2>
+        <p style="color:var(--text-muted);margin-bottom:20px;">Customize all content on the admission page including titles, dates, requirements, and form fields</p>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+          <!-- Page Header -->
+          <div class="card">
+            <div class="card-header"><div class="font-semibold">Page Header</div></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+              <div class="form-group">
+                <label class="form-label">Page Title</label>
+                <input class="form-input" id="adm_title" value="${s.admission?.title || 'Online Admission'}">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Page Subtitle</label>
+                <input class="form-input" id="adm_subtitle" value="${s.admission?.subtitle || 'Apply for admission to Tiarkhali M.M High School and College — Session 2025–2026'}">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Session Year</label>
+                <input class="form-input" id="adm_session" value="${s.admission?.session || '2025–2026'}">
+              </div>
+              <button class="btn btn-primary" onclick="saveAdmissionSettings()">Save Header</button>
+            </div>
+          </div>
+
+          <!-- Info Panel -->
+          <div class="card">
+            <div class="card-header"><div class="font-semibold">Info Panel</div></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+              <div class="form-group">
+                <label class="form-label">Info Panel Title</label>
+                <input class="form-input" id="adm_info_title" value="${s.admission?.infoTitle || 'Admission 2025–26'}">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Info Panel Description</label>
+                <textarea class="form-input" id="adm_info_desc" rows="3" style="resize:vertical;">${s.admission?.infoDesc || 'Apply online for Classes 6 to 9. Admission to Class 10 is only through internal promotion.'}</textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Available Classes (comma-separated)</label>
+                <input class="form-input" id="adm_classes" value="${s.admission?.classes || 'Class 6,Class 7,Class 8,Class 9'}">
+              </div>
+              <button class="btn btn-primary" onclick="saveAdmissionSettings()">Save Info</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Important Dates -->
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header"><div class="font-semibold">Important Dates</div></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+            ${(s.admission?.dates || [
+              {event:'Form Submission Opens', date:'August 1, 2025'},
+              {event:'Form Submission Closes', date:'August 25, 2025'},
+              {event:'Written Test', date:'September 5, 2025'},
+              {event:'Results Published', date:'September 15, 2025'},
+              {event:'Admission Confirmation', date:'September 20, 2025'}
+            ]).map((d, i) => `
+              <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;">
+                <div class="form-group" style="margin:0;">
+                  <label class="form-label" style="font-size:11px;">Event Name</label>
+                  <input class="form-input adm_date_event" style="height:36px;font-size:13px;" value="${d.event || ''}" data-idx="${i}">
+                </div>
+                <div class="form-group" style="margin:0;">
+                  <label class="form-label" style="font-size:11px;">Date</label>
+                  <input class="form-input adm_date_value" style="height:36px;font-size:13px;" value="${d.date || ''}" data-idx="${i}">
+                </div>
+                <button onclick="removeAdmissionDate(${i})" style="height:36px;padding:0 12px;background:var(--danger);color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;">Remove</button>
+              </div>
+            `).join('')}
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button class="btn btn-secondary btn-sm" onclick="addAdmissionDate()">+ Add Date</button>
+              <button class="btn btn-primary btn-sm" onclick="saveAdmissionSettings()">Save Dates</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Eligibility Requirements -->
+        <div class="card">
+          <div class="card-header"><div class="font-semibold">Eligibility Requirements</div></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+            ${(s.admission?.eligibility || [
+              'Class 6: Completed Grade 5 with minimum GPA 4.0',
+              "Class 7–9: Previous year's marksheet required",
+              'Transfer students: Contact office directly',
+              'All students require guardian ID and birth certificate'
+            ]).map((req, i) => `
+              <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;">
+                <div class="form-group" style="margin:0;">
+                  <label class="form-label" style="font-size:11px;">Requirement ${i + 1}</label>
+                  <input class="form-input adm_eligibility" style="height:36px;font-size:13px;" value="${req || ''}" data-idx="${i}">
+                </div>
+                <button onclick="removeAdmissionEligibility(${i})" style="height:36px;padding:0 12px;background:var(--danger);color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;">Remove</button>
+              </div>
+            `).join('')}
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button class="btn btn-secondary btn-sm" onclick="addAdmissionEligibility()">+ Add Requirement</button>
+              <button class="btn btn-primary btn-sm" onclick="saveAdmissionSettings()">Save Requirements</button>
+            </div>
+          </div>
+        </div>
+      </div>
   
       <!-- Leadership Cards Management -->
       <div style="margin-top:32px;">
@@ -2139,10 +2244,12 @@ function renderAdminSettings() {
         <p style="color:var(--text-muted);margin-bottom:20px;">Manage the profile cards displayed on the home page: Principal's Message, President's Message, and Company Profile</p>
         
         <div style="display:flex;flex-direction:column;gap:20px;">
-          ${(s.leadershipCards && Array.isArray(s.leadershipCards) && s.leadershipCards.length > 0) ? s.leadershipCards.map((card, index) => `
+          ${(s.leadershipCards && Array.isArray(s.leadershipCards) && s.leadershipCards.length > 0) ? s.leadershipCards.map((card, index) => {
+            const roleDisplay = card.role ? card.role.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'Unknown';
+            return `
             <div class="card">
               <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
-                <div class="font-semibold">Card ${index + 1}: ${card.role ? card.role.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'Unknown'}</div>
+                <div class="font-semibold">Card ${index + 1}: ${roleDisplay}</div>
                 <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
                   <input type="checkbox" ${card.enabled !== false ? 'checked' : ''} onchange="toggleLeadershipCard(${index}, this.checked)" style="width:18px;height:18px;cursor:pointer;">
                   <span style="font-size:13px;color:var(--text-secondary);">Enabled</span>
@@ -2186,7 +2293,8 @@ function renderAdminSettings() {
                 </div>
               </div>
             </div>
-          `).join('') : `
+            `;
+          }).join('') : `
             <div class="card">
               <div class="card-body text-center text-muted" style="padding:40px;">
                 <p>No leadership cards configured yet.</p>
@@ -2848,6 +2956,97 @@ window.removeSchoolPhoto = async function() {
   await _refreshTab('settings');
 };
 
+// "" Admission Settings ""
+window.saveAdmissionSettings = async function() {
+  const existing = await api.getSettings() || {};
+  
+  // Collect dates
+  const dates = [];
+  document.querySelectorAll('.adm_date_event').forEach((input, i) => {
+    const event = input.value?.trim();
+    const date = document.querySelectorAll('.adm_date_value')[i]?.value?.trim();
+    if (event && date) {
+      dates.push({ event, date });
+    }
+  });
+  
+  // Collect eligibility
+  const eligibility = [];
+  document.querySelectorAll('.adm_eligibility').forEach(input => {
+    const req = input.value?.trim();
+    if (req) eligibility.push(req);
+  });
+  
+  const admission = {
+    title: document.getElementById('adm_title')?.value || 'Online Admission',
+    subtitle: document.getElementById('adm_subtitle')?.value || '',
+    session: document.getElementById('adm_session')?.value || '',
+    infoTitle: document.getElementById('adm_info_title')?.value || '',
+    infoDesc: document.getElementById('adm_info_desc')?.value || '',
+    classes: document.getElementById('adm_classes')?.value || '',
+    dates: dates,
+    eligibility: eligibility
+  };
+  
+  existing.admission = admission;
+  await api.saveSettings(existing);
+  _cache.settings = existing;
+  showToast('Admission settings saved successfully!', 'success');
+  await _refreshTab('settings');
+};
+
+window.addAdmissionDate = function() {
+  const container = document.querySelector('.card-body [style*="flex-direction:column"]');
+  const dates = document.querySelectorAll('.adm_date_event');
+  const newIdx = dates.length;
+  const newRow = document.createElement('div');
+  newRow.style.cssText = 'display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;';
+  newRow.innerHTML = `
+    <div class="form-group" style="margin:0;">
+      <label class="form-label" style="font-size:11px;">Event Name</label>
+      <input class="form-input adm_date_event" style="height:36px;font-size:13px;" value="" data-idx="${newIdx}">
+    </div>
+    <div class="form-group" style="margin:0;">
+      <label class="form-label" style="font-size:11px;">Date</label>
+      <input class="form-input adm_date_value" style="height:36px;font-size:13px;" value="" data-idx="${newIdx}">
+    </div>
+    <button onclick="this.parentElement.remove()" style="height:36px;padding:0 12px;background:var(--danger);color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;">Remove</button>
+  `;
+  const btnRow = container.querySelector('[style*="margin-top:8px"]');
+  container.insertBefore(newRow, btnRow);
+};
+
+window.removeAdmissionDate = function(idx) {
+  const inputs = document.querySelectorAll('.adm_date_event');
+  if (inputs[idx]) {
+    inputs[idx].closest('[style*="grid-template-columns"]').remove();
+  }
+};
+
+window.addAdmissionEligibility = function() {
+  const container = document.querySelectorAll('.card-body [style*="flex-direction:column"]')[1];
+  const items = document.querySelectorAll('.adm_eligibility');
+  const newIdx = items.length;
+  const newRow = document.createElement('div');
+  newRow.style.cssText = 'display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;';
+  newRow.innerHTML = `
+    <div class="form-group" style="margin:0;">
+      <label class="form-label" style="font-size:11px;">Requirement ${newIdx + 1}</label>
+      <input class="form-input adm_eligibility" style="height:36px;font-size:13px;" value="" data-idx="${newIdx}">
+    </div>
+    <button onclick="this.parentElement.remove()" style="height:36px;padding:0 12px;background:var(--danger);color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;">Remove</button>
+  `;
+  const btnRow = container.querySelector('[style*="margin-top:8px"]');
+  container.insertBefore(newRow, btnRow);
+};
+
+window.removeAdmissionEligibility = function(idx) {
+  const inputs = document.querySelectorAll('.adm_eligibility');
+  if (inputs[idx]) {
+    inputs[idx].closest('[style*="grid-template-columns"]').remove();
+  }
+};
+
 // "" Leadership Cards Management ""
 window.saveLeadershipCard = async function(index) {
   try {
@@ -3364,7 +3563,7 @@ async function _sendAccountSms(phone, name, password, role) {
       body: JSON.stringify({ phone, message: msg }),
     });
   } catch (err) {
-    console.warn('[SMS] Could not send account info:', err.message);
+    // SMS send failed silently
   }
 }
 
@@ -4191,3 +4390,601 @@ window.filterAdminStaff = function() {
   const countEl = document.getElementById('staffCount');
   if (countEl) countEl.textContent = `${visibleCount} staff members`;
 };
+
+
+// ===================================================
+// ACADEMIC MANAGEMENT (Class Routine, Exam Routine, Syllabus)
+// ===================================================
+
+function renderAdminAcademic() {
+  const s = _cache.settings;
+  const academic = s.academic || {};
+  
+  // Initialize academicData with existing settings
+  if (!window.academicData || Object.keys(window.academicData.classRoutines || {}).length === 0) {
+    window.academicData = {
+      classRoutines: academic.classRoutines || {},
+      examRoutines: academic.examRoutines || {},
+      syllabus: academic.syllabus || {},
+      academicCalendar: academic.academicCalendar || [],
+      holidayCalendar: academic.holidayCalendar || []
+    };
+  }
+  
+  return `
+    <div>
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 style="font-size:24px;font-weight:800;margin-bottom:4px;">Academic Management</h1>
+          <p class="text-muted text-sm">Manage Class Routines, Exam Schedules, and Syllabus for all classes</p>
+        </div>
+        <button class="btn btn-success" onclick="saveAcademicData()">
+          ${SVG('<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>',16,'white')} Save All Changes
+        </button>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div style="display:flex;gap:8px;margin-bottom:24px;border-bottom:2px solid var(--border);padding-bottom:0;overflow-x:auto;">
+        <button id="acadTab1" class="btn btn-ghost" style="border-radius:8px 8px 0 0;border-bottom:3px solid var(--primary);font-weight:700;color:var(--primary);" onclick="switchAcademicTab(1)">
+          ${SVG('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',16)} Class Routine
+        </button>
+        <button id="acadTab2" class="btn btn-ghost" style="border-radius:8px 8px 0 0;border-bottom:3px solid transparent;" onclick="switchAcademicTab(2)">
+          ${SVG('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="15" x2="15" y2="15"/>',16)} Exam Routine
+        </button>
+        <button id="acadTab3" class="btn btn-ghost" style="border-radius:8px 8px 0 0;border-bottom:3px solid transparent;" onclick="switchAcademicTab(3)">
+          ${SVG('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',16)} Syllabus
+        </button>
+        <button id="acadTab4" class="btn btn-ghost" style="border-radius:8px 8px 0 0;border-bottom:3px solid transparent;" onclick="switchAcademicTab(4)">
+          ${SVG('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',16)} Academic Calendar
+        </button>
+        <button id="acadTab5" class="btn btn-ghost" style="border-radius:8px 8px 0 0;border-bottom:3px solid transparent;" onclick="switchAcademicTab(5)">
+          ${SVG('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',16)} Holiday Calendar
+        </button>
+      </div>
+
+      <!-- Tab Content -->
+      <div id="acadTabContent1" style="display:block;">
+        ${renderClassRoutineEditor(academic)}
+      </div>
+      <div id="acadTabContent2" style="display:none;">
+        ${renderExamRoutineEditor(academic)}
+      </div>
+      <div id="acadTabContent3" style="display:none;">
+        ${renderSyllabusEditor(academic)}
+      </div>
+      <div id="acadTabContent4" style="display:none;">
+        ${renderAcademicCalendarEditor(academic)}
+      </div>
+      <div id="acadTabContent5" style="display:none;">
+        ${renderHolidayCalendarEditor(academic)}
+      </div>
+    </div>
+  `;
+}
+
+function renderClassRoutineEditor(academic) {
+  const classes = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'];
+  const routines = academic.classRoutines || {};
+  
+  let html = '<div class="card" style="padding:0;overflow:hidden;">';
+  
+  classes.forEach((className, idx) => {
+    const classRoutine = routines[className] || [];
+    const isExpanded = idx === 4; // Class 10 expanded by default
+    
+    html += `
+      <div style="border-bottom:1px solid var(--border);">
+        <div style="padding:20px;background:var(--bg-secondary);cursor:pointer;display:flex;align-items:center;justify-content:space-between;" onclick="toggleRoutineClass('routine${idx}')">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:40px;height:40px;background:linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:16px;">
+              ${className.replace('Class ', '')}
+            </div>
+            <div>
+              <div class="font-bold">${className} Daily Routine</div>
+              <div class="text-xs text-muted">${classRoutine.length || 0} periods configured</div>
+            </div>
+          </div>
+          <svg id="chevron_routine${idx}" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:rotate(${isExpanded ? '180deg' : '0deg'});transition:transform 0.3s;">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+        <div id="routine${idx}" style="display:${isExpanded ? 'block' : 'none'};padding:20px;background:var(--bg-primary);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div class="text-sm text-muted">Configure daily class schedule</div>
+            <button class="btn btn-primary btn-sm" onclick="addRoutinePeriod('${className}')">
+              ${SVG('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',14,'white')} Add Period
+            </button>
+          </div>
+          <div id="routineList_${className.replace(' ', '')}">
+            ${classRoutine.length === 0 ? `
+              <div style="text-align:center;padding:40px;color:var(--text-muted);">
+                <div style="margin-bottom:12px;">${SVG('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',36,'var(--text-muted)')}</div>
+                <div>No periods added yet. Click "Add Period" to start.</div>
+              </div>
+            ` : classRoutine.map((period, pidx) => renderRoutinePeriodRow(className, period, pidx)).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  return html;
+}
+
+function renderRoutinePeriodRow(className, period, idx) {
+  const isBreak = period.isBreak || false;
+  return `
+    <div class="card" style="margin-bottom:12px;padding:16px;">
+      <div style="display:grid;grid-template-columns:120px 1fr 1fr 120px 80px 60px;gap:12px;align-items:center;">
+        <input type="text" class="form-input form-input-sm" value="${period.time || ''}" placeholder="8:00-8:45" onchange="updateRoutinePeriod('${className}',${idx},'time',this.value)">
+        <input type="text" class="form-input form-input-sm" value="${period.subject || ''}" placeholder="Subject" onchange="updateRoutinePeriod('${className}',${idx},'subject',this.value)" ${isBreak ? 'disabled' : ''}>
+        <input type="text" class="form-input form-input-sm" value="${period.teacher || ''}" placeholder="Teacher Name" onchange="updateRoutinePeriod('${className}',${idx},'teacher',this.value)" ${isBreak ? 'disabled' : ''}>
+        <input type="text" class="form-input form-input-sm" value="${period.room || ''}" placeholder="Room" onchange="updateRoutinePeriod('${className}',${idx},'room',this.value)" ${isBreak ? 'disabled' : ''}>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+          <input type="checkbox" ${isBreak ? 'checked' : ''} onchange="updateRoutinePeriod('${className}',${idx},'isBreak',this.checked)"> Break
+        </label>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="deleteRoutinePeriod('${className}',${idx})" title="Delete">
+          ${SVG('<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',16)}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderExamRoutineEditor(academic) {
+  const classes = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'];
+  const examRoutines = academic.examRoutines || {};
+  
+  let html = '<div class="card" style="padding:0;overflow:hidden;">';
+  
+  classes.forEach((className, idx) => {
+    const classExams = examRoutines[className] || [];
+    const isExpanded = idx === 4;
+    
+    html += `
+      <div style="border-bottom:1px solid var(--border);">
+        <div style="padding:20px;background:var(--bg-secondary);cursor:pointer;display:flex;align-items:center;justify-content:space-between;" onclick="toggleRoutineClass('exam${idx}')">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:40px;height:40px;background:linear-gradient(135deg, #f093fb 0%, #f5576c 100%);border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:16px;">
+              ${className.replace('Class ', '')}
+            </div>
+            <div>
+              <div class="font-bold">${className} Exam Schedule</div>
+              <div class="text-xs text-muted">${classExams.length || 0} exams configured</div>
+            </div>
+          </div>
+          <svg id="chevron_exam${idx}" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:rotate(${isExpanded ? '180deg' : '0deg'});transition:transform 0.3s;">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+        <div id="exam${idx}" style="display:${isExpanded ? 'block' : 'none'};padding:20px;background:var(--bg-primary);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div class="text-sm text-muted">Configure exam schedule</div>
+            <button class="btn btn-primary btn-sm" onclick="addExamSchedule('${className}')">
+              ${SVG('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',14,'white')} Add Exam
+            </button>
+          </div>
+          <div id="examList_${className.replace(' ', '')}">
+            ${classExams.length === 0 ? `
+              <div style="text-align:center;padding:40px;color:var(--text-muted);">
+                <div style="margin-bottom:12px;">${SVG('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="15" x2="15" y2="15"/>',36,'var(--text-muted)')}</div>
+                <div>No exams added yet. Click "Add Exam" to start.</div>
+              </div>
+            ` : classExams.map((exam, eidx) => renderExamRow(className, exam, eidx)).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  return html;
+}
+
+function renderExamRow(className, exam, idx) {
+  return `
+    <div class="card" style="margin-bottom:12px;padding:16px;">
+      <div style="display:grid;grid-template-columns:130px 1fr 100px 100px 120px 60px;gap:12px;align-items:center;">
+        <input type="date" class="form-input form-input-sm" value="${exam.date || ''}" onchange="updateExamSchedule('${className}',${idx},'date',this.value)">
+        <input type="text" class="form-input form-input-sm" value="${exam.subject || ''}" placeholder="Subject" onchange="updateExamSchedule('${className}',${idx},'subject',this.value)">
+        <input type="time" class="form-input form-input-sm" value="${exam.time || '10:00'}" onchange="updateExamSchedule('${className}',${idx},'time',this.value)">
+        <input type="text" class="form-input form-input-sm" value="${exam.duration || ''}" placeholder="3 hours" onchange="updateExamSchedule('${className}',${idx},'duration',this.value)">
+        <input type="text" class="form-input form-input-sm" value="${exam.room || ''}" placeholder="Room" onchange="updateExamSchedule('${className}',${idx},'room',this.value)">
+        <button class="btn btn-danger btn-sm btn-icon" onclick="deleteExamSchedule('${className}',${idx})" title="Delete">
+          ${SVG('<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',16)}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderSyllabusEditor(academic) {
+  const classes = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'];
+  const syllabus = academic.syllabus || {};
+  
+  let html = '<div class="card" style="padding:0;overflow:hidden;">';
+  
+  classes.forEach((className, idx) => {
+    const classSubjects = syllabus[className] || [];
+    const isExpanded = idx === 4;
+    
+    html += `
+      <div style="border-bottom:1px solid var(--border);">
+        <div style="padding:20px;background:var(--bg-secondary);cursor:pointer;display:flex;align-items:center;justify-content:space-between;" onclick="toggleRoutineClass('syllabus${idx}')">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:40px;height:40px;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:16px;">
+              ${className.replace('Class ', '')}
+            </div>
+            <div>
+              <div class="font-bold">${className} Syllabus</div>
+              <div class="text-xs text-muted">${classSubjects.length || 0} subjects configured</div>
+            </div>
+          </div>
+          <svg id="chevron_syllabus${idx}" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:rotate(${isExpanded ? '180deg' : '0deg'});transition:transform 0.3s;">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+        <div id="syllabus${idx}" style="display:${isExpanded ? 'block' : 'none'};padding:20px;background:var(--bg-primary);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div class="text-sm text-muted">Configure subject syllabus</div>
+            <button class="btn btn-primary btn-sm" onclick="addSyllabusSubject('${className}')">
+              ${SVG('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',14,'white')} Add Subject
+            </button>
+          </div>
+          <div id="syllabusList_${className.replace(' ', '')}">
+            ${classSubjects.length === 0 ? `
+              <div style="text-align:center;padding:40px;color:var(--text-muted);">
+                <div style="margin-bottom:12px;">${SVG('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',36,'var(--text-muted)')}</div>
+                <div>No subjects added yet. Click "Add Subject" to start.</div>
+              </div>
+            ` : classSubjects.map((subject, sidx) => renderSyllabusRow(className, subject, sidx)).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  return html;
+}
+
+function renderSyllabusRow(className, subject, idx) {
+  return `
+    <div class="card" style="margin-bottom:12px;padding:16px;">
+      <div style="display:grid;grid-template-columns:1fr 100px 100px 200px 60px;gap:12px;align-items:center;">
+        <input type="text" class="form-input form-input-sm" value="${subject.name || ''}" placeholder="Subject Name" onchange="updateSyllabus('${className}',${idx},'name',this.value)">
+        <input type="number" class="form-input form-input-sm" value="${subject.chapters || ''}" placeholder="Chapters" onchange="updateSyllabus('${className}',${idx},'chapters',this.value)">
+        <input type="number" class="form-input form-input-sm" value="${subject.topics || ''}" placeholder="Topics" onchange="updateSyllabus('${className}',${idx},'topics',this.value)">
+        <input type="text" class="form-input form-input-sm" value="${subject.file || ''}" placeholder="filename.pdf" onchange="updateSyllabus('${className}',${idx},'file',this.value)">
+        <button class="btn btn-danger btn-sm btn-icon" onclick="deleteSyllabus('${className}',${idx})" title="Delete">
+          ${SVG('<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',16)}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderAcademicCalendarEditor(academic) {
+  const events = academic.academicCalendar || [];
+  
+  return `
+    <div class="card">
+      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="font-semibold">Academic Calendar Events</div>
+        <button class="btn btn-primary btn-sm" onclick="addAcademicEvent()">
+          ${SVG('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',14,'white')} Add Event
+        </button>
+      </div>
+      <div class="card-body">
+        <div id="academicEventsList">
+          ${events.length === 0 ? `
+            <div style="text-align:center;padding:40px;color:var(--text-muted);">
+              <div style="margin-bottom:12px;">${SVG('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',36,'var(--text-muted)')}</div>
+              <div>No events added yet. Click "Add Event" to start.</div>
+            </div>
+          ` : events.map((event, idx) => `
+            <div class="card" style="margin-bottom:12px;padding:16px;">
+              <div style="display:grid;grid-template-columns:130px 1fr 1fr 120px 60px;gap:12px;align-items:center;">
+                <input type="date" class="form-input form-input-sm" value="${event.date || ''}" onchange="updateAcademicEvent(${idx},'date',this.value)">
+                <input type="text" class="form-input form-input-sm" value="${event.title || ''}" placeholder="Event Title" onchange="updateAcademicEvent(${idx},'title',this.value)">
+                <input type="text" class="form-input form-input-sm" value="${event.desc || ''}" placeholder="Description" onchange="updateAcademicEvent(${idx},'desc',this.value)">
+                <select class="form-input form-input-sm form-select" value="${event.type || 'academic'}" onchange="updateAcademicEvent(${idx},'type',this.value)">
+                  <option value="academic" ${event.type === 'academic' ? 'selected' : ''}>Academic</option>
+                  <option value="holiday" ${event.type === 'holiday' ? 'selected' : ''}>Holiday</option>
+                </select>
+                <button class="btn btn-danger btn-sm btn-icon" onclick="deleteAcademicEvent(${idx})" title="Delete">
+                  ${SVG('<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',16)}
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderHolidayCalendarEditor(academic) {
+  const holidays = academic.holidayCalendar || [];
+  
+  return `
+    <div class="card">
+      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="font-semibold">Holiday Calendar</div>
+        <button class="btn btn-primary btn-sm" onclick="addHoliday()">
+          ${SVG('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',14,'white')} Add Holiday
+        </button>
+      </div>
+      <div class="card-body">
+        <div id="holidaysList">
+          ${holidays.length === 0 ? `
+            <div style="text-align:center;padding:40px;color:var(--text-muted);">
+              <div style="margin-bottom:12px;">${SVG('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',36,'var(--text-muted)')}</div>
+              <div>No holidays added yet. Click "Add Holiday" to start.</div>
+            </div>
+          ` : holidays.map((holiday, idx) => `
+            <div class="card" style="margin-bottom:12px;padding:16px;">
+              <div style="display:grid;grid-template-columns:130px 1fr 1fr 120px 60px;gap:12px;align-items:center;">
+                <input type="date" class="form-input form-input-sm" value="${holiday.date || ''}" onchange="updateHoliday(${idx},'date',this.value)">
+                <input type="text" class="form-input form-input-sm" value="${holiday.title || ''}" placeholder="Holiday Name" onchange="updateHoliday(${idx},'title',this.value)">
+                <input type="text" class="form-input form-input-sm" value="${holiday.desc || ''}" placeholder="Description" onchange="updateHoliday(${idx},'desc',this.value)">
+                <input type="color" class="form-input form-input-sm" value="${holiday.color || '#f093fb'}" onchange="updateHoliday(${idx},'color',this.value)" style="height:36px;">
+                <button class="btn btn-danger btn-sm btn-icon" onclick="deleteHoliday(${idx})" title="Delete">
+                  ${SVG('<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',16)}
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Helper functions
+window.switchAcademicTab = function(tabNum) {
+  [1,2,3,4,5].forEach(n => {
+    document.getElementById('acadTab'+n).style.borderBottom = n===tabNum ? '3px solid var(--primary)' : '3px solid transparent';
+    document.getElementById('acadTab'+n).style.color = n===tabNum ? 'var(--primary)' : 'var(--text-secondary)';
+    document.getElementById('acadTab'+n).style.fontWeight = n===tabNum ? '700' : '500';
+    document.getElementById('acadTabContent'+n).style.display = n===tabNum ? 'block' : 'none';
+  });
+};
+
+window.toggleRoutineClass = function(id) {
+  const elem = document.getElementById(id);
+  const chevron = document.getElementById('chevron_'+id);
+  const isHidden = elem.style.display === 'none';
+  elem.style.display = isHidden ? 'block' : 'none';
+  if (chevron) chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+};
+
+// Class Routine Functions
+window.academicData = { classRoutines: {}, examRoutines: {}, syllabus: {} };
+
+window.addRoutinePeriod = function(className) {
+  if (!academicData.classRoutines[className]) academicData.classRoutines[className] = [];
+  academicData.classRoutines[className].push({
+    time: '', subject: '', teacher: '', room: '', color: '#667eea', isBreak: false
+  });
+  refreshRoutineList(className);
+};
+
+window.updateRoutinePeriod = function(className, idx, field, value) {
+  if (!academicData.classRoutines[className]) academicData.classRoutines[className] = [];
+  if (field === 'isBreak') {
+    academicData.classRoutines[className][idx].isBreak = value;
+    if (value) {
+      academicData.classRoutines[className][idx].subject = 'Break';
+      academicData.classRoutines[className][idx].teacher = '';
+      academicData.classRoutines[className][idx].room = '';
+    }
+    refreshRoutineList(className);
+  } else {
+    academicData.classRoutines[className][idx][field] = value;
+  }
+};
+
+window.deleteRoutinePeriod = function(className, idx) {
+  if (!academicData.classRoutines[className]) return;
+  academicData.classRoutines[className].splice(idx, 1);
+  refreshRoutineList(className);
+};
+
+function refreshRoutineList(className) {
+  const container = document.getElementById('routineList_'+className.replace(' ',''));
+  if (!container) return;
+  const routine = academicData.classRoutines[className] || [];
+  container.innerHTML = routine.length === 0
+    ? `<div style="text-align:center;padding:40px;color:var(--text-muted);">No periods added yet.</div>`
+    : routine.map((p,i) => renderRoutinePeriodRow(className, p, i)).join('');
+}
+
+// Exam Routine Functions
+window.addExamSchedule = function(className) {
+  if (!academicData.examRoutines[className]) academicData.examRoutines[className] = [];
+  academicData.examRoutines[className].push({
+    date: '', time: '10:00', subject: '', duration: '3 hours', room: '', color: '#667eea'
+  });
+  refreshExamList(className);
+};
+
+window.updateExamSchedule = function(className, idx, field, value) {
+  if (!academicData.examRoutines[className]) academicData.examRoutines[className] = [];
+  academicData.examRoutines[className][idx][field] = value;
+};
+
+window.deleteExamSchedule = function(className, idx) {
+  if (!academicData.examRoutines[className]) return;
+  academicData.examRoutines[className].splice(idx, 1);
+  refreshExamList(className);
+};
+
+function refreshExamList(className) {
+  const container = document.getElementById('examList_'+className.replace(' ',''));
+  if (!container) return;
+  const exams = academicData.examRoutines[className] || [];
+  container.innerHTML = exams.length === 0
+    ? `<div style="text-align:center;padding:40px;color:var(--text-muted);">No exams added yet.</div>`
+    : exams.map((e,i) => renderExamRow(className, e, i)).join('');
+}
+
+// Syllabus Functions
+window.addSyllabusSubject = function(className) {
+  if (!academicData.syllabus[className]) academicData.syllabus[className] = [];
+  academicData.syllabus[className].push({
+    name: '', chapters: 0, topics: 0, file: '', color: '#667eea', icon: 'bookOpen'
+  });
+  refreshSyllabusList(className);
+};
+
+window.updateSyllabus = function(className, idx, field, value) {
+  if (!academicData.syllabus[className]) academicData.syllabus[className] = [];
+  academicData.syllabus[className][idx][field] = field === 'chapters' || field === 'topics' ? parseInt(value) || 0 : value;
+};
+
+window.deleteSyllabus = function(className, idx) {
+  if (!academicData.syllabus[className]) return;
+  academicData.syllabus[className].splice(idx, 1);
+  refreshSyllabusList(className);
+};
+
+function refreshSyllabusList(className) {
+  const container = document.getElementById('syllabusList_'+className.replace(' ',''));
+  if (!container) return;
+  const subjects = academicData.syllabus[className] || [];
+  container.innerHTML = subjects.length === 0
+    ? `<div style="text-align:center;padding:40px;color:var(--text-muted);">No subjects added yet.</div>`
+    : subjects.map((s,i) => renderSyllabusRow(className, s, i)).join('');
+}
+
+// Save Function
+window.saveAcademicData = async function() {
+  const settings = await api.getSettings();
+  settings.academic = academicData;
+  const result = await api.saveSettings(settings);
+  if (result && result.ok !== false) {
+    showToast('Academic data saved successfully!', 'success');
+    await _refreshTab('academic');
+  } else {
+    showToast('Failed to save academic data', 'error');
+  }
+};
+
+// Academic Calendar Functions
+window.addAcademicEvent = function() {
+  if (!academicData.academicCalendar) academicData.academicCalendar = [];
+  academicData.academicCalendar.push({
+    date: '', title: '', desc: '', type: 'academic'
+  });
+  refreshAcademicEventsList();
+};
+
+window.updateAcademicEvent = function(idx, field, value) {
+  if (!academicData.academicCalendar) academicData.academicCalendar = [];
+  academicData.academicCalendar[idx][field] = value;
+};
+
+window.deleteAcademicEvent = function(idx) {
+  if (!academicData.academicCalendar) return;
+  academicData.academicCalendar.splice(idx, 1);
+  refreshAcademicEventsList();
+};
+
+function refreshAcademicEventsList() {
+  const container = document.getElementById('academicEventsList');
+  if (!container) return;
+  const events = academicData.academicCalendar || [];
+  container.innerHTML = events.length === 0
+    ? `<div style="text-align:center;padding:40px;color:var(--text-muted);">No events added yet.</div>`
+    : events.map((event, idx) => `
+      <div class="card" style="margin-bottom:12px;padding:16px;">
+        <div style="display:grid;grid-template-columns:130px 1fr 1fr 120px 60px;gap:12px;align-items:center;">
+          <input type="date" class="form-input form-input-sm" value="${event.date || ''}" onchange="updateAcademicEvent(${idx},'date',this.value)">
+          <input type="text" class="form-input form-input-sm" value="${event.title || ''}" placeholder="Event Title" onchange="updateAcademicEvent(${idx},'title',this.value)">
+          <input type="text" class="form-input form-input-sm" value="${event.desc || ''}" placeholder="Description" onchange="updateAcademicEvent(${idx},'desc',this.value)">
+          <select class="form-input form-input-sm form-select" onchange="updateAcademicEvent(${idx},'type',this.value)">
+            <option value="academic" ${event.type === 'academic' ? 'selected' : ''}>Academic</option>
+            <option value="holiday" ${event.type === 'holiday' ? 'selected' : ''}>Holiday</option>
+          </select>
+          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteAcademicEvent(${idx})" title="Delete">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
+      </div>
+    `).join('');
+}
+
+// Holiday Calendar Functions
+window.addHoliday = function() {
+  if (!academicData.holidayCalendar) academicData.holidayCalendar = [];
+  academicData.holidayCalendar.push({
+    date: '', title: '', desc: '', color: '#f093fb'
+  });
+  refreshHolidaysList();
+};
+
+window.updateHoliday = function(idx, field, value) {
+  if (!academicData.holidayCalendar) academicData.holidayCalendar = [];
+  academicData.holidayCalendar[idx][field] = value;
+};
+
+window.deleteHoliday = function(idx) {
+  if (!academicData.holidayCalendar) return;
+  academicData.holidayCalendar.splice(idx, 1);
+  refreshHolidaysList();
+};
+
+function refreshHolidaysList() {
+  const container = document.getElementById('holidaysList');
+  if (!container) return;
+  const holidays = academicData.holidayCalendar || [];
+  container.innerHTML = holidays.length === 0
+    ? `<div style="text-align:center;padding:40px;color:var(--text-muted);">No holidays added yet.</div>`
+    : holidays.map((holiday, idx) => `
+      <div class="card" style="margin-bottom:12px;padding:16px;">
+        <div style="display:grid;grid-template-columns:130px 1fr 1fr 120px 60px;gap:12px;align-items:center;">
+          <input type="date" class="form-input form-input-sm" value="${holiday.date || ''}" onchange="updateHoliday(${idx},'date',this.value)">
+          <input type="text" class="form-input form-input-sm" value="${holiday.title || ''}" placeholder="Holiday Name" onchange="updateHoliday(${idx},'title',this.value)">
+          <input type="text" class="form-input form-input-sm" value="${holiday.desc || ''}" placeholder="Description" onchange="updateHoliday(${idx},'desc',this.value)">
+          <input type="color" class="form-input form-input-sm" value="${holiday.color || '#f093fb'}" onchange="updateHoliday(${idx},'color',this.value)" style="height:36px;">
+          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteHoliday(${idx})" title="Delete">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
+      </div>
+    `).join('');
+}
+
+// Initialize academicData global variable
+if (typeof window.academicData === 'undefined') {
+  window.academicData = { 
+    classRoutines: {}, 
+    examRoutines: {}, 
+    syllabus: {}, 
+    academicCalendar: [], 
+    holidayCalendar: [] 
+  };
+}
+
+// Load existing data when settings are cached
+async function loadAcademicData() {
+  const settings = await api.getSettings();
+  if (settings.academic) {
+    window.academicData = {
+      classRoutines: settings.academic.classRoutines || {},
+      examRoutines: settings.academic.examRoutines || {},
+      syllabus: settings.academic.syllabus || {},
+      academicCalendar: settings.academic.academicCalendar || [],
+      holidayCalendar: settings.academic.holidayCalendar || []
+    };
+  }
+}
+
+// Call on page load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadAcademicData);
+} else {
+  loadAcademicData();
+}

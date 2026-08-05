@@ -36,7 +36,7 @@ export async function renderNotices() {
       </div>
       <div class="container section-sm">
         <!-- Category Filters -->
-        <div class="flex gap-2 mb-6 overflow-x-auto" style="padding-bottom:4px;">
+        <div class="flex gap-3 mb-6 overflow-x-auto flex-wrap" style="padding-bottom:4px;">
           ${CATEGORIES.map(cat=>`
             <button class="search-filter ${cat==='All'?'active':''}" onclick="filterNotices('${cat}',this)">${cat}</button>
           `).join('')}

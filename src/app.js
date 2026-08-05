@@ -5,8 +5,11 @@
 import * as auth from './utils/auth.js';
 import { api } from './utils/api.js';
 import { renderNavbar }         from './components/navbar.js';
+import { renderTopbar }         from './components/topbar.js';
 import { renderFooter }         from './components/footer.js';
-import { renderSearchModal, initSearch } from './components/search.js';
+import { initSearch } from './components/search.js';
+import { updateDateDisplays } from './utils/dateUtils.js';
+import { setLanguage, t, getCurrentLanguage, initLanguage } from './utils/translator.js';
 import { renderHome, renderHomeExtra }   from './pages/home.js';
 import { renderStudents, renderStudentProfile } from './pages/students.js';
 import { renderLogin, renderRegister, renderForgotPassword, renderResetPassword, renderPrincipalLogin } from './pages/auth.js';
@@ -84,9 +87,19 @@ async function render() {
   const role       = user?.role || 'guest';
 
   const navRoot    = document.getElementById('navbar-root');
+  const topbarRoot = document.getElementById('topbar-root');
   const pageRoot   = document.getElementById('page-root');
   const footerRoot = document.getElementById('footer-root');
   const searchRoot = document.getElementById('search-root');
+
+  // Topbar (always show except on auth pages)
+  if (AUTH_PAGES.includes(currentPage)) {
+    topbarRoot.innerHTML = '';
+    topbarRoot.style.display = 'none';
+  } else {
+    topbarRoot.innerHTML = renderTopbar();
+    topbarRoot.style.display = '';
+  }
 
   // Navbar
   if (AUTH_PAGES.includes(currentPage)) {
@@ -99,23 +112,9 @@ async function render() {
     // Force hamburger visibility on mobile - aggressive debugging
     setTimeout(() => {
       const hamburger = document.getElementById('hamburgerBtn');
-      console.log('🔍 Hamburger element:', hamburger);
-      console.log('🔍 Window width:', window.innerWidth);
       
       if (hamburger) {
         const computed = window.getComputedStyle(hamburger);
-        console.log('🔍 Hamburger BEFORE fix:', {
-          display: computed.display,
-          visibility: computed.visibility,
-          opacity: computed.opacity,
-          position: computed.position,
-          right: computed.right,
-          top: computed.top,
-          transform: computed.transform,
-          width: computed.width,
-          height: computed.height,
-          zIndex: computed.zIndex
-        });
         
         if (window.innerWidth <= 1024) {
           // Force all critical styles
@@ -128,33 +127,19 @@ async function render() {
           hamburger.style.setProperty('transform', 'translateY(-50%)', 'important');
           hamburger.style.setProperty('z-index', '10002', 'important');
           hamburger.style.setProperty('pointer-events', 'auto', 'important');
-          
-          const computedAfter = window.getComputedStyle(hamburger);
-          console.log('🔍 Hamburger AFTER fix:', {
-            display: computedAfter.display,
-            visibility: computedAfter.visibility,
-            opacity: computedAfter.opacity,
-            position: computedAfter.position,
-            right: computedAfter.right,
-            top: computedAfter.top,
-            transform: computedAfter.transform,
-            width: computedAfter.width,
-            height: computedAfter.height,
-            zIndex: computedAfter.zIndex,
-            rect: hamburger.getBoundingClientRect()
-          });
-          
-          console.log('✅ Hamburger visibility enforced');
         }
-      } else {
-        console.error('❌ Hamburger element NOT FOUND!');
       }
     }, 100);
   }
 
-  // Search
-  searchRoot.innerHTML = renderSearchModal();
+  // Search - now integrated in navbar, just initialize
   initSearch();
+  
+  // Update date displays
+  updateDateDisplays();
+  
+  // Update dates every minute
+  setInterval(updateDateDisplays, 60000);
 
   // Page — may be async (admin)
   if (currentPage === 'admin') {
@@ -1256,21 +1241,15 @@ function bindGlobalActions() {
   let mobileMenuClickHandler = null;
 
   window.toggleMobileMenu = function() {
-    console.log('toggleMobileMenu called');
     const menu = document.getElementById('mobileMenu');
     const hamburger = document.getElementById('hamburgerBtn');
     const userDropdown = document.getElementById('userDropdown');
     
-    console.log('Menu element:', menu);
-    console.log('Hamburger element:', hamburger);
-    
     if (!menu) {
-      console.error('Mobile menu element not found');
       return;
     }
     
     const isCurrentlyHidden = menu.classList.contains('hidden');
-    console.log('Menu is currently hidden:', isCurrentlyHidden);
     
     if (isCurrentlyHidden) {
       // Hide user dropdown if open
@@ -1280,7 +1259,6 @@ function bindGlobalActions() {
       
       // Show menu (slide in)
       menu.classList.remove('hidden');
-      console.log('Menu opened');
       
       // Add active class to hamburger for animation
       if (hamburger) {
@@ -1307,7 +1285,6 @@ function bindGlobalActions() {
     } else {
       // Hide menu (slide out)
       menu.classList.add('hidden');
-      console.log('Menu closed');
       
       // Remove active class from hamburger
       if (hamburger) {
@@ -1329,6 +1306,93 @@ function bindGlobalActions() {
     localStorage.setItem('theme', html.dataset.theme);
     document.getElementById('iconSun')?.classList.toggle('hidden', !dark);
     document.getElementById('iconMoon')?.classList.toggle('hidden', dark);
+  };
+
+  // Language switcher - Hybrid system: Re-render page with correct translations
+  window.switchLanguage = async function(lang) {
+    // Prevent multiple rapid clicks
+    if (window._switchingLanguage) {
+      return;
+    }
+    
+    // Check if already on this language
+    const currentLang = getCurrentLanguage();
+    if (currentLang === lang) {
+      return;
+    }
+    
+    window._switchingLanguage = true;
+    
+    // Set language in custom translator
+    setLanguage(lang);
+    
+    // Save language preference
+    localStorage.setItem('language', lang);
+    
+    // Update button visual state immediately
+    document.querySelectorAll('.lang-option').forEach(btn => {
+      btn.classList.remove('active');
+      if (btn.dataset.lang === lang) {
+        btn.classList.add('active');
+      }
+    });
+    
+    // Re-render the page with the new language
+    await render();
+    
+    // Wait for Google Translate to be fully ready
+    const waitForGoogleTranslate = (attempts = 0) => {
+      return new Promise((resolve) => {
+        const checkGT = () => {
+          const select = document.querySelector('.goog-te-combo');
+          
+          if (select && select.options.length > 1) {
+            // Google Translate is ready
+            resolve(true);
+          } else if (attempts < 50) {
+            // Not ready yet, keep checking
+            attempts++;
+            setTimeout(checkGT, 200);
+          } else {
+            // Timeout - Google Translate didn't load
+            resolve(false);
+          }
+        };
+        checkGT();
+      });
+    };
+    
+    // Wait for Google Translate and then switch language
+    const gtReady = await waitForGoogleTranslate();
+    
+    if (gtReady) {
+      const select = document.querySelector('.goog-te-combo');
+      
+      // IMPORTANT: Reset to English first, then switch to target language
+      // This "wakes up" Google Translate properly
+      if (lang === 'bn') {
+        select.value = 'en';
+        select.dispatchEvent(new Event('change'));
+        
+        // Wait a bit, then switch to Bangla
+        setTimeout(() => {
+          select.value = 'bn';
+          select.dispatchEvent(new Event('change'));
+        }, 500);
+      } else {
+        // Switching to English
+        select.value = 'en';
+        select.dispatchEvent(new Event('change'));
+      }
+    }
+    
+    const langName = lang === 'bn' ? 'বাংলা' : 'English';
+    showToast(`Language changed to ${langName}`, 'success');
+    
+    // Re-enable after a longer delay to account for Google Translate animation
+    setTimeout(() => {
+      window._switchingLanguage = false;
+    }, 1500);
   };
 
   window.toggleUserDropdown = function() {
@@ -1667,6 +1731,9 @@ async function renderNotificationsPage() {
   const savedTheme = localStorage.getItem('theme');
   if (savedTheme) document.documentElement.dataset.theme = savedTheme;
 
+  // Initialize language system
+  const savedLang = initLanguage();
+
   // Sync users from API server to localStorage cache on startup
   api.getUsers().then(users => {
     if (users && users.length > 0) {
@@ -1682,4 +1749,19 @@ async function renderNotificationsPage() {
   }).catch(() => {});
 
   render();
+  
+  // After render, apply saved language if Bangla
+  if (savedLang === 'bn') {
+    // Wait longer for Google Translate to fully load
+    setTimeout(() => {
+      switchLanguage('bn');
+    }, 2000); // Increased delay to 2 seconds
+  } else {
+    // Just update button states for English
+    setTimeout(() => {
+      document.querySelectorAll('.lang-option').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === savedLang);
+      });
+    }, 200);
+  }
 })();

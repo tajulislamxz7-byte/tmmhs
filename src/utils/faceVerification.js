@@ -27,7 +27,6 @@ export async function verifyFaceInImage(base64Image) {
     return result;
     
   } catch (error) {
-    console.error('Face verification error:', error);
     // Return validation with clear message
     return {
       valid: false,
@@ -56,12 +55,6 @@ async function detectFaceWithBrowserAPI(base64Image) {
         // Use canvas-based face detection heuristics
         const result = await analyzeImageForFace(img);
         
-        if (result.valid) {
-          console.log('✅ Face detection PASSED - Real human face detected');
-        } else {
-          console.log('🚫 Face detection FAILED:', result.reason);
-        }
-        
         resolve(result);
       };
       
@@ -75,7 +68,6 @@ async function detectFaceWithBrowserAPI(base64Image) {
       img.src = base64Image;
       
     } catch (error) {
-      console.error('Face detection error:', error);
       resolve({
         valid: false,
         reason: 'Unable to verify face. Please upload a clear photo showing your face.'
@@ -159,15 +151,6 @@ async function analyzeImageForFace(img) {
   const brightnessMean = avgBrightness;
   const brightnessVariance = stats.brightness.reduce((sum, b) => sum + Math.pow(b - brightnessMean, 2), 0) / stats.brightness.length;
   const brightnessStdDev = Math.sqrt(brightnessVariance);
-  
-  console.log('📊 Image Analysis:', {
-    skinRatio: skinRatio.toFixed(3),
-    unnaturalRatio: unnaturalRatio.toFixed(3),
-    saturationRatio: saturationRatio.toFixed(3),
-    colorVariety,
-    avgBrightness: avgBrightness.toFixed(1),
-    brightnessStdDev: brightnessStdDev.toFixed(1)
-  });
   
   // Validation Rules - STRICT for real face detection
   

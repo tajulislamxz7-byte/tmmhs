@@ -2,23 +2,13 @@
 // NAVBAR — Clean SVG icons, auth-aware
 // ================================================
 import { icon } from '../utils/icons.js';
+import { renderSearchInNavbar } from './search.js';
 
 export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'guest', user = null) {
   const active = (page) => activePage === page ? 'active' : '';
   
   // Normalize role to lowercase to handle case sensitivity issues
   const normalizedRole = role ? role.toLowerCase().trim() : 'guest';
-  
-  // Debug logging
-  if (isLoggedIn && user) {
-    console.log('🔍 Navbar render:', {
-      role: role,
-      normalizedRole: normalizedRole,
-      userId: user?.id,
-      userName: user?.name,
-      userEmail: user?.email
-    });
-  }
 
   return `
   <nav class="navbar" id="navbar">
@@ -27,15 +17,7 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
 
       <!-- Logo -->
       <a class="navbar-logo" onclick="navigate('home')" style="cursor:pointer;text-decoration:none;">
-        <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
-          <rect width="34" height="34" rx="10" fill="#2563eb"/>
-          <path d="M7 26L17 9L27 26H7Z" fill="white" opacity="0.92"/>
-          <circle cx="17" cy="19" r="4.5" fill="#93c5fd"/>
-        </svg>
-        <div>
-          <div class="logo-name">Tiarkhali M.M</div>
-          <div class="logo-tagline">High School & College</div>
-        </div>
+        <div style="font-size: 16px; font-weight: 800; letter-spacing: 0.5px; color: var(--primary);">TMMHS</div>
       </a>
 
       <!-- Desktop Links -->
@@ -97,11 +79,8 @@ export function renderNavbar(activePage = 'home', isLoggedIn = false, role = 'gu
       <!-- Right actions -->
       <div class="navbar-actions">
 
-        <!-- Search -->
-        <button class="btn btn-ghost btn-icon" onclick="openSearch()" title="Search  Ctrl+K" style="position:relative;">
-          ${icon('search', 18)}
-          <span style="position:absolute;bottom:-2px;right:-2px;background:var(--primary);color:white;font-size:9px;font-weight:700;padding:1px 4px;border-radius:4px;line-height:1.4;">K</span>
-        </button>
+        <!-- Meridian Search -->
+        ${renderSearchInNavbar()}
 
         <!-- Theme toggle -->
         <button class="btn btn-ghost btn-icon" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">

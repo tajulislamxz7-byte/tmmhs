@@ -1,38 +1,102 @@
 [
   {
-    "id": "B2026",
-    "name": "Batch 2026",
-    "year": "2026",
-    "class": "Class 10",
-    "description": "SSC examination batch focused on science and mathematics excellence.",
-    "totalStudents": 45,
-    "classTeacher": "Abdullah Khan",
-    "passingYear": "2026",
-    "achievements": ["District Science Fair 2025 Winners", "5 Students scored GPA 5.00"],
-    "createdAt": "2024-01-01T00:00:00.000Z"
-  },
-  {
     "id": "B2027",
     "name": "Batch 2027",
     "year": "2027",
-    "class": "Class 9",
-    "description": "Rising stars showing great promise in academics and sports.",
-    "totalStudents": 52,
-    "classTeacher": "Nasrin Akter",
+    "class": "Class 10",
+    "description": "SSC examination batch of 2027. Outstanding performance in academics and extracurricular activities. Strong focus on science and technology.",
+    "totalStudents": 48,
+    "classTeacher": "Dr. Kamal Hossain",
     "passingYear": "2027",
-    "achievements": ["District Sports Champions 2025", "Best Cultural Performance 2025"],
-    "createdAt": "2024-01-01T00:00:00.000Z"
+    "sections": ["A", "B"],
+    "groups": ["Science", "Commerce", "Arts"],
+    "achievements": [
+      "5 Students scored GPA 5.00 in Mock Exams",
+      "District Science Fair Winners 2026",
+      "Inter-School Debate Champions",
+      "Math Olympiad Regional Finalists"
+    ],
+    "activities": ["Science Club", "Debate Team", "Sports Team"],
+    "createdAt": "2022-01-10T00:00:00.000Z"
   },
   {
     "id": "B2028",
     "name": "Batch 2028",
     "year": "2028",
-    "class": "Class 8",
-    "description": "Enthusiastic learners with strong foundation in core subjects.",
-    "totalStudents": 48,
-    "classTeacher": "Kamal Uddin",
+    "class": "Class 9",
+    "description": "Promising batch showing excellence in both academics and sports. Active participation in cultural programs and community service.",
+    "totalStudents": 52,
+    "classTeacher": "Mrs. Farida Rahman",
     "passingYear": "2028",
-    "achievements": ["Best Debate Team 2025"],
-    "createdAt": "2024-01-01T00:00:00.000Z"
+    "sections": ["A", "B"],
+    "groups": ["Science", "Commerce", "Arts"],
+    "achievements": [
+      "District Sports Champions 2026",
+      "Best Cultural Performance Award",
+      "Science Project Competition Winners",
+      "100% Pass Rate in Class Tests"
+    ],
+    "activities": ["Sports Club", "Cultural Committee", "Environment Club"],
+    "createdAt": "2023-01-10T00:00:00.000Z"
+  },
+  {
+    "id": "B2029",
+    "name": "Batch 2029",
+    "year": "2029",
+    "class": "Class 8",
+    "description": "Enthusiastic learners with strong foundation in core subjects. Showing great promise in ICT and creative arts.",
+    "totalStudents": 50,
+    "classTeacher": "Mr. Abdul Khan",
+    "passingYear": "2029",
+    "sections": ["A", "B"],
+    "groups": ["General"],
+    "achievements": [
+      "Best Debate Team 2026",
+      "ICT Quiz Competition Winners",
+      "Art Exhibition Best Display",
+      "Perfect Attendance - 15 Students"
+    ],
+    "activities": ["Debate Club", "ICT Club", "Art Club"],
+    "createdAt": "2024-01-10T00:00:00.000Z"
+  },
+  {
+    "id": "B2030",
+    "name": "Batch 2030",
+    "year": "2030",
+    "class": "Class 7",
+    "description": "Young and energetic batch with keen interest in technology and innovation. Strong participation in robotics and coding activities.",
+    "totalStudents": 55,
+    "classTeacher": "Ms. Sultana Ahmed",
+    "passingYear": "2030",
+    "sections": ["A", "B"],
+    "groups": ["General"],
+    "achievements": [
+      "Robotics Competition Participants",
+      "Coding Club Founders",
+      "Environmental Awareness Campaign Leaders",
+      "School Magazine Contributors"
+    ],
+    "activities": ["Robotics Club", "Coding Club", "Photography Club"],
+    "createdAt": "2025-01-10T00:00:00.000Z"
+  },
+  {
+    "id": "B2031",
+    "name": "Batch 2031",
+    "year": "2031",
+    "class": "Class 6",
+    "description": "Newest batch joining the school family. Eager learners adapting well to secondary education. Strong emphasis on building fundamental skills.",
+    "totalStudents": 60,
+    "classTeacher": "Mrs. Nahar Akter",
+    "passingYear": "2031",
+    "sections": ["A", "B", "C"],
+    "groups": ["General"],
+    "achievements": [
+      "Best Discipline Award",
+      "Class Average Above 80%",
+      "Active Library Users",
+      "Clean Classroom Award"
+    ],
+    "activities": ["Reading Club", "Nature Club", "Music Club"],
+    "createdAt": "2026-01-10T00:00:00.000Z"
   }
 ]

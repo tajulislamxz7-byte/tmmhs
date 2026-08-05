@@ -1,8 +1,8 @@
 [
   {
-    "id": "EX1785832026238",
-    "name": "hg",
-    "date": "2026-08-06",
+    "id": "EX2026120101",
+    "name": "First Terminal Examination 2026",
+    "date": "2026-12-01",
     "scope": "Class 10, Section A - Science",
     "class": "Class 10",
     "section": "A",
@@ -23,6 +23,131 @@
       "Higher Mathematics"
     ],
     "status": "Published",
-    "createdAt": "2026-08-04T08:27:06.238Z"
+    "createdAt": "2026-11-01T08:00:00.000Z"
+  },
+  {
+    "id": "EX2026120102",
+    "name": "First Terminal Examination 2026",
+    "date": "2026-12-01",
+    "scope": "Class 10, Section B - Commerce",
+    "class": "Class 10",
+    "section": "B",
+    "group": "Commerce",
+    "subjects": [
+      "Bangla",
+      "Bangla 2nd",
+      "English",
+      "English 2nd",
+      "Mathematics",
+      "Bangladesh and Global Studies",
+      "Religion and Moral Education",
+      "Information and Communication Technology (ICT)",
+      "Physical Education",
+      "Accounting",
+      "Business Studies",
+      "Finance and Banking"
+    ],
+    "status": "Published",
+    "createdAt": "2026-11-01T08:00:00.000Z"
+  },
+  {
+    "id": "EX2026120201",
+    "name": "First Terminal Examination 2026",
+    "date": "2026-12-01",
+    "scope": "Class 9, Section A - Science",
+    "class": "Class 9",
+    "section": "A",
+    "group": "Science",
+    "subjects": [
+      "Bangla",
+      "English",
+      "Mathematics",
+      "Bangladesh and Global Studies",
+      "Religion and Moral Education",
+      "ICT",
+      "Physical Education",
+      "Physics",
+      "Chemistry",
+      "Biology"
+    ],
+    "status": "Published",
+    "createdAt": "2026-11-01T08:00:00.000Z"
+  },
+  {
+    "id": "EX2026120301",
+    "name": "First Terminal Examination 2026",
+    "date": "2026-12-01",
+    "scope": "Class 8, Section A - General",
+    "class": "Class 8",
+    "section": "A",
+    "group": "General",
+    "subjects": [
+      "Bangla",
+      "English",
+      "Mathematics",
+      "Science",
+      "Bangladesh and Global Studies",
+      "Religion and Moral Education",
+      "ICT",
+      "Physical Education"
+    ],
+    "status": "Published",
+    "createdAt": "2026-11-01T08:00:00.000Z"
+  },
+  {
+    "id": "EX2026120401",
+    "name": "First Terminal Examination 2026",
+    "date": "2026-12-01",
+    "scope": "Class 7, Section A - General",
+    "class": "Class 7",
+    "section": "A",
+    "group": "General",
+    "subjects": [
+      "Bangla",
+      "English",
+      "Mathematics",
+      "Science",
+      "Bangladesh and Global Studies",
+      "Religion and Moral Education",
+      "ICT",
+      "Arts and Crafts"
+    ],
+    "status": "Published",
+    "createdAt": "2026-11-01T08:00:00.000Z"
+  },
+  {
+    "id": "EX2026060101",
+    "name": "Mid-Term Examination 2026",
+    "date": "2026-06-15",
+    "scope": "Class 10 - All Groups",
+    "class": "Class 10",
+    "section": "All",
+    "group": "All",
+    "subjects": [
+      "Bangla",
+      "English",
+      "Mathematics",
+      "Physics",
+      "Chemistry",
+      "Biology"
+    ],
+    "status": "Completed",
+    "createdAt": "2026-05-10T08:00:00.000Z"
+  },
+  {
+    "id": "EX2026030101",
+    "name": "First Class Test 2026",
+    "date": "2026-03-01",
+    "scope": "All Classes",
+    "class": "All",
+    "section": "All",
+    "group": "All",
+    "subjects": [
+      "Bangla",
+      "English",
+      "Mathematics"
+    ],
+    "status": "Completed",
+    "createdAt": "2026-02-15T08:00:00.000Z"
   }
 ]
